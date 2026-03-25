@@ -1,9 +1,9 @@
 {
-    "projectName": "start-app",
+    "projectName": "conexao-influenzza",
     "mode": "file-router",
     "typescript": true,
     "tailwind": true,
-    "packageManager": "pnpm",
+    "packageManager": "npm",
     "addOnOptions": {},
     "git": true,
     "version": 1,
