@@ -15,7 +15,7 @@ export const Route = createRootRoute({
                 content: 'width=device-width, initial-scale=1'
             },
             {
-                title: 'TanStack Start Starter'
+                title: 'Conexão Influenzza'
             }
         ],
         links: [
@@ -34,8 +34,10 @@ function RootDocument({ children }: { children: React.ReactNode }) {
             <head>
                 <HeadContent />
             </head>
+
             <body>
                 {children}
+
                 <TanStackDevtools
                     config={{
                         position: 'bottom-right'
