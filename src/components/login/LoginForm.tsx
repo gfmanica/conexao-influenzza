@@ -42,12 +42,13 @@ export function LoginForm({ className }: React.ComponentProps<'form'>) {
             }}
         >
             <FieldGroup>
-                <div className="mb-2 flex flex-col items-center gap-1 text-center">
-                    <h1 className="text-2xl font-semibold tracking-tight">
-                        Fazer login
+                <div className="mb-2 flex flex-col items-center gap-2 text-center">
+                    <h1 className="font-heading text-4xl tracking-tight">
+                        Seja bem vindo!
                     </h1>
+
                     <p className="text-muted-foreground max-w-sm text-sm text-balance">
-                        Informe seu e-mail para receber o código de acesso
+                        Informe seu e-mail para acessar sua conta.
                     </p>
                 </div>
 
@@ -85,7 +86,7 @@ export function LoginForm({ className }: React.ComponentProps<'form'>) {
                             </Field>
                         );
                     }}
-                ></form.Field>
+                />
 
                 <Field>
                     <Button

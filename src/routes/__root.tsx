@@ -16,6 +16,10 @@ export const Route = createRootRoute({
             },
             {
                 title: 'Conexão Influenzza'
+            },
+            {
+                name: 'apple-mobile-web-app-title',
+                content: 'Conexão Influenzza'
             }
         ],
         links: [

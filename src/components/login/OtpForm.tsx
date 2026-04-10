@@ -44,16 +44,17 @@ export function OtpForm({ className }: React.ComponentProps<'form'>) {
             }}
         >
             <FieldGroup>
-                <div className="flex flex-col items-center gap-1 text-center">
-                    <h1 className="text-2xl font-bold">
+                <div className="flex flex-col items-center gap-2 text-center">
+                    <h1 className="font-heading text-3xl">
                         Código de verificação
                     </h1>
+
                     <p className="text-muted-foreground text-sm text-balance">
                         Digite o código de 6 dígitos enviado para <br />
                         <strong className="text-foreground">
                             {email}
                         </strong>{' '}
-                        para continuar
+                        para continuar.
                     </p>
                 </div>
 
@@ -98,7 +99,7 @@ export function OtpForm({ className }: React.ComponentProps<'form'>) {
                             </Field>
                         );
                     }}
-                ></form.Field>
+                />
 
                 <div className="flex flex-col gap-3">
                     <Field>
@@ -116,7 +117,7 @@ export function OtpForm({ className }: React.ComponentProps<'form'>) {
                         onClick={() => setStep('email')}
                         className="transition-transform duration-160 ease-out active:scale-[0.97]"
                     >
-                        Alterar email
+                        Voltar
                     </Button>
                 </div>
             </FieldGroup>
