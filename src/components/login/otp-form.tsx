@@ -11,7 +11,7 @@ import {
     FieldLabel
 } from '@/components/ui/field';
 import { cn } from '@/lib/utils';
-import { useLoginStore } from '@/store/useLoginStore';
+import { useLoginStore } from '@/store/use-login-store';
 
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '../ui/input-otp';
 

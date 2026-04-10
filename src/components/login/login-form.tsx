@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { useLoginStore } from '@/store/useLoginStore';
+import { useLoginStore } from '@/store/use-login-store';
 
 const loginSchema = z.object({
     email: z.string().email('Email inválido')
