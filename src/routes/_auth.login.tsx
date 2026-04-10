@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 
-import { LoginForm } from '@/components/login/LoginForm';
-import { OtpForm } from '@/components/login/OtpForm';
+import { LoginForm } from '@/components/login/login-form';
+import { OtpForm } from '@/components/login/otp-form';
 import { cn } from '@/lib/utils';
 import { useLoginStore } from '@/store/useLoginStore';
 
