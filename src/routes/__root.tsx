@@ -45,7 +45,7 @@ export const Route = createRootRoute({
             },
             {
                 rel: 'manifest',
-                href: '/public/webmanifest.json'
+                href: '/public/manifest.json'
             },
             {
                 rel: 'stylesheet',
