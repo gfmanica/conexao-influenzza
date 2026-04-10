@@ -26,7 +26,7 @@ function Login() {
                 <img
                     src="/logo/logomarca-black.svg"
                     alt="Logo"
-                    className="-mt-16 block h-22 object-cover lg:hidden dark:brightness-[0.2] dark:grayscale"
+                    className="-mt-16 block h-22 object-cover [image-rendering:-webkit-optimize-contrast] [image-rendering:crisp-edges] lg:hidden dark:brightness-[0.2] dark:grayscale"
                 />
 
                 <div className="grid w-full max-w-xs">
