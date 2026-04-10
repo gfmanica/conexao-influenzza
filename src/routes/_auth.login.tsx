@@ -22,11 +22,11 @@ function Login() {
                 />
             </div>
 
-            <div className="relative flex flex-col items-center justify-center gap-8 p-6 sm:gap-12 md:p-10">
+            <div className="relative flex flex-col items-center justify-center gap-12 p-6 sm:gap-12 md:p-10">
                 <img
                     src="/logo/logomarca-black.svg"
                     alt="Logo"
-                    className="-mt-38 block h-34 object-cover lg:hidden dark:brightness-[0.2] dark:grayscale"
+                    className="-mt-16 block h-22 object-cover lg:hidden dark:brightness-[0.2] dark:grayscale"
                 />
 
                 <div className="grid w-full max-w-xs">
@@ -53,8 +53,8 @@ function Login() {
                     </div>
                 </div>
 
-                <div className="text-muted-foreground absolute right-0 bottom-10 left-0 text-center text-xs">
-                    &copy; {new Date().getFullYear()} Influenzza Cazza. Todos os
+                <div className="text-muted-foreground absolute right-0 bottom-6 left-0 text-center text-xs">
+                    &copy; {new Date().getFullYear()} Influenzza Caza. Todos os
                     direitos reservados.
                 </div>
             </div>
