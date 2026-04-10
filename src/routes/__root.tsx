@@ -26,26 +26,26 @@ export const Route = createRootRoute({
             {
                 rel: 'icon',
                 type: 'image/png',
-                href: '/public/favicon/favicon-96x96.png',
+                href: '/favicon/favicon-96x96.png',
                 sizes: '96x96'
             },
             {
                 rel: 'icon',
                 type: 'image/svg+xml',
-                href: '/public/favicon/favicon.svg'
+                href: '/favicon/favicon.svg'
             },
             {
                 rel: 'shortcut icon',
-                href: '/public/favicon/favicon.ico'
+                href: '/favicon/favicon.ico'
             },
             {
                 rel: 'apple-touch-icon',
                 sizes: '180x180',
-                href: '/public/favicon/apple-touch-icon.png'
+                href: '/favicon/apple-touch-icon.png'
             },
             {
                 rel: 'manifest',
-                href: '/public/manifest.json'
+                href: '/manifest.json'
             },
             {
                 rel: 'stylesheet',
