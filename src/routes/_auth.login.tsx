@@ -16,7 +16,7 @@ function Login() {
         <div className="grid min-h-svh lg:grid-cols-2">
             <div className="bg-foreground hidden items-center justify-center lg:flex">
                 <img
-                    src="/logo/logomarca-white.svg"
+                    src="/logo/logomarca-white.png"
                     alt="Logo"
                     className="h-84 object-cover dark:brightness-[0.2] dark:grayscale"
                 />
@@ -24,9 +24,9 @@ function Login() {
 
             <div className="relative flex flex-col items-center justify-center gap-12 p-6 sm:gap-12 md:p-10">
                 <img
-                    src="/logo/logomarca-black.svg"
+                    src="/logo/logomarca-black.png"
                     alt="Logo"
-                    className="-mt-16 block h-22 object-cover [image-rendering:-webkit-optimize-contrast] [image-rendering:crisp-edges] lg:hidden dark:brightness-[0.2] dark:grayscale"
+                    className="-mt-16 block h-22 object-cover [image-rendering:-webkit-optimize-contrast] lg:hidden dark:brightness-[0.2] dark:grayscale"
                 />
 
                 <div className="grid w-full max-w-xs">

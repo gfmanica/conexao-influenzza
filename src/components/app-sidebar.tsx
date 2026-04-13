@@ -1,25 +1,13 @@
 import * as React from 'react';
 
 import {
-    CameraIcon,
-    ChartBarIcon,
-    CircleHelpIcon,
-    CommandIcon,
-    DatabaseIcon,
-    FileChartColumnIcon,
-    FileIcon,
-    FileTextIcon,
-    FolderIcon,
     LayoutDashboardIcon,
-    ListIcon,
-    SearchIcon,
-    Settings2Icon,
+    StarIcon,
+    TrophyIcon,
     UsersIcon
 } from 'lucide-react';
 
-import { NavDocuments } from '@/components/nav-documents';
 import { NavMain } from '@/components/nav-main';
-import { NavSecondary } from '@/components/nav-secondary';
 import { NavUser } from '@/components/nav-user';
 import {
     Sidebar,
@@ -27,151 +15,114 @@ import {
     SidebarFooter,
     SidebarHeader,
     SidebarMenu,
-    SidebarMenuButton,
-    SidebarMenuItem
+    SidebarMenuItem,
+    SidebarSeparator,
+    SidebarTrigger,
+    useSidebar
 } from '@/components/ui/sidebar';
+import { cn } from '@/lib/utils';
 
-const data = {
-    user: {
-        name: 'shadcn',
-        email: 'm@example.com',
-        avatar: '/avatars/shadcn.jpg'
+const navItems = [
+    {
+        title: 'Dashboard',
+        url: '/dashboard',
+        icon: <LayoutDashboardIcon />
     },
-    navMain: [
-        {
-            title: 'Dashboard',
-            url: '#',
-            icon: <LayoutDashboardIcon />
-        },
-        {
-            title: 'Lifecycle',
-            url: '#',
-            icon: <ListIcon />
-        },
-        {
-            title: 'Analytics',
-            url: '#',
-            icon: <ChartBarIcon />
-        },
-        {
-            title: 'Projects',
-            url: '#',
-            icon: <FolderIcon />
-        },
-        {
-            title: 'Team',
-            url: '#',
-            icon: <UsersIcon />
-        }
-    ],
-    navClouds: [
-        {
-            title: 'Capture',
-            icon: <CameraIcon />,
-            isActive: true,
-            url: '#',
-            items: [
-                {
-                    title: 'Active Proposals',
-                    url: '#'
-                },
-                {
-                    title: 'Archived',
-                    url: '#'
-                }
-            ]
-        },
-        {
-            title: 'Proposal',
-            icon: <FileTextIcon />,
-            url: '#',
-            items: [
-                {
-                    title: 'Active Proposals',
-                    url: '#'
-                },
-                {
-                    title: 'Archived',
-                    url: '#'
-                }
-            ]
-        },
-        {
-            title: 'Prompts',
-            icon: <FileTextIcon />,
-            url: '#',
-            items: [
-                {
-                    title: 'Active Proposals',
-                    url: '#'
-                },
-                {
-                    title: 'Archived',
-                    url: '#'
-                }
-            ]
-        }
-    ],
-    navSecondary: [
-        {
-            title: 'Settings',
-            url: '#',
-            icon: <Settings2Icon />
-        },
-        {
-            title: 'Get Help',
-            url: '#',
-            icon: <CircleHelpIcon />
-        },
-        {
-            title: 'Search',
-            url: '#',
-            icon: <SearchIcon />
-        }
-    ],
-    documents: [
-        {
-            name: 'Data Library',
-            url: '#',
-            icon: <DatabaseIcon />
-        },
-        {
-            name: 'Reports',
-            url: '#',
-            icon: <FileChartColumnIcon />
-        },
-        {
-            name: 'Word Assistant',
-            url: '#',
-            icon: <FileIcon />
-        }
-    ]
+    {
+        title: 'Arquitetos',
+        url: '/arquitetos',
+        icon: <UsersIcon />
+    },
+    {
+        title: 'Pontuações',
+        url: '/pontuacoes',
+        icon: <StarIcon />
+    },
+    {
+        title: 'Ranking',
+        url: '/ranking',
+        icon: <TrophyIcon />
+    }
+];
+
+const mockUser = {
+    name: 'Administrador',
+    email: 'admin@conexaoinfluenzza.com.br',
+    avatar: ''
 };
+
+function SidebarHeaderContent() {
+    const { state } = useSidebar();
+    const collapsed = state === 'collapsed';
+
+    return (
+        <SidebarMenu className="flex flex-col gap-2 pt-2">
+            <SidebarMenuItem>
+                <div
+                    className={cn(
+                        'flex items-start',
+                        collapsed ? '' : 'pr-1 pb-1 pl-2',
+                        collapsed ? 'justify-center' : 'justify-between'
+                    )}
+                >
+                    {collapsed ? (
+                        <>
+                            <img
+                                src="/logo/logo-black.png"
+                                alt="Conexão Influenzza"
+                                className="h-auto w-5 object-contain dark:hidden"
+                            />
+
+                            <img
+                                src="/logo/logo-white.png"
+                                alt="Conexão Influenzza"
+                                className="hidden h-auto w-5 object-contain dark:block"
+                            />
+                        </>
+                    ) : (
+                        <>
+                            <img
+                                src="/logo/logomarca-horizontal-black.png"
+                                alt="Conexão Influenzza"
+                                className="h-12 w-auto object-contain dark:hidden"
+                            />
+
+                            <img
+                                src="/logo/logomarca-horizontal-white.png"
+                                alt="Conexão Influenzza"
+                                className="hidden h-12 w-auto object-contain dark:block"
+                            />
+
+                            <SidebarTrigger className="-mt-1 -mr-1 shrink-0" />
+                        </>
+                    )}
+                </div>
+            </SidebarMenuItem>
+
+            {collapsed && (
+                <SidebarMenuItem className="flex justify-center">
+                    <SidebarTrigger />
+                </SidebarMenuItem>
+            )}
+        </SidebarMenu>
+    );
+}
+
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     return (
-        <Sidebar collapsible="offcanvas" {...props}>
+        <Sidebar collapsible="icon" {...props}>
             <SidebarHeader>
-                <SidebarMenu>
-                    <SidebarMenuItem>
-                        <SidebarMenuButton
-                            className="data-[slot=sidebar-menu-button]:p-1.5!"
-                            render={<a href="#" />}
-                        >
-                            <CommandIcon className="size-5!" />
-                            <span className="text-base font-semibold">
-                                Acme Inc.
-                            </span>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                </SidebarMenu>
+                <SidebarHeaderContent />
             </SidebarHeader>
+
+            <SidebarSeparator />
+
             <SidebarContent>
-                <NavMain items={data.navMain} />
-                <NavDocuments items={data.documents} />
-                <NavSecondary items={data.navSecondary} className="mt-auto" />
+                <NavMain items={navItems} />
             </SidebarContent>
+
             <SidebarFooter>
-                <NavUser user={data.user} />
+                <NavUser user={mockUser} />
             </SidebarFooter>
         </Sidebar>
     );
