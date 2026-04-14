@@ -1,4 +1,5 @@
-import { useSuspenseQuery } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
+
 import { createFileRoute } from '@tanstack/react-router';
 import { PlusIcon } from 'lucide-react';
 
@@ -6,36 +7,59 @@ import { ArchitectSheet } from '@/components/architects/architect-sheet';
 import { columns } from '@/components/architects/columns';
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/ui/data-table';
+import { Input } from '@/components/ui/input';
 import { architectsQueryOptions } from '@/hooks/use-architects';
+import { useTableQuery } from '@/hooks/use-table-query';
 
 export const Route = createFileRoute('/_app/arquitetos')({
-    loader: ({ context }) => {
-        context.queryClient.ensureQueryData(architectsQueryOptions);
-    },
     component: RouteComponent
 });
 
 function RouteComponent() {
-    const { data: architects } = useSuspenseQuery(architectsQueryOptions);
+    const [nameFilter, setNameFilter] = useState('');
+
+    useEffect(() => {
+        const t = setTimeout(
+            () => onFilterChange([{ field: 'name', operator: 'ilike', value: `%${nameFilter}%` }]),
+            300
+        );
+        return () => clearTimeout(t);
+    }, [nameFilter]);
+
+    const { onFilterChange, ...tableQuery } = useTableQuery({
+        queryOptions: architectsQueryOptions
+    });
 
     return (
         <div className="flex min-h-0 flex-1 flex-col gap-6 py-6">
             <div className="flex flex-col gap-2 px-4 lg:px-6">
-                <h1 className="font-heading text-3xl font-semibold">
-                    Arquitetos
-                </h1>
+                <h1 className="font-heading text-3xl font-semibold">Arquitetos</h1>
 
                 <p className="text-muted-foreground text-sm">
-                    Gerencie os arquitetos parceiros e acompanhe suas
-                    pontuações.
+                    Gerencie os arquitetos parceiros e acompanhe suas pontuações.
                 </p>
+            </div>
+
+            <div className="flex items-center gap-3 px-4 lg:px-6">
+                <Input
+                    className="max-w-xs"
+                    placeholder="Buscar arquiteto..."
+                    value={nameFilter}
+                    onChange={(e) => setNameFilter(e.target.value)}
+                />
             </div>
 
             <DataTable
                 columns={columns}
-                data={architects}
-                filterColumn="name"
-                filterPlaceholder="Buscar arquiteto..."
+                data={tableQuery.data}
+                total={tableQuery.total}
+                pageIndex={tableQuery.pageIndex}
+                pageSize={tableQuery.pageSize}
+                onPageChange={tableQuery.onPageChange}
+                onPageSizeChange={tableQuery.onPageSizeChange}
+                sort={tableQuery.sort}
+                onSortChange={tableQuery.onSortChange}
+                isLoading={tableQuery.isFetching}
                 toolbar={
                     <ArchitectSheet
                         trigger={

@@ -1,4 +1,5 @@
 {
+    "printWidth": 100,
     "tabWidth": 4,
     "endOfLine": "lf",
     "trailingComma": "none",
@@ -11,7 +12,11 @@
     ],
     "importOrderTypeScriptVersion": "5.0.0",
     "importOrderCaseSensitive": false,
-    "importOrderParserPlugins": ["typescript", "jsx", "decorators-legacy"],
+    "importOrderParserPlugins": [
+        "typescript",
+        "jsx",
+        "decorators-legacy"
+    ],
     "importOrder": [
         "^(react/(.*)$)|^(react$)",
         "^(next/(.*)$)|^(next$)",

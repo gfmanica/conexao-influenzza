@@ -1,41 +1,54 @@
 import { createServerFn } from '@tanstack/react-start';
 import { z } from 'zod/v4';
 
-import { getSupabaseAdminClient } from '@/lib/supabase/server';
+import { createArchitectSchema, updateArchitectSchema } from '@/lib/schemas/architect';
+import { queryParamsSchema } from '@/lib/schemas/query';
 import {
-    createArchitectSchema,
-    updateArchitectSchema
-} from '@/lib/schemas/architect';
+    applyFilters,
+    applyOrder,
+    buildPagedResponse,
+    getPaginationRange
+} from '@/lib/supabase/query-helpers';
+import { getSupabaseAdminClient } from '@/lib/supabase/server';
 
 /**
- * Lista todos os arquitetos com total de pontos e status de vínculo.
+ * Lista arquitetos com paginação, filtros dinâmicos e ordenação.
  */
-export const listArchitects = createServerFn({ method: 'GET' }).handler(
-    async () => {
+export const listArchitects = createServerFn({ method: 'GET' })
+    .inputValidator(queryParamsSchema)
+    .handler(async ({ data }) => {
         const supabase = getSupabaseAdminClient();
+        const { from, to } = getPaginationRange(data?.page, data?.pageSize);
 
-        const { data, error } = await supabase
+        let query = supabase
             .from('architects')
-            .select('*, point_entries ( amount )')
-            .order('name');
+            .select('*, point_entries ( amount )', { count: 'exact' })
+            .range(from, to);
+
+        query = applyFilters(query, data?.filter);
+        query = applyOrder(query, data?.order);
+
+        const { data: rows, count, error } = await query;
 
         if (error) throw new Error(error.message);
 
-        return data.map((a) => ({
-            ...a,
-            linked: a.user_id !== null,
-            total_points:
-                a.point_entries?.reduce((sum, e) => sum + e.amount, 0) ?? 0,
-            point_entries: undefined
-        }));
-    }
-);
+        return buildPagedResponse(
+            rows.map((a) => ({
+                ...a,
+                linked: a.user_id !== null,
+                total_points: a.point_entries?.reduce((sum, e) => sum + e.amount, 0) ?? 0,
+                point_entries: undefined
+            })),
+            count,
+            to
+        );
+    });
 
 /**
  * Retorna dados completos de um arquiteto + histórico de pontuações.
  */
 export const getArchitect = createServerFn({ method: 'GET' })
-    .inputValidator(z.object({ id: z.string().uuid() }))
+    .inputValidator(z.object({ id: z.uuid() }))
     .handler(async ({ data }) => {
         const supabase = getSupabaseAdminClient();
 
@@ -52,11 +65,7 @@ export const getArchitect = createServerFn({ method: 'GET' })
         return {
             ...architect,
             linked: architect.user_id !== null,
-            total_points:
-                architect.point_entries?.reduce(
-                    (sum, e) => sum + e.amount,
-                    0
-                ) ?? 0
+            total_points: architect.point_entries?.reduce((sum, e) => sum + e.amount, 0) ?? 0
         };
     });
 
@@ -75,8 +84,8 @@ export const createArchitect = createServerFn({ method: 'POST' })
             .single();
 
         if (error) {
-            if (error.code === '23505')
-                throw new Error('E-mail já cadastrado.');
+            if (error.code === '23505') throw new Error('E-mail já cadastrado.');
+
             throw new Error(error.message);
         }
 
@@ -100,5 +109,6 @@ export const updateArchitect = createServerFn({ method: 'POST' })
             .single();
 
         if (error) throw new Error(error.message);
+
         return architect;
     });

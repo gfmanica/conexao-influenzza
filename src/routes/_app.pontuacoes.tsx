@@ -1,6 +1,6 @@
-import * as React from 'react';
+import { useState } from 'react';
 
-import { useSuspenseQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
 import { PlusIcon } from 'lucide-react';
 
@@ -19,30 +19,25 @@ import {
     useDeletePointEntry,
     useUpdatePointEntry
 } from '@/hooks/use-point-entries';
+import { useTableQuery } from '@/hooks/use-table-query';
+import { type FilterItem } from '@/lib/schemas/query';
 
 export const Route = createFileRoute('/_app/pontuacoes')({
-    loader: ({ context }) => {
-        context.queryClient.ensureQueryData(pointEntriesQueryOptions());
-        context.queryClient.ensureQueryData(architectsQueryOptions);
-    },
     component: RouteComponent
 });
 
 function RouteComponent() {
-    const [filterArchitectId, setFilterArchitectId] = React.useState('');
-    const [filterFrom, setFilterFrom] = React.useState('');
-    const [filterTo, setFilterTo] = React.useState('');
+    const [filterArchitectId, setFilterArchitectId] = useState('');
+    const [filterFrom, setFilterFrom] = useState('');
+    const [filterTo, setFilterTo] = useState('');
 
-    const filters = {
-        architect_id: filterArchitectId || undefined,
-        from: filterFrom || undefined,
-        to: filterTo || undefined
-    };
+    const { onFilterChange, ...tableQuery } = useTableQuery({
+        queryOptions: pointEntriesQueryOptions
+    });
 
-    const { data: entries } = useSuspenseQuery(
-        pointEntriesQueryOptions(filters)
-    );
-    const { data: architects } = useSuspenseQuery(architectsQueryOptions);
+    const { data: architectsData } = useQuery(architectsQueryOptions());
+
+    const architects = architectsData?.data ?? [];
 
     const createEntry = useCreatePointEntry();
     const updateEntry = useUpdatePointEntry();
@@ -60,6 +55,26 @@ function RouteComponent() {
         deleteEntry.mutate({ data: { id } });
     }
 
+    function handleFilterChange() {
+        const items: FilterItem[] = [];
+
+        if (filterArchitectId)
+            items.push({ field: 'architect_id', operator: 'eq', value: filterArchitectId });
+
+        if (filterFrom) items.push({ field: 'entry_date', operator: 'gte', value: filterFrom });
+
+        if (filterTo) items.push({ field: 'entry_date', operator: 'lte', value: filterTo });
+
+        onFilterChange(items);
+    }
+
+    function clearFilters() {
+        setFilterArchitectId('');
+        setFilterFrom('');
+        setFilterTo('');
+        onFilterChange([]);
+    }
+
     const columns = buildColumns({
         architects,
         onEdit: handleEdit,
@@ -71,9 +86,7 @@ function RouteComponent() {
     return (
         <div className="flex min-h-0 flex-1 flex-col gap-6 py-6">
             <div className="flex flex-col gap-2 px-4 lg:px-6">
-                <h1 className="font-heading text-3xl font-semibold">
-                    Pontuações
-                </h1>
+                <h1 className="font-heading text-3xl font-semibold">Pontuações</h1>
                 <p className="text-muted-foreground text-sm">
                     Gerencie os lançamentos de pontos dos arquitetos parceiros.
                 </p>
@@ -82,25 +95,33 @@ function RouteComponent() {
             <div className="flex flex-wrap items-end gap-3 px-4 lg:px-6">
                 <div className="flex flex-col gap-1.5">
                     <Label className="text-xs">Arquiteto</Label>
+
                     <Combobox
                         value={filterArchitectId}
-                        onChange={setFilterArchitectId}
-                        options={architects.map((a) => ({
-                            value: a.id,
-                            label: a.name
-                        }))}
+                        onChange={(value) => {
+                            setFilterArchitectId(value);
+                            handleFilterChange();
+                        }}
                         placeholder="Todos"
                         searchPlaceholder="Buscar arquiteto..."
                         emptyText="Nenhum arquiteto encontrado."
                         className="h-8 w-48 text-sm"
+                        options={architects.map((a) => ({
+                            value: a.id,
+                            label: a.name
+                        }))}
                     />
                 </div>
 
                 <div className="flex flex-col gap-1.5">
                     <Label className="text-xs">De</Label>
+
                     <DatePicker
                         value={filterFrom}
-                        onChange={setFilterFrom}
+                        onChange={(value) => {
+                            setFilterFrom(value);
+                            handleFilterChange();
+                        }}
                         placeholder="Data inicial"
                         className="h-8 w-44 text-sm"
                     />
@@ -108,9 +129,13 @@ function RouteComponent() {
 
                 <div className="flex flex-col gap-1.5">
                     <Label className="text-xs">Até</Label>
+
                     <DatePicker
                         value={filterTo}
-                        onChange={setFilterTo}
+                        onChange={(value) => {
+                            setFilterTo(value);
+                            handleFilterChange();
+                        }}
                         placeholder="Data final"
                         className="h-8 w-44 text-sm"
                     />
@@ -121,11 +146,7 @@ function RouteComponent() {
                         variant="ghost"
                         size="sm"
                         className="h-8 self-end"
-                        onClick={() => {
-                            setFilterArchitectId('');
-                            setFilterFrom('');
-                            setFilterTo('');
-                        }}
+                        onClick={clearFilters}
                     >
                         Limpar filtros
                     </Button>
@@ -134,7 +155,15 @@ function RouteComponent() {
 
             <DataTable
                 columns={columns}
-                data={entries}
+                data={tableQuery.data}
+                total={tableQuery.total}
+                pageIndex={tableQuery.pageIndex}
+                pageSize={tableQuery.pageSize}
+                onPageChange={tableQuery.onPageChange}
+                onPageSizeChange={tableQuery.onPageSizeChange}
+                sort={tableQuery.sort}
+                onSortChange={tableQuery.onSortChange}
+                isLoading={tableQuery.isFetching}
                 toolbar={
                     <PointEntrySheet
                         architects={architects}
