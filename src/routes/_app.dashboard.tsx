@@ -1,37 +1,28 @@
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import { CrownIcon, StarIcon, TrophyIcon } from 'lucide-react';
+import { CrownIcon, StarIcon } from 'lucide-react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { rankingQueryOptions } from '@/hooks/use-ranking';
 import { cn } from '@/lib/utils';
 
 export const Route = createFileRoute('/_app/dashboard')({
+    loader: ({ context }) => {
+        context.queryClient.ensureQueryData(rankingQueryOptions);
+    },
     component: RouteComponent
 });
-
-// ── Mock data ──────────────────────────────────────────────────────────────
+// ── Types ─────────────────────────────────────────────────────────────────
 
 type RankingEntry = {
-    id: string;
+    position: number;
+    architect_id: string;
     name: string;
-    photo_url?: string;
+    photo_url: string | null;
     total_points: number;
 };
 
-const RANKING: RankingEntry[] = [
-    { id: '4', name: 'Marcos Vinicius Alves', total_points: 2100 },
-    { id: '1', name: 'Ana Carolina Mendes', total_points: 1250 },
-    { id: '2', name: 'Roberto Figueiredo', total_points: 980 },
-    { id: '3', name: 'Juliana Costa Braga', total_points: 750 },
-    { id: '5', name: 'Fernanda Lopes', total_points: 620 },
-    { id: '6', name: 'Pedro Henrique Costa', total_points: 480 },
-    { id: '7', name: 'Sofia Almeida', total_points: 320 },
-    { id: '8', name: 'Carlos Eduardo Lima', total_points: 210 },
-    { id: '9', name: 'Beatriz Santos', total_points: 150 },
-    { id: '10', name: 'Lucas Martins', total_points: 80 }
-].sort((a, b) => b.total_points - a.total_points);
-
-const YEAR = new Date().getFullYear();
 // ── Helpers ────────────────────────────────────────────────────────────────
 
 function getInitials(name: string) {
@@ -48,7 +39,8 @@ function getInitials(name: string) {
 const BAR_CONFIG = {
     1: {
         barClass: 'bg-gradient-to-t from-amber-600 via-amber-400 to-amber-300',
-        ringClass: 'ring-2 ring-amber-400/90 ring-offset-2 ring-offset-background',
+        ringClass:
+            'ring-2 ring-amber-400/90 ring-offset-2 ring-offset-background',
         ptsClass: 'text-amber-600 dark:text-amber-400',
         rankClass: 'text-white/90',
         avatarSize: 'size-18',
@@ -59,7 +51,8 @@ const BAR_CONFIG = {
     },
     2: {
         barClass: 'bg-gradient-to-t from-zinc-500 via-zinc-400 to-zinc-300',
-        ringClass: 'ring-2 ring-zinc-400/70 ring-offset-2 ring-offset-background',
+        ringClass:
+            'ring-2 ring-zinc-400/70 ring-offset-2 ring-offset-background',
         ptsClass: 'text-zinc-500 dark:text-zinc-400',
         rankClass: 'text-white/90',
         avatarSize: 'size-14',
@@ -70,7 +63,8 @@ const BAR_CONFIG = {
     },
     3: {
         barClass: 'bg-gradient-to-t from-amber-800 via-amber-700 to-amber-500',
-        ringClass: 'ring-2 ring-amber-700/70 ring-offset-2 ring-offset-background',
+        ringClass:
+            'ring-2 ring-amber-700/70 ring-offset-2 ring-offset-background',
         ptsClass: 'text-amber-700 dark:text-amber-600',
         rankClass: 'text-white/90',
         avatarSize: 'size-14',
@@ -110,7 +104,7 @@ function PodiumBar({
                 )}
 
                 <Avatar className={cn(cfg.avatarSize, cfg.ringClass)}>
-                    <AvatarImage src={entry.photo_url} />
+                    <AvatarImage src={entry.photo_url ?? undefined} />
                     <AvatarFallback
                         className={cn(
                             'font-semibold',
@@ -124,7 +118,7 @@ function PodiumBar({
                 <div>
                     <p
                         className={cn(
-                            'font-semibold leading-tight',
+                            'leading-tight font-semibold',
                             rank === 1 ? 'text-sm' : 'text-xs'
                         )}
                     >
@@ -159,12 +153,14 @@ function PodiumBar({
                 }
             >
                 {/* Shine sweep for 1st */}
-                {cfg.showShine && <div className="bar-shine absolute inset-0" />}
+                {cfg.showShine && (
+                    <div className="bar-shine absolute inset-0" />
+                )}
 
                 {/* Rank number at top center */}
                 <span
                     className={cn(
-                        'font-heading absolute top-4 left-0 right-0 text-center text-5xl font-black drop-shadow-sm',
+                        'font-heading absolute top-4 right-0 left-0 text-center text-5xl font-black drop-shadow-sm',
                         cfg.rankClass
                     )}
                 >
@@ -192,15 +188,15 @@ function RankingRow({
 
     return (
         <div
-            className="row-appear flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-muted/60"
+            className="row-appear hover:bg-muted/60 flex items-center gap-3 rounded-xl px-3 py-2.5 transition-colors"
             style={{ animationDelay: `${delay}ms` }}
         >
-            <span className="font-heading w-6 shrink-0 text-right text-sm font-bold tabular-nums text-muted-foreground">
+            <span className="font-heading text-muted-foreground w-6 shrink-0 text-right text-sm font-bold tabular-nums">
                 {rank}
             </span>
 
             <Avatar className="size-8 shrink-0">
-                <AvatarImage src={entry.photo_url} />
+                <AvatarImage src={entry.photo_url ?? undefined} />
                 <AvatarFallback className="text-[10px] font-medium">
                     {getInitials(entry.name)}
                 </AvatarFallback>
@@ -210,7 +206,7 @@ function RankingRow({
                 <span className="truncate text-sm font-medium">
                     {entry.name}
                 </span>
-                <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
+                <div className="bg-muted h-1.5 w-full overflow-hidden rounded-full">
                     <div
                         className="bar-fill h-full rounded-full bg-gradient-to-r from-amber-500/80 to-amber-400/40"
                         style={
@@ -223,7 +219,7 @@ function RankingRow({
                 </div>
             </div>
 
-            <div className="flex shrink-0 items-center gap-1 text-muted-foreground">
+            <div className="text-muted-foreground flex shrink-0 items-center gap-1">
                 <StarIcon className="size-3 fill-current text-amber-500/70" />
                 <span className="text-sm font-semibold tabular-nums">
                     {entry.total_points.toLocaleString('pt-BR')}
@@ -236,9 +232,12 @@ function RankingRow({
 // ── Route ──────────────────────────────────────────────────────────────────
 
 function RouteComponent() {
-    const top3 = RANKING.slice(0, 3);
-    const rest = RANKING.slice(3);
-    const maxPoints = RANKING[0]?.total_points ?? 1;
+    const { data } = useSuspenseQuery(rankingQueryOptions);
+    const { ranking, year: YEAR } = data;
+
+    const top3 = ranking.slice(0, 3);
+    const rest = ranking.slice(3);
+    const maxPoints = ranking[0]?.total_points ?? 1;
 
     return (
         <>
@@ -344,12 +343,12 @@ function RouteComponent() {
                 {/* List 4–10 */}
                 {rest.length > 0 && (
                     <div className="flex flex-col gap-0.5 px-4 lg:px-6">
-                        <p className="text-muted-foreground mb-3 px-3 text-xs font-semibold uppercase tracking-widest">
+                        <p className="text-muted-foreground mb-3 px-3 text-xs font-semibold tracking-widest uppercase">
                             Classificação geral
                         </p>
                         {rest.map((entry, i) => (
                             <RankingRow
-                                key={entry.id}
+                                key={entry.architect_id}
                                 rank={i + 4}
                                 entry={entry}
                                 maxPoints={maxPoints}
