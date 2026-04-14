@@ -55,15 +55,23 @@ function RouteComponent() {
         deleteEntry.mutate({ data: { id } });
     }
 
-    function handleFilterChange() {
+    function handleFilterChange(overrides?: {
+        architectId?: string;
+        from?: string;
+        to?: string;
+    }) {
+        const architectId = overrides?.architectId ?? filterArchitectId;
+        const from = overrides?.from ?? filterFrom;
+        const to = overrides?.to ?? filterTo;
+
         const items: FilterItem[] = [];
 
-        if (filterArchitectId)
-            items.push({ field: 'architect_id', operator: 'eq', value: filterArchitectId });
+        if (architectId)
+            items.push({ field: 'architect_id', operator: 'eq', value: architectId });
 
-        if (filterFrom) items.push({ field: 'entry_date', operator: 'gte', value: filterFrom });
+        if (from) items.push({ field: 'entry_date', operator: 'gte', value: from });
 
-        if (filterTo) items.push({ field: 'entry_date', operator: 'lte', value: filterTo });
+        if (to) items.push({ field: 'entry_date', operator: 'lte', value: to });
 
         onFilterChange(items);
     }
@@ -100,7 +108,7 @@ function RouteComponent() {
                         value={filterArchitectId}
                         onChange={(value) => {
                             setFilterArchitectId(value);
-                            handleFilterChange();
+                            handleFilterChange({ architectId: value });
                         }}
                         placeholder="Todos"
                         searchPlaceholder="Buscar arquiteto..."
@@ -120,7 +128,7 @@ function RouteComponent() {
                         value={filterFrom}
                         onChange={(value) => {
                             setFilterFrom(value);
-                            handleFilterChange();
+                            handleFilterChange({ from: value });
                         }}
                         placeholder="Data inicial"
                         className="h-8 w-44 text-sm"
@@ -134,7 +142,7 @@ function RouteComponent() {
                         value={filterTo}
                         onChange={(value) => {
                             setFilterTo(value);
-                            handleFilterChange();
+                            handleFilterChange({ to: value });
                         }}
                         placeholder="Data final"
                         className="h-8 w-44 text-sm"

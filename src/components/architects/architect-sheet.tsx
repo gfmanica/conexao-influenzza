@@ -7,7 +7,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { Textarea } from '@/components/ui/textarea';
 import {
     Sheet,
     SheetClose,
@@ -18,10 +17,9 @@ import {
     SheetTitle,
     SheetTrigger
 } from '@/components/ui/sheet';
-import {
-    createArchitectSchema,
-    updateArchitectSchema
-} from '@/lib/schemas/architect';
+import { Textarea } from '@/components/ui/textarea';
+import { createArchitectSchema, updateArchitectSchema } from '@/lib/schemas/architect';
+import { createArchitect, updateArchitect } from '@/server/fn/architects';
 
 export type Architect = {
     id: string;
@@ -40,34 +38,17 @@ export type Architect = {
     updated_at: string;
 };
 
-type ArchitectFormData = {
-    name: string;
-    email: string;
-    office_email?: string;
-    phone?: string;
-    office_address?: string;
-    birthdate?: string;
-    cau_register?: string;
-    observation?: string;
-    photo?: File;
-};
-
 type ArchitectSheetProps = {
     architect?: Architect;
     trigger: React.ReactNode;
-    onSubmit?: (data: ArchitectFormData) => void;
 };
 
-export function ArchitectSheet({
-    architect,
-    trigger,
-    onSubmit
-}: ArchitectSheetProps) {
+export function ArchitectSheet({ architect, trigger }: ArchitectSheetProps) {
     const isEditing = !!architect;
     const [photoPreview, setPhotoPreview] = React.useState<string | undefined>(
         architect?.photo_url ?? undefined
     );
-    const [photoFile, setPhotoFile] = React.useState<File | undefined>();
+    const [photoFile, setPhotoFile] = React.useState<File>();
 
     const schema = isEditing ? updateArchitectSchema : createArchitectSchema;
 
@@ -80,19 +61,15 @@ export function ArchitectSheet({
             office_address: architect?.office_address ?? '',
             birthdate: architect?.birthdate ?? '',
             cau_register: architect?.cau_register ?? '',
-            observation: architect?.observation ?? ''
+            observation: architect?.observation ?? '',
+            photo: photoFile
         },
         onSubmit: ({ value }) => {
-            onSubmit?.({
-                ...value,
-                office_email: value.office_email || undefined,
-                phone: value.phone || undefined,
-                office_address: value.office_address || undefined,
-                birthdate: value.birthdate || undefined,
-                cau_register: value.cau_register || undefined,
-                observation: value.observation || undefined,
-                photo: photoFile
-            });
+            if (isEditing) {
+                updateArchitect({ data: { ...value, id: architect.id } });
+            } else {
+                createArchitect({ data: value });
+            }
         },
         validators: {
             onSubmit: ({ value }) => {
@@ -125,9 +102,7 @@ export function ArchitectSheet({
             <SheetTrigger render={trigger as React.ReactElement} />
             <SheetContent className="flex flex-col overflow-y-auto sm:max-w-lg">
                 <SheetHeader>
-                    <SheetTitle>
-                        {isEditing ? 'Editar Arquiteto' : 'Novo Arquiteto'}
-                    </SheetTitle>
+                    <SheetTitle>{isEditing ? 'Editar Arquiteto' : 'Novo Arquiteto'}</SheetTitle>
                     <SheetDescription>
                         {isEditing
                             ? 'Edite os dados do arquiteto parceiro.'
@@ -149,9 +124,7 @@ export function ArchitectSheet({
                         <div className="flex items-center gap-4">
                             <Avatar size="lg">
                                 <AvatarImage src={photoPreview} />
-                                <AvatarFallback>
-                                    {initials ?? 'AR'}
-                                </AvatarFallback>
+                                <AvatarFallback>{initials ?? 'AR'}</AvatarFallback>
                             </Avatar>
                             <Input
                                 id="photo"
@@ -179,17 +152,14 @@ export function ArchitectSheet({
                         {(field) => (
                             <div className="flex flex-col gap-3">
                                 <Label htmlFor="name">
-                                    Nome completo{' '}
-                                    <span className="text-destructive">*</span>
+                                    Nome completo <span className="text-destructive">*</span>
                                 </Label>
                                 <Input
                                     id="name"
                                     placeholder="Ex: Ana Carolina Mendes"
                                     value={field.state.value}
                                     onBlur={field.handleBlur}
-                                    onChange={(e) =>
-                                        field.handleChange(e.target.value)
-                                    }
+                                    onChange={(e) => field.handleChange(e.target.value)}
                                 />
                                 {field.state.meta.errors.length > 0 && (
                                     <p className="text-destructive text-xs">
@@ -205,12 +175,8 @@ export function ArchitectSheet({
                         name="email"
                         validators={{
                             onBlur: ({ value }) => {
-                                if (!isEditing && !value.trim())
-                                    return 'E-mail é obrigatório';
-                                if (
-                                    value &&
-                                    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
-                                )
+                                if (!isEditing && !value.trim()) return 'E-mail é obrigatório';
+                                if (value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))
                                     return 'E-mail inválido';
                                 return undefined;
                             }
@@ -219,8 +185,7 @@ export function ArchitectSheet({
                         {(field) => (
                             <div className="flex flex-col gap-3">
                                 <Label htmlFor="email">
-                                    E-mail{' '}
-                                    <span className="text-destructive">*</span>
+                                    E-mail <span className="text-destructive">*</span>
                                 </Label>
                                 <Input
                                     id="email"
@@ -228,15 +193,12 @@ export function ArchitectSheet({
                                     placeholder="arquiteto@escritorio.com"
                                     value={field.state.value}
                                     onBlur={field.handleBlur}
-                                    onChange={(e) =>
-                                        field.handleChange(e.target.value)
-                                    }
+                                    onChange={(e) => field.handleChange(e.target.value)}
                                     disabled={isEditing}
                                 />
                                 {isEditing && (
                                     <p className="text-muted-foreground text-xs">
-                                        E-mail não pode ser alterado após o
-                                        cadastro.
+                                        E-mail não pode ser alterado após o cadastro.
                                     </p>
                                 )}
                                 {field.state.meta.errors.length > 0 && (
@@ -253,10 +215,7 @@ export function ArchitectSheet({
                         name="office_email"
                         validators={{
                             onBlur: ({ value }) => {
-                                if (
-                                    value &&
-                                    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
-                                )
+                                if (value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))
                                     return 'E-mail inválido';
                                 return undefined;
                             }
@@ -264,18 +223,14 @@ export function ArchitectSheet({
                     >
                         {(field) => (
                             <div className="flex flex-col gap-3">
-                                <Label htmlFor="office_email">
-                                    E-mail do escritório
-                                </Label>
+                                <Label htmlFor="office_email">E-mail do escritório</Label>
                                 <Input
                                     id="office_email"
                                     type="email"
                                     placeholder="contato@escritorio.com"
                                     value={field.state.value}
                                     onBlur={field.handleBlur}
-                                    onChange={(e) =>
-                                        field.handleChange(e.target.value)
-                                    }
+                                    onChange={(e) => field.handleChange(e.target.value)}
                                 />
                                 {field.state.meta.errors.length > 0 && (
                                     <p className="text-destructive text-xs">
@@ -297,9 +252,7 @@ export function ArchitectSheet({
                                         placeholder="(11) 99999-0000"
                                         value={field.state.value}
                                         onBlur={field.handleBlur}
-                                        onChange={(e) =>
-                                            field.handleChange(e.target.value)
-                                        }
+                                        onChange={(e) => field.handleChange(e.target.value)}
                                     />
                                 </div>
                             )}
@@ -309,17 +262,13 @@ export function ArchitectSheet({
                         <form.Field name="birthdate">
                             {(field) => (
                                 <div className="flex flex-col gap-3">
-                                    <Label htmlFor="birthdate">
-                                        Data de nascimento
-                                    </Label>
+                                    <Label htmlFor="birthdate">Data de nascimento</Label>
                                     <Input
                                         id="birthdate"
                                         type="date"
                                         value={field.state.value}
                                         onBlur={field.handleBlur}
-                                        onChange={(e) =>
-                                            field.handleChange(e.target.value)
-                                        }
+                                        onChange={(e) => field.handleChange(e.target.value)}
                                     />
                                 </div>
                             )}
@@ -330,17 +279,13 @@ export function ArchitectSheet({
                     <form.Field name="cau_register">
                         {(field) => (
                             <div className="flex flex-col gap-3">
-                                <Label htmlFor="cau_register">
-                                    Registro CAU
-                                </Label>
+                                <Label htmlFor="cau_register">Registro CAU</Label>
                                 <Input
                                     id="cau_register"
                                     placeholder="Ex: A123456-0"
                                     value={field.state.value}
                                     onBlur={field.handleBlur}
-                                    onChange={(e) =>
-                                        field.handleChange(e.target.value)
-                                    }
+                                    onChange={(e) => field.handleChange(e.target.value)}
                                 />
                             </div>
                         )}
@@ -350,17 +295,13 @@ export function ArchitectSheet({
                     <form.Field name="office_address">
                         {(field) => (
                             <div className="flex flex-col gap-3">
-                                <Label htmlFor="office_address">
-                                    Endereço do escritório
-                                </Label>
+                                <Label htmlFor="office_address">Endereço do escritório</Label>
                                 <Input
                                     id="office_address"
                                     placeholder="Rua das Flores, 123, São Paulo - SP"
                                     value={field.state.value}
                                     onBlur={field.handleBlur}
-                                    onChange={(e) =>
-                                        field.handleChange(e.target.value)
-                                    }
+                                    onChange={(e) => field.handleChange(e.target.value)}
                                 />
                             </div>
                         )}
@@ -376,9 +317,7 @@ export function ArchitectSheet({
                                     placeholder="Observações adicionais sobre o arquiteto..."
                                     value={field.state.value}
                                     onBlur={field.handleBlur}
-                                    onChange={(e) =>
-                                        field.handleChange(e.target.value)
-                                    }
+                                    onChange={(e) => field.handleChange(e.target.value)}
                                 />
                             </div>
                         )}
@@ -386,19 +325,12 @@ export function ArchitectSheet({
                 </form>
 
                 <SheetFooter>
-                    <SheetClose render={<Button variant="outline" />}>
-                        Cancelar
-                    </SheetClose>
+                    <SheetClose render={<Button variant="outline" />}>Cancelar</SheetClose>
+
                     <form.Subscribe selector={(s) => s.canSubmit}>
                         {(canSubmit) => (
-                            <Button
-                                type="submit"
-                                form="architect-form"
-                                disabled={!canSubmit}
-                            >
-                                {isEditing
-                                    ? 'Salvar alterações'
-                                    : 'Cadastrar arquiteto'}
+                            <Button type="submit" form="architect-form" disabled={!canSubmit}>
+                                {isEditing ? 'Salvar alterações' : 'Cadastrar arquiteto'}
                             </Button>
                         )}
                     </form.Subscribe>

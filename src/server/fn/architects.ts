@@ -76,10 +76,12 @@ export const createArchitect = createServerFn({ method: 'POST' })
     .inputValidator(createArchitectSchema)
     .handler(async ({ data }) => {
         const supabase = getSupabaseAdminClient();
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { photo: _photo, ...insertData } = data;
 
         const { data: architect, error } = await supabase
             .from('architects')
-            .insert(data)
+            .insert(insertData)
             .select()
             .single();
 
@@ -98,7 +100,8 @@ export const createArchitect = createServerFn({ method: 'POST' })
 export const updateArchitect = createServerFn({ method: 'POST' })
     .inputValidator(updateArchitectSchema)
     .handler(async ({ data }) => {
-        const { id, ...updates } = data;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { id, photo: _photo, ...updates } = data;
         const supabase = getSupabaseAdminClient();
 
         const { data: architect, error } = await supabase

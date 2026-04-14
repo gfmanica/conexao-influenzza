@@ -92,7 +92,7 @@ export function DataTable<TData, TValue>({
     const hasData = data.length > 0;
 
     const showLoading = isLoading && !hasData;
-    const showRows = (!isLoading || hasData) && table.getRowModel().rows?.length;
+    const showRows = (!isLoading || hasData) && !!table.getRowModel().rows?.length;
     const showNoResults = !isLoading && !hasData;
 
     return (
