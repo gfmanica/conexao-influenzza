@@ -1,5 +1,5 @@
 import { useForm } from '@tanstack/react-form';
-import * as z from 'zod';
+import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -10,26 +10,25 @@ import {
 } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { requestOtp } from '@/server/fn/auth';
 import { useLoginStore } from '@/store/use-login-store';
-
-const loginSchema = z.object({
-    email: z.string().email('Email inválido')
-});
 
 export function LoginForm({ className }: React.ComponentProps<'form'>) {
     const setStep = useLoginStore((state) => state.setStep);
     const setEmail = useLoginStore((state) => state.setEmail);
 
     const form = useForm({
-        defaultValues: {
-            email: ''
-        },
-        validators: {
-            onSubmit: loginSchema
-        },
+        defaultValues: { email: '' },
         onSubmit: async ({ value }) => {
-            setEmail(value.email);
-            setStep('otp');
+            try {
+                await requestOtp({ data: { email: value.email } });
+                setEmail(value.email);
+                setStep('otp');
+            } catch (err) {
+                toast.error(
+                    err instanceof Error ? err.message : 'Erro ao enviar código.'
+                );
+            }
         }
     });
 
@@ -54,10 +53,19 @@ export function LoginForm({ className }: React.ComponentProps<'form'>) {
 
                 <form.Field
                     name="email"
-                    children={(field) => {
+                    validators={{
+                        onBlur: ({ value }) => {
+                            if (!value) return 'E-mail é obrigatório';
+                            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))
+                                return 'E-mail inválido';
+                            return undefined;
+                        }
+                    }}
+                >
+                    {(field) => {
                         const isInvalid =
                             field.state.meta.isTouched &&
-                            !field.state.meta.isValid;
+                            field.state.meta.errors.length > 0;
 
                         return (
                             <Field data-invalid={isInvalid}>
@@ -80,21 +88,30 @@ export function LoginForm({ className }: React.ComponentProps<'form'>) {
 
                                 {isInvalid && (
                                     <FieldError
-                                        errors={field.state.meta.errors}
+                                        errors={field.state.meta.errors.map(
+                                            (e) => ({ message: String(e) })
+                                        )}
                                     />
                                 )}
                             </Field>
                         );
                     }}
-                />
+                </form.Field>
 
                 <Field>
-                    <Button
-                        type="submit"
-                        className="transition-transform duration-160 ease-out active:scale-[0.97]"
+                    <form.Subscribe
+                        selector={(s) => s.isSubmitting}
                     >
-                        Continuar
-                    </Button>
+                        {(isSubmitting) => (
+                            <Button
+                                type="submit"
+                                disabled={isSubmitting}
+                                className="transition-transform duration-160 ease-out active:scale-[0.97]"
+                            >
+                                {isSubmitting ? 'Enviando...' : 'Continuar'}
+                            </Button>
+                        )}
+                    </form.Subscribe>
                 </Field>
             </FieldGroup>
         </form>

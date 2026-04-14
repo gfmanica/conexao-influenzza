@@ -1,7 +1,15 @@
 import { type ColumnDef } from '@tanstack/react-table';
-import { ArrowUpDownIcon, LinkIcon, UnlinkIcon } from 'lucide-react';
+import {
+    ArrowUpDownIcon,
+    EllipsisVerticalIcon,
+    LinkIcon,
+    UnlinkIcon
+} from 'lucide-react';
 
-import { ArchitectSheet, type Architect } from '@/components/architects/architect-sheet';
+import {
+    ArchitectSheet,
+    type Architect
+} from '@/components/architects/architect-sheet';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -12,7 +20,6 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { EllipsisVerticalIcon } from 'lucide-react';
 
 function getInitials(name: string) {
     return name
@@ -40,13 +47,13 @@ export const columns: ColumnDef<Architect>[] = [
         cell: ({ row }) => (
             <div className="flex items-center gap-3">
                 <Avatar>
-                    <AvatarImage src={row.original.photo_url} />
+                    <AvatarImage src={row.original.photo_url ?? undefined} />
                     <AvatarFallback>
                         {getInitials(row.original.name)}
                     </AvatarFallback>
                 </Avatar>
                 <div className="flex flex-col">
-                    <span className="font-medium leading-tight">
+                    <span className="leading-tight font-medium">
                         {row.original.name}
                     </span>
                     <span className="text-muted-foreground text-xs">

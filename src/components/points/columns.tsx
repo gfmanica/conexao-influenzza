@@ -62,27 +62,27 @@ export function buildColumns({
             )
         },
         {
-            accessorKey: 'architect_name',
+            accessorKey: 'architect_id',
             header: 'Arquiteto',
-            cell: ({ row }) => (
-                <div className="flex items-center gap-3">
-                    <Avatar>
-                        <AvatarImage src={row.original.architect_photo_url} />
-                        <AvatarFallback>
-                            {getInitials(row.original.architect_name)}
-                        </AvatarFallback>
-                    </Avatar>
-                    <span className="font-medium">
-                        {row.original.architect_name}
-                    </span>
-                </div>
-            )
+            cell: ({ row }) => {
+                const arch = row.original.architects;
+                const name = arch?.name ?? '—';
+                return (
+                    <div className="flex items-center gap-3">
+                        <Avatar>
+                            <AvatarImage src={arch?.photo_url ?? undefined} />
+                            <AvatarFallback>{getInitials(name)}</AvatarFallback>
+                        </Avatar>
+                        <span className="font-medium">{name}</span>
+                    </div>
+                );
+            }
         },
         {
-            accessorKey: 'point_type_name',
+            accessorKey: 'point_type',
             header: 'Tipo',
             cell: ({ row }) => (
-                <Badge variant="outline">{row.original.point_type_name}</Badge>
+                <Badge variant="outline">{row.original.point_type}</Badge>
             )
         },
         {

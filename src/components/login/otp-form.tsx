@@ -1,7 +1,7 @@
 import { useForm } from '@tanstack/react-form';
+import { useRouter } from '@tanstack/react-router';
 import { REGEXP_ONLY_DIGITS } from 'input-otp';
 import { toast } from 'sonner';
-import * as z from 'zod';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -11,27 +11,32 @@ import {
     FieldLabel
 } from '@/components/ui/field';
 import { cn } from '@/lib/utils';
+import { verifyOtp } from '@/server/fn/auth';
 import { useLoginStore } from '@/store/use-login-store';
 
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '../ui/input-otp';
 
-const otpSchema = z.object({
-    otp: z.string().length(6, 'Código inválido')
-});
-
 export function OtpForm({ className }: React.ComponentProps<'form'>) {
     const email = useLoginStore((state) => state.email);
     const setStep = useLoginStore((state) => state.setStep);
+    const reset = useLoginStore((state) => state.reset);
+    const router = useRouter();
 
     const form = useForm({
-        defaultValues: {
-            otp: ''
-        },
-        validators: {
-            onSubmit: otpSchema
-        },
+        defaultValues: { otp: '' },
         onSubmit: async ({ value }) => {
-            toast.success(`Validando OTP ${value.otp} para ${email}`);
+            try {
+                await verifyOtp({ data: { email, token: value.otp } });
+                reset();
+                await router.invalidate();
+                router.navigate({ to: '/dashboard' });
+            } catch (err) {
+                toast.error(
+                    err instanceof Error
+                        ? err.message
+                        : 'Código inválido ou expirado.'
+                );
+            }
         }
     });
 
@@ -51,19 +56,26 @@ export function OtpForm({ className }: React.ComponentProps<'form'>) {
 
                     <p className="text-muted-foreground text-sm text-balance">
                         Digite o código de 6 dígitos enviado para <br />
-                        <strong className="text-foreground">
-                            {email}
-                        </strong>{' '}
+                        <strong className="text-foreground">{email}</strong>{' '}
                         para continuar.
                     </p>
                 </div>
 
                 <form.Field
                     name="otp"
-                    children={(field) => {
+                    validators={{
+                        onChange: ({ value }) =>
+                            value.length === 6 ? undefined : undefined,
+                        onSubmit: ({ value }) =>
+                            value.length !== 6
+                                ? 'Código deve ter 6 dígitos'
+                                : undefined
+                    }}
+                >
+                    {(field) => {
                         const isInvalid =
                             field.state.meta.isTouched &&
-                            !field.state.meta.isValid;
+                            field.state.meta.errors.length > 0;
 
                         return (
                             <Field data-invalid={isInvalid}>
@@ -93,22 +105,31 @@ export function OtpForm({ className }: React.ComponentProps<'form'>) {
 
                                 {isInvalid && (
                                     <FieldError
-                                        errors={field.state.meta.errors}
+                                        errors={field.state.meta.errors.map(
+                                            (e) => ({ message: String(e) })
+                                        )}
                                     />
                                 )}
                             </Field>
                         );
                     }}
-                />
+                </form.Field>
 
                 <div className="flex flex-col gap-3">
                     <Field>
-                        <Button
-                            type="submit"
-                            className="transition-transform duration-160 ease-out active:scale-[0.97]"
-                        >
-                            Validar código
-                        </Button>
+                        <form.Subscribe selector={(s) => s.isSubmitting}>
+                            {(isSubmitting) => (
+                                <Button
+                                    type="submit"
+                                    disabled={isSubmitting}
+                                    className="transition-transform duration-160 ease-out active:scale-[0.97]"
+                                >
+                                    {isSubmitting
+                                        ? 'Validando...'
+                                        : 'Validar código'}
+                                </Button>
+                            )}
+                        </form.Subscribe>
                     </Field>
 
                     <Button

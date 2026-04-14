@@ -1,10 +1,13 @@
 import * as React from 'react';
 
+import { useForm } from '@tanstack/react-form';
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { Textarea } from '@/components/ui/textarea';
 import {
     Sheet,
     SheetClose,
@@ -15,16 +18,22 @@ import {
     SheetTitle,
     SheetTrigger
 } from '@/components/ui/sheet';
+import {
+    createArchitectSchema,
+    updateArchitectSchema
+} from '@/lib/schemas/architect';
 
 export type Architect = {
     id: string;
     name: string;
     email: string;
-    phone?: string;
-    office_address?: string;
-    birthdate?: string;
-    cau_register?: string;
-    photo_url?: string;
+    office_email?: string | null;
+    phone?: string | null;
+    office_address?: string | null;
+    birthdate?: string | null;
+    cau_register?: string | null;
+    observation?: string | null;
+    photo_url?: string | null;
     linked: boolean;
     total_points: number;
     created_at: string;
@@ -34,10 +43,12 @@ export type Architect = {
 type ArchitectFormData = {
     name: string;
     email: string;
+    office_email?: string;
     phone?: string;
     office_address?: string;
     birthdate?: string;
     cau_register?: string;
+    observation?: string;
     photo?: File;
 };
 
@@ -53,36 +64,57 @@ export function ArchitectSheet({
     onSubmit
 }: ArchitectSheetProps) {
     const isEditing = !!architect;
-    const formId = React.useId();
     const [photoPreview, setPhotoPreview] = React.useState<string | undefined>(
-        architect?.photo_url
+        architect?.photo_url ?? undefined
     );
+    const [photoFile, setPhotoFile] = React.useState<File | undefined>();
+
+    const schema = isEditing ? updateArchitectSchema : createArchitectSchema;
+
+    const form = useForm({
+        defaultValues: {
+            name: architect?.name ?? '',
+            email: architect?.email ?? '',
+            office_email: architect?.office_email ?? '',
+            phone: architect?.phone ?? '',
+            office_address: architect?.office_address ?? '',
+            birthdate: architect?.birthdate ?? '',
+            cau_register: architect?.cau_register ?? '',
+            observation: architect?.observation ?? ''
+        },
+        onSubmit: ({ value }) => {
+            onSubmit?.({
+                ...value,
+                office_email: value.office_email || undefined,
+                phone: value.phone || undefined,
+                office_address: value.office_address || undefined,
+                birthdate: value.birthdate || undefined,
+                cau_register: value.cau_register || undefined,
+                observation: value.observation || undefined,
+                photo: photoFile
+            });
+        },
+        validators: {
+            onSubmit: ({ value }) => {
+                const result = schema.safeParse(value);
+                if (!result.success) {
+                    return result.error.issues[0]?.message ?? 'Formulário inválido';
+                }
+                return undefined;
+            }
+        }
+    });
 
     function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0];
         if (file) {
             setPhotoPreview(URL.createObjectURL(file));
+            setPhotoFile(file);
         }
     }
 
-    function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-        e.preventDefault();
-        const form = e.currentTarget;
-        const formData = new FormData(form);
-        onSubmit?.({
-            name: formData.get('name') as string,
-            email: formData.get('email') as string,
-            phone: (formData.get('phone') as string) || undefined,
-            office_address:
-                (formData.get('office_address') as string) || undefined,
-            birthdate: (formData.get('birthdate') as string) || undefined,
-            cau_register: (formData.get('cau_register') as string) || undefined,
-            photo: (formData.get('photo') as File) || undefined
-        });
-    }
-
-    const initials = architect?.name
-        .split(' ')
+    const initials = (form.state.values.name || architect?.name)
+        ?.split(' ')
         .slice(0, 2)
         .map((n) => n[0])
         .join('')
@@ -104,9 +136,12 @@ export function ArchitectSheet({
                 </SheetHeader>
 
                 <form
-                    id={formId}
-                    onSubmit={handleSubmit}
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        form.handleSubmit();
+                    }}
                     className="flex flex-col gap-5 overflow-y-auto px-6 py-2"
+                    id="architect-form"
                 >
                     {/* Photo */}
                     <div className="flex flex-col gap-3">
@@ -132,99 +167,241 @@ export function ArchitectSheet({
                     <Separator />
 
                     {/* Nome */}
-                    <div className="flex flex-col gap-3">
-                        <Label htmlFor="name">
-                            Nome completo{' '}
-                            <span className="text-destructive">*</span>
-                        </Label>
-                        <Input
-                            id="name"
-                            name="name"
-                            placeholder="Ex: Ana Carolina Mendes"
-                            defaultValue={architect?.name}
-                            required
-                        />
-                    </div>
+                    <form.Field
+                        name="name"
+                        validators={{
+                            onBlur: ({ value }) => {
+                                if (!value.trim()) return 'Nome é obrigatório';
+                                return undefined;
+                            }
+                        }}
+                    >
+                        {(field) => (
+                            <div className="flex flex-col gap-3">
+                                <Label htmlFor="name">
+                                    Nome completo{' '}
+                                    <span className="text-destructive">*</span>
+                                </Label>
+                                <Input
+                                    id="name"
+                                    placeholder="Ex: Ana Carolina Mendes"
+                                    value={field.state.value}
+                                    onBlur={field.handleBlur}
+                                    onChange={(e) =>
+                                        field.handleChange(e.target.value)
+                                    }
+                                />
+                                {field.state.meta.errors.length > 0 && (
+                                    <p className="text-destructive text-xs">
+                                        {field.state.meta.errors[0]?.toString()}
+                                    </p>
+                                )}
+                            </div>
+                        )}
+                    </form.Field>
 
                     {/* E-mail */}
-                    <div className="flex flex-col gap-3">
-                        <Label htmlFor="email">
-                            E-mail <span className="text-destructive">*</span>
-                        </Label>
-                        <Input
-                            id="email"
-                            name="email"
-                            type="email"
-                            placeholder="arquiteto@escritorio.com"
-                            defaultValue={architect?.email}
-                            required
-                            disabled={isEditing}
-                        />
-                        {isEditing && (
-                            <p className="text-muted-foreground text-xs">
-                                E-mail não pode ser alterado após o cadastro.
-                            </p>
+                    <form.Field
+                        name="email"
+                        validators={{
+                            onBlur: ({ value }) => {
+                                if (!isEditing && !value.trim())
+                                    return 'E-mail é obrigatório';
+                                if (
+                                    value &&
+                                    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+                                )
+                                    return 'E-mail inválido';
+                                return undefined;
+                            }
+                        }}
+                    >
+                        {(field) => (
+                            <div className="flex flex-col gap-3">
+                                <Label htmlFor="email">
+                                    E-mail{' '}
+                                    <span className="text-destructive">*</span>
+                                </Label>
+                                <Input
+                                    id="email"
+                                    type="email"
+                                    placeholder="arquiteto@escritorio.com"
+                                    value={field.state.value}
+                                    onBlur={field.handleBlur}
+                                    onChange={(e) =>
+                                        field.handleChange(e.target.value)
+                                    }
+                                    disabled={isEditing}
+                                />
+                                {isEditing && (
+                                    <p className="text-muted-foreground text-xs">
+                                        E-mail não pode ser alterado após o
+                                        cadastro.
+                                    </p>
+                                )}
+                                {field.state.meta.errors.length > 0 && (
+                                    <p className="text-destructive text-xs">
+                                        {field.state.meta.errors[0]?.toString()}
+                                    </p>
+                                )}
+                            </div>
                         )}
-                    </div>
+                    </form.Field>
+
+                    {/* E-mail do escritório */}
+                    <form.Field
+                        name="office_email"
+                        validators={{
+                            onBlur: ({ value }) => {
+                                if (
+                                    value &&
+                                    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+                                )
+                                    return 'E-mail inválido';
+                                return undefined;
+                            }
+                        }}
+                    >
+                        {(field) => (
+                            <div className="flex flex-col gap-3">
+                                <Label htmlFor="office_email">
+                                    E-mail do escritório
+                                </Label>
+                                <Input
+                                    id="office_email"
+                                    type="email"
+                                    placeholder="contato@escritorio.com"
+                                    value={field.state.value}
+                                    onBlur={field.handleBlur}
+                                    onChange={(e) =>
+                                        field.handleChange(e.target.value)
+                                    }
+                                />
+                                {field.state.meta.errors.length > 0 && (
+                                    <p className="text-destructive text-xs">
+                                        {field.state.meta.errors[0]?.toString()}
+                                    </p>
+                                )}
+                            </div>
+                        )}
+                    </form.Field>
 
                     <div className="grid grid-cols-2 gap-4">
                         {/* Telefone */}
-                        <div className="flex flex-col gap-3">
-                            <Label htmlFor="phone">Telefone</Label>
-                            <Input
-                                id="phone"
-                                name="phone"
-                                placeholder="(11) 99999-0000"
-                                defaultValue={architect?.phone}
-                            />
-                        </div>
+                        <form.Field name="phone">
+                            {(field) => (
+                                <div className="flex flex-col gap-3">
+                                    <Label htmlFor="phone">Telefone</Label>
+                                    <Input
+                                        id="phone"
+                                        placeholder="(11) 99999-0000"
+                                        value={field.state.value}
+                                        onBlur={field.handleBlur}
+                                        onChange={(e) =>
+                                            field.handleChange(e.target.value)
+                                        }
+                                    />
+                                </div>
+                            )}
+                        </form.Field>
 
                         {/* Data de nascimento */}
-                        <div className="flex flex-col gap-3">
-                            <Label htmlFor="birthdate">
-                                Data de nascimento
-                            </Label>
-                            <Input
-                                id="birthdate"
-                                name="birthdate"
-                                type="date"
-                                defaultValue={architect?.birthdate}
-                            />
-                        </div>
+                        <form.Field name="birthdate">
+                            {(field) => (
+                                <div className="flex flex-col gap-3">
+                                    <Label htmlFor="birthdate">
+                                        Data de nascimento
+                                    </Label>
+                                    <Input
+                                        id="birthdate"
+                                        type="date"
+                                        value={field.state.value}
+                                        onBlur={field.handleBlur}
+                                        onChange={(e) =>
+                                            field.handleChange(e.target.value)
+                                        }
+                                    />
+                                </div>
+                            )}
+                        </form.Field>
                     </div>
 
                     {/* Registro CAU */}
-                    <div className="flex flex-col gap-3">
-                        <Label htmlFor="cau_register">Registro CAU</Label>
-                        <Input
-                            id="cau_register"
-                            name="cau_register"
-                            placeholder="Ex: A123456-0"
-                            defaultValue={architect?.cau_register}
-                        />
-                    </div>
+                    <form.Field name="cau_register">
+                        {(field) => (
+                            <div className="flex flex-col gap-3">
+                                <Label htmlFor="cau_register">
+                                    Registro CAU
+                                </Label>
+                                <Input
+                                    id="cau_register"
+                                    placeholder="Ex: A123456-0"
+                                    value={field.state.value}
+                                    onBlur={field.handleBlur}
+                                    onChange={(e) =>
+                                        field.handleChange(e.target.value)
+                                    }
+                                />
+                            </div>
+                        )}
+                    </form.Field>
 
                     {/* Endereço do escritório */}
-                    <div className="flex flex-col gap-3">
-                        <Label htmlFor="office_address">
-                            Endereço do escritório
-                        </Label>
-                        <Input
-                            id="office_address"
-                            name="office_address"
-                            placeholder="Rua das Flores, 123, São Paulo - SP"
-                            defaultValue={architect?.office_address}
-                        />
-                    </div>
+                    <form.Field name="office_address">
+                        {(field) => (
+                            <div className="flex flex-col gap-3">
+                                <Label htmlFor="office_address">
+                                    Endereço do escritório
+                                </Label>
+                                <Input
+                                    id="office_address"
+                                    placeholder="Rua das Flores, 123, São Paulo - SP"
+                                    value={field.state.value}
+                                    onBlur={field.handleBlur}
+                                    onChange={(e) =>
+                                        field.handleChange(e.target.value)
+                                    }
+                                />
+                            </div>
+                        )}
+                    </form.Field>
+
+                    {/* Observação */}
+                    <form.Field name="observation">
+                        {(field) => (
+                            <div className="flex flex-col gap-3">
+                                <Label htmlFor="observation">Observação</Label>
+                                <Textarea
+                                    id="observation"
+                                    placeholder="Observações adicionais sobre o arquiteto..."
+                                    value={field.state.value}
+                                    onBlur={field.handleBlur}
+                                    onChange={(e) =>
+                                        field.handleChange(e.target.value)
+                                    }
+                                />
+                            </div>
+                        )}
+                    </form.Field>
                 </form>
 
                 <SheetFooter>
                     <SheetClose render={<Button variant="outline" />}>
                         Cancelar
                     </SheetClose>
-                    <Button type="submit" form={formId}>
-                        {isEditing ? 'Salvar alterações' : 'Cadastrar arquiteto'}
-                    </Button>
+                    <form.Subscribe selector={(s) => s.canSubmit}>
+                        {(canSubmit) => (
+                            <Button
+                                type="submit"
+                                form="architect-form"
+                                disabled={!canSubmit}
+                            >
+                                {isEditing
+                                    ? 'Salvar alterações'
+                                    : 'Cadastrar arquiteto'}
+                            </Button>
+                        )}
+                    </form.Subscribe>
                 </SheetFooter>
             </SheetContent>
         </Sheet>
