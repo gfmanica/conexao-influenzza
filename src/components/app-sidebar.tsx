@@ -37,11 +37,6 @@ const navItems = [
         title: 'Pontuações',
         url: '/pontuacoes',
         icon: <StarIcon />
-    },
-    {
-        title: 'Ranking',
-        url: '/ranking',
-        icon: <TrophyIcon />
     }
 ];
 

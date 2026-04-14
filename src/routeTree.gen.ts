@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthLoginRouteImport } from './routes/_auth.login'
+import { Route as AppPontuacoesRouteImport } from './routes/_app.pontuacoes'
 import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
 import { Route as AppArquitetosRouteImport } from './routes/_app.arquitetos'
 
@@ -29,6 +30,11 @@ const AuthLoginRoute = AuthLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AppPontuacoesRoute = AppPontuacoesRouteImport.update({
+  id: '/pontuacoes',
+  path: '/pontuacoes',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppDashboardRoute = AppDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -44,12 +50,14 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/arquitetos': typeof AppArquitetosRoute
   '/dashboard': typeof AppDashboardRoute
+  '/pontuacoes': typeof AppPontuacoesRoute
   '/login': typeof AuthLoginRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/arquitetos': typeof AppArquitetosRoute
   '/dashboard': typeof AppDashboardRoute
+  '/pontuacoes': typeof AppPontuacoesRoute
   '/login': typeof AuthLoginRoute
 }
 export interface FileRoutesById {
@@ -58,19 +66,21 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/_app/arquitetos': typeof AppArquitetosRoute
   '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/pontuacoes': typeof AppPontuacoesRoute
   '/_auth/login': typeof AuthLoginRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/arquitetos' | '/dashboard' | '/login'
+  fullPaths: '/' | '/arquitetos' | '/dashboard' | '/pontuacoes' | '/login'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/arquitetos' | '/dashboard' | '/login'
+  to: '/' | '/arquitetos' | '/dashboard' | '/pontuacoes' | '/login'
   id:
     | '__root__'
     | '/'
     | '/_app'
     | '/_app/arquitetos'
     | '/_app/dashboard'
+    | '/_app/pontuacoes'
     | '/_auth/login'
   fileRoutesById: FileRoutesById
 }
@@ -103,6 +113,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_app/pontuacoes': {
+      id: '/_app/pontuacoes'
+      path: '/pontuacoes'
+      fullPath: '/pontuacoes'
+      preLoaderRoute: typeof AppPontuacoesRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/dashboard': {
       id: '/_app/dashboard'
       path: '/dashboard'
@@ -123,11 +140,13 @@ declare module '@tanstack/react-router' {
 interface AppRouteChildren {
   AppArquitetosRoute: typeof AppArquitetosRoute
   AppDashboardRoute: typeof AppDashboardRoute
+  AppPontuacoesRoute: typeof AppPontuacoesRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppArquitetosRoute: AppArquitetosRoute,
   AppDashboardRoute: AppDashboardRoute,
+  AppPontuacoesRoute: AppPontuacoesRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)

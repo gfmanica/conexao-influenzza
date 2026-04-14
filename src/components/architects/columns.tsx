@@ -77,7 +77,19 @@ export const columns: ColumnDef<Architect>[] = [
     },
     {
         accessorKey: 'total_points',
-        header: () => <div className="text-right">Pontos</div>,
+        header: ({ column }) => (
+            <div className="flex justify-end">
+                <Button
+                    variant="ghost"
+                    onClick={() =>
+                        column.toggleSorting(column.getIsSorted() === 'asc')
+                    }
+                >
+                    Pontos
+                    <ArrowUpDownIcon className="ml-2 size-4" />
+                </Button>
+            </div>
+        ),
         cell: ({ row }) => (
             <div className="text-right">
                 <Badge variant="secondary">
