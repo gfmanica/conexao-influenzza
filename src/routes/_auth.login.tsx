@@ -1,4 +1,6 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, redirect } from '@tanstack/react-router';
+
+import { getSession } from '@/server/fn/auth';
 
 import { LoginForm } from '@/components/login/login-form';
 import { OtpForm } from '@/components/login/otp-form';
@@ -6,6 +8,10 @@ import { cn } from '@/lib/utils';
 import { useLoginStore } from '@/store/use-login-store';
 
 export const Route = createFileRoute('/_auth/login')({
+    beforeLoad: async () => {
+        const user = await getSession();
+        if (user) throw redirect({ to: '/dashboard' });
+    },
     component: Login
 });
 
@@ -16,7 +22,7 @@ function Login() {
         <div className="grid min-h-svh lg:grid-cols-2">
             <div className="bg-foreground hidden items-center justify-center lg:flex">
                 <img
-                    src="/logo/logomarca-white.png"
+                    src="/logo/logomarca-vertical-white.png"
                     alt="Logo"
                     className="h-84 object-cover dark:brightness-[0.2] dark:grayscale"
                 />
@@ -24,7 +30,7 @@ function Login() {
 
             <div className="relative flex flex-col items-center justify-center gap-12 p-6 sm:gap-12 md:p-10">
                 <img
-                    src="/logo/logomarca-black.png"
+                    src="/logo/logomarca-vertical-black.png"
                     alt="Logo"
                     className="-mt-16 block h-22 object-cover [image-rendering:-webkit-optimize-contrast] lg:hidden dark:brightness-[0.2] dark:grayscale"
                 />

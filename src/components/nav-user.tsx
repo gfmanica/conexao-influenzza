@@ -1,16 +1,11 @@
-import {
-    BellIcon,
-    CircleUserRoundIcon,
-    CreditCardIcon,
-    EllipsisVerticalIcon,
-    LogOutIcon
-} from 'lucide-react';
+import { useRouter } from '@tanstack/react-router';
+import { EllipsisVerticalIcon, LogOutIcon } from 'lucide-react';
+import { toast } from 'sonner';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
     DropdownMenu,
     DropdownMenuContent,
-    DropdownMenuGroup,
     DropdownMenuItem,
     DropdownMenuLabel,
     DropdownMenuSeparator,
@@ -22,6 +17,7 @@ import {
     SidebarMenuItem,
     useSidebar
 } from '@/components/ui/sidebar';
+import { logout } from '@/server/fn/auth';
 
 export function NavUser({
     user
@@ -33,6 +29,25 @@ export function NavUser({
     };
 }) {
     const { isMobile } = useSidebar();
+    const router = useRouter();
+
+    const initials = user.name
+        .split(' ')
+        .slice(0, 2)
+        .map((n) => n[0])
+        .join('')
+        .toUpperCase();
+
+    async function handleLogout() {
+        try {
+            await logout();
+            await router.invalidate();
+            router.navigate({ to: '/login' });
+        } catch {
+            toast.error('Erro ao sair. Tente novamente.');
+        }
+    }
+
     return (
         <SidebarMenu>
             <SidebarMenuItem>
@@ -48,7 +63,7 @@ export function NavUser({
                         <Avatar className="size-8 rounded-lg grayscale">
                             <AvatarImage src={user.avatar} alt={user.name} />
                             <AvatarFallback className="rounded-lg">
-                                CN
+                                {initials}
                             </AvatarFallback>
                         </Avatar>
                         <div className="grid flex-1 text-left text-sm leading-tight">
@@ -67,48 +82,31 @@ export function NavUser({
                         align="end"
                         sideOffset={4}
                     >
-                        <DropdownMenuGroup>
-                            <DropdownMenuLabel className="p-0 font-normal">
-                                <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
-                                    <Avatar className="size-8">
-                                        <AvatarImage
-                                            src={user.avatar}
-                                            alt={user.name}
-                                        />
-                                        <AvatarFallback className="rounded-lg">
-                                            CN
-                                        </AvatarFallback>
-                                    </Avatar>
-                                    <div className="grid flex-1 text-left text-sm leading-tight">
-                                        <span className="truncate font-medium">
-                                            {user.name}
-                                        </span>
-                                        <span className="text-muted-foreground truncate text-xs">
-                                            {user.email}
-                                        </span>
-                                    </div>
+                        <DropdownMenuLabel className="p-0 font-normal">
+                            <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
+                                <Avatar className="size-8">
+                                    <AvatarImage
+                                        src={user.avatar}
+                                        alt={user.name}
+                                    />
+                                    <AvatarFallback className="rounded-lg">
+                                        {initials}
+                                    </AvatarFallback>
+                                </Avatar>
+                                <div className="grid flex-1 text-left text-sm leading-tight">
+                                    <span className="truncate font-medium">
+                                        {user.name}
+                                    </span>
+                                    <span className="text-muted-foreground truncate text-xs">
+                                        {user.email}
+                                    </span>
                                 </div>
-                            </DropdownMenuLabel>
-                        </DropdownMenuGroup>
+                            </div>
+                        </DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuGroup>
-                            <DropdownMenuItem>
-                                <CircleUserRoundIcon />
-                                Account
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                                <CreditCardIcon />
-                                Billing
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                                <BellIcon />
-                                Notifications
-                            </DropdownMenuItem>
-                        </DropdownMenuGroup>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleLogout}>
                             <LogOutIcon />
-                            Log out
+                            Sair
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>

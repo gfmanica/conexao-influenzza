@@ -1,11 +1,7 @@
 import * as React from 'react';
 
-import {
-    LayoutDashboardIcon,
-    StarIcon,
-    TrophyIcon,
-    UsersIcon
-} from 'lucide-react';
+import { useRouteContext } from '@tanstack/react-router';
+import { LayoutDashboardIcon, StarIcon, UsersIcon } from 'lucide-react';
 
 import { NavMain } from '@/components/nav-main';
 import { NavUser } from '@/components/nav-user';
@@ -22,7 +18,7 @@ import {
 } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
 
-const navItems = [
+const adminNavItems = [
     {
         title: 'Dashboard',
         url: '/dashboard',
@@ -40,11 +36,13 @@ const navItems = [
     }
 ];
 
-const mockUser = {
-    name: 'Administrador',
-    email: 'admin@conexaoinfluenzza.com.br',
-    avatar: ''
-};
+const architectNavItems = [
+    {
+        title: 'Dashboard',
+        url: '/dashboard',
+        icon: <LayoutDashboardIcon />
+    }
+];
 
 function SidebarHeaderContent() {
     const { state } = useSidebar();
@@ -104,6 +102,10 @@ function SidebarHeaderContent() {
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+    const { user } = useRouteContext({ from: '/_app' });
+    const navItems =
+        user.role === 'admin' ? adminNavItems : architectNavItems;
+
     return (
         <Sidebar collapsible="icon" {...props}>
             <SidebarHeader>
@@ -117,7 +119,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarContent>
 
             <SidebarFooter>
-                <NavUser user={mockUser} />
+                <NavUser
+                    user={{
+                        name: user.name,
+                        email: user.email,
+                        avatar: user.photo_url ?? ''
+                    }}
+                />
             </SidebarFooter>
         </Sidebar>
     );
