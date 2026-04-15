@@ -1,7 +1,6 @@
 import { useForm } from '@tanstack/react-form';
 import { useRouter } from '@tanstack/react-router';
 import { REGEXP_ONLY_DIGITS } from 'input-otp';
-import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
@@ -14,19 +13,25 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from '../ui/input-otp';
 export function OtpForm({ className }: React.ComponentProps<'form'>) {
     const email = useLoginStore((state) => state.email);
     const setStep = useLoginStore((state) => state.setStep);
-    const reset = useLoginStore((state) => state.reset);
     const router = useRouter();
 
     const form = useForm({
         defaultValues: { otp: '' },
-        onSubmit: async ({ value }) => {
+        onSubmit: async ({ value, formApi }) => {
             try {
                 await verifyOtp({ data: { email, token: value.otp } });
-                reset();
+
                 await router.invalidate();
+
                 router.navigate({ to: '/dashboard' });
             } catch (err) {
-                toast.error(err instanceof Error ? err.message : 'Código inválido ou expirado.');
+                formApi.setErrorMap({
+                    onSubmit: {
+                        fields: {
+                            otp: err instanceof Error ? err.message : 'Código inválido ou expirado.'
+                        }
+                    }
+                });
             }
         }
     });
@@ -101,10 +106,10 @@ export function OtpForm({ className }: React.ComponentProps<'form'>) {
                             {(isSubmitting) => (
                                 <Button
                                     type="submit"
-                                    disabled={isSubmitting}
+                                    loading={isSubmitting}
                                     className="transition-transform duration-160 ease-out active:scale-[0.97]"
                                 >
-                                    {isSubmitting ? 'Validando...' : 'Validar código'}
+                                    Validar código
                                 </Button>
                             )}
                         </form.Subscribe>

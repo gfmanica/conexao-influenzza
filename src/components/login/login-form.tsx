@@ -14,22 +14,20 @@ export function LoginForm({ className }: React.ComponentProps<'form'>) {
     const form = useForm({
         defaultValues: { email: '' },
         onSubmit: async ({ value, formApi }) => {
-            formApi.setFieldMeta('email', (prev) => ({
-                ...prev,
-                errorMap: { ...prev.errorMap, onServer: undefined }
-            }));
             try {
                 await requestOtp({ data: { email: value.email } });
+
                 setEmail(value.email);
+
                 setStep('otp');
             } catch (err) {
-                formApi.setFieldMeta('email', (prev) => ({
-                    ...prev,
-                    errorMap: {
-                        ...prev.errorMap,
-                        onServer: err instanceof Error ? err.message : 'Erro ao enviar código.'
+                formApi.setErrorMap({
+                    onSubmit: {
+                        fields: {
+                            email: err instanceof Error ? err.message : 'Erro ao enviar código.'
+                        }
                     }
-                }));
+                });
             }
         }
     });
@@ -99,10 +97,10 @@ export function LoginForm({ className }: React.ComponentProps<'form'>) {
                         {(isSubmitting) => (
                             <Button
                                 type="submit"
-                                disabled={isSubmitting}
+                                loading={isSubmitting}
                                 className="transition-transform duration-160 ease-out active:scale-[0.97]"
                             >
-                                {isSubmitting ? 'Enviando...' : 'Continuar'}
+                                Continuar
                             </Button>
                         )}
                     </form.Subscribe>

@@ -70,7 +70,10 @@ function RootDocument({ children }: { children: React.ReactNode }) {
                     position="bottom-left"
                     toastOptions={{
                         classNames: {
-                            info: 'bg-emerald-500 text-white border-emerald-700'
+                            // info: 'bg-emerald-400! text-emerald-200! border-emerald-700! [&>[data-icon]]:text-emerald-400! [&_[data-title]]:text-white! [&_[data-title]]:font-semibold!',
+                            // warning: 'bg-amber-400! text-amber-200! border-amber-700! [&>[data-icon]]:text-amber-400! [&_[data-title]]:text-white! [&_[data-title]]:font-semibold!',
+                            // error: 'bg-red-400! text-red-200! border-red-700! [&>[data-icon]]:text-red-400! [&_[data-title]]:text-white! [&_[data-title]]:font-semibold!',
+                            // success: 'bg-emerald-400! text-emerald-200! border-emerald-700! [&>[data-icon]]:text-emerald-400! [&_[data-title]]:text-white! [&_[data-title]]:font-semibold!'
                         }
                     }}
                 />
