@@ -2,7 +2,6 @@ import * as React from 'react';
 
 import { useForm } from '@tanstack/react-form';
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
     Drawer,
@@ -18,9 +17,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
+import { useCreateArchitect, useUpdateArchitect } from '@/hooks/use-architects';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { createArchitectSchema, updateArchitectSchema } from '@/lib/schemas/architect';
-import { createArchitect, updateArchitect } from '@/server/architects';
 
 import { ArchitectAvatar } from './architect-avatar';
 
@@ -56,6 +55,8 @@ export function ArchitectForm({ architect, trigger, open: openProp, onOpenChange
         architect?.photo_url ?? undefined
     );
     const [photoFile, setPhotoFile] = React.useState<File>();
+    const createArchitectMutation = useCreateArchitect();
+    const updateArchitectMutation = useUpdateArchitect();
 
     React.useEffect(() => {
         setPhotoPreview(architect?.photo_url ?? undefined);
@@ -64,6 +65,7 @@ export function ArchitectForm({ architect, trigger, open: openProp, onOpenChange
 
     const form = useForm({
         defaultValues: {
+            id: architect?.id ?? '',
             name: architect?.name ?? '',
             email: architect?.email ?? '',
             office_email: architect?.office_email ?? '',
@@ -76,9 +78,9 @@ export function ArchitectForm({ architect, trigger, open: openProp, onOpenChange
         },
         onSubmit: ({ value }) => {
             if (isEditing) {
-                updateArchitect({ data: { ...value, id: architect.id } });
+                updateArchitectMutation.mutate({ data: { ...value, id: architect.id } });
             } else {
-                createArchitect({ data: value });
+                createArchitectMutation.mutate({ data: value });
             }
         },
         validators: {

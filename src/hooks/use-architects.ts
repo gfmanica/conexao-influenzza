@@ -1,4 +1,5 @@
 import { keepPreviousData, queryOptions, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 import { type QueryParams } from '@/lib/schemas/query';
 import { createArchitect, listArchitects, updateArchitect } from '@/server/architects';
@@ -22,7 +23,11 @@ export function useCreateArchitect() {
 
     return useMutation({
         mutationFn: createArchitect,
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['architects'] })
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['architects'] });
+
+            toast.success('Arquiteto salvo com sucesso!');
+        }
     });
 }
 
@@ -34,6 +39,14 @@ export function useUpdateArchitect() {
 
     return useMutation({
         mutationFn: updateArchitect,
-        onSuccess: () => queryClient.invalidateQueries({ queryKey: ['architects'] })
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['architects'] });
+
+            toast.success('Arquiteto salvo com sucesso!');
+        },
+        onError: (error) => {
+            console.error(error);
+            toast.error(error.message);
+        }
     });
 }

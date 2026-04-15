@@ -97,10 +97,6 @@ export function DataTable<TData, TValue>({
 
     return (
         <div className="flex min-h-0 flex-1 flex-col gap-4">
-            <div className="flex items-center px-4 lg:px-6">
-                <div className="ml-auto">{toolbar}</div>
-            </div>
-
             <div className="mx-4 flex-1 overflow-auto rounded-md border lg:mx-6">
                 <Table>
                     <TableHeader>
