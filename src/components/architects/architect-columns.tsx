@@ -1,38 +1,28 @@
 import { type ColumnDef } from '@tanstack/react-table';
 import { LinkIcon, UnlinkIcon } from 'lucide-react';
 
-import { type Architect } from '@/components/architects/architect-sheet';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { type Architect } from '@/components/architects/architect-form';
 import { Badge } from '@/components/ui/badge';
 
 import { DataTableActionCell } from '../ui/data-table-action-cell';
 import { DataTableColumnHeader } from '../ui/data-table-column-header';
-
-function getInitials(name: string) {
-    return name
-        .split(' ')
-        .slice(0, 2)
-        .map((n) => n[0])
-        .join('')
-        .toUpperCase();
-}
+import { ArchitectAvatar } from './architect-avatar';
 
 type ColumnsOptions = {
     onEdit(architect: Architect): void;
 };
 
-export function buildColumns({ onEdit }: ColumnsOptions): ColumnDef<Architect>[] {
+export function architectColumns({ onEdit }: ColumnsOptions): ColumnDef<Architect>[] {
     return [
         {
             accessorKey: 'name',
             header: ({ column }) => <DataTableColumnHeader column={column} title="Arquiteto" />,
             cell: ({ row }) => (
                 <div className="flex items-center gap-3">
-                    <Avatar>
-                        <AvatarImage src={row.original.photo_url ?? undefined} />
-
-                        <AvatarFallback>{getInitials(row.original.name)}</AvatarFallback>
-                    </Avatar>
+                    <ArchitectAvatar
+                        photoUrl={row.original.photo_url || ''}
+                        name={row.original.name}
+                    />
 
                     <div className="flex flex-col">
                         <span className="leading-tight font-medium">{row.original.name}</span>

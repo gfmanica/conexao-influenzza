@@ -77,13 +77,13 @@ function SidebarHeaderContent() {
                             <img
                                 src="/logo/logomarca-horizontal-black.png"
                                 alt="Conexão Influenzza"
-                                className="h-12 w-auto object-contain dark:hidden"
+                                className="h-10 w-auto object-contain dark:hidden"
                             />
 
                             <img
                                 src="/logo/logomarca-horizontal-white.png"
                                 alt="Conexão Influenzza"
-                                className="hidden h-12 w-auto object-contain dark:block"
+                                className="hidden h-10 w-auto object-contain dark:block"
                             />
 
                             <SidebarTrigger className="-mt-1 -mr-1 shrink-0" />
@@ -103,8 +103,7 @@ function SidebarHeaderContent() {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const { user } = useRouteContext({ from: '/_app' });
-    const navItems =
-        user.role === 'admin' ? adminNavItems : architectNavItems;
+    const navItems = user.role === 'admin' ? adminNavItems : architectNavItems;
 
     return (
         <Sidebar collapsible="icon" {...props}>

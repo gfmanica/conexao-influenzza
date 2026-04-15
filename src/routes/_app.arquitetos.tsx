@@ -3,8 +3,8 @@ import { useEffect, useState } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 import { PlusIcon } from 'lucide-react';
 
-import { ArchitectSheet, type Architect } from '@/components/architects/architect-sheet';
-import { buildColumns } from '@/components/architects/columns';
+import { architectColumns } from '@/components/architects/architect-columns';
+import { ArchitectForm, type Architect } from '@/components/architects/architect-form';
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/ui/data-table';
 import { Input } from '@/components/ui/input';
@@ -35,7 +35,7 @@ function RouteComponent() {
         return () => clearTimeout(t);
     }, [nameFilter]);
 
-    const columns = buildColumns({
+    const columns = architectColumns({
         onEdit: (architect) => {
             setEditingArchitect(architect);
             setOpenDrawer(true);
@@ -80,7 +80,7 @@ function RouteComponent() {
                 }
             />
 
-            <ArchitectSheet
+            <ArchitectForm
                 architect={editingArchitect ?? undefined}
                 open={openDrawer}
                 onOpenChange={setOpenDrawer}

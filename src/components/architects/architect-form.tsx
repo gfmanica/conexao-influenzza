@@ -22,6 +22,8 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { createArchitectSchema, updateArchitectSchema } from '@/lib/schemas/architect';
 import { createArchitect, updateArchitect } from '@/server/fn/architects';
 
+import { ArchitectAvatar } from './architect-avatar';
+
 export type Architect = {
     id: string;
     name: string;
@@ -39,19 +41,14 @@ export type Architect = {
     updated_at: string;
 };
 
-type ArchitectSheetProps = {
+type ArchitectForm = {
     architect?: Architect;
     trigger?: React.ReactNode;
     open?: boolean;
     onOpenChange?: (open: boolean) => void;
 };
 
-export function ArchitectSheet({
-    architect,
-    trigger,
-    open: openProp,
-    onOpenChange
-}: ArchitectSheetProps) {
+export function ArchitectForm({ architect, trigger, open: openProp, onOpenChange }: ArchitectForm) {
     const isEditing = !!architect;
     const isControlled = openProp !== undefined;
     const isMobile = useIsMobile();
@@ -106,13 +103,6 @@ export function ArchitectSheet({
         }
     }
 
-    const initials = (form.state.values.name || architect?.name)
-        ?.split(' ')
-        .slice(0, 2)
-        .map((n) => n[0])
-        .join('')
-        .toUpperCase();
-
     return (
         <Drawer
             direction={isMobile ? 'bottom' : 'right'}
@@ -145,10 +135,11 @@ export function ArchitectSheet({
                         <Label htmlFor="photo">Foto</Label>
 
                         <div className="flex items-center gap-4">
-                            <Avatar size="lg">
-                                <AvatarImage src={photoPreview} />
-                                <AvatarFallback>{initials ?? 'AR'}</AvatarFallback>
-                            </Avatar>
+                            <ArchitectAvatar
+                                photoUrl={photoPreview}
+                                name={form.state.values.name}
+                            />
+
                             <Input
                                 id="photo"
                                 name="photo"

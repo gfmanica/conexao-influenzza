@@ -2,7 +2,7 @@ import * as React from 'react';
 
 import { useForm } from '@tanstack/react-form';
 
-import { type Architect } from '@/components/architects/architect-sheet';
+import { type Architect } from '@/components/architects/architect-form';
 import { Button } from '@/components/ui/button';
 import { Combobox } from '@/components/ui/combobox';
 import { DatePicker } from '@/components/ui/date-picker';
@@ -99,9 +99,7 @@ export function PointEntrySheet({
             {trigger && <DrawerTrigger asChild>{trigger}</DrawerTrigger>}
             <DrawerContent className="flex flex-col sm:max-w-lg">
                 <DrawerHeader>
-                    <DrawerTitle>
-                        {isEditing ? 'Editar lançamento' : 'Novo lançamento'}
-                    </DrawerTitle>
+                    <DrawerTitle>{isEditing ? 'Editar lançamento' : 'Novo lançamento'}</DrawerTitle>
                     <DrawerDescription>
                         {isEditing
                             ? 'Edite os dados do lançamento de pontos.'
@@ -128,8 +126,7 @@ export function PointEntrySheet({
                         {(field) => (
                             <div className="flex flex-col gap-3">
                                 <Label htmlFor="architect">
-                                    Arquiteto{' '}
-                                    <span className="text-destructive">*</span>
+                                    Arquiteto <span className="text-destructive">*</span>
                                 </Label>
                                 <Combobox
                                     id="architect"
@@ -159,25 +156,20 @@ export function PointEntrySheet({
                         name="point_type"
                         validators={{
                             onBlur: ({ value }) =>
-                                !value.trim()
-                                    ? 'Tipo de ponto é obrigatório'
-                                    : undefined
+                                !value.trim() ? 'Tipo de ponto é obrigatório' : undefined
                         }}
                     >
                         {(field) => (
                             <div className="flex flex-col gap-3">
                                 <Label htmlFor="point_type">
-                                    Tipo de ponto{' '}
-                                    <span className="text-destructive">*</span>
+                                    Tipo de ponto <span className="text-destructive">*</span>
                                 </Label>
                                 <Input
                                     id="point_type"
                                     placeholder="Ex: Venda de Rack"
                                     value={field.state.value}
                                     onBlur={field.handleBlur}
-                                    onChange={(e) =>
-                                        field.handleChange(e.target.value)
-                                    }
+                                    onChange={(e) => field.handleChange(e.target.value)}
                                 />
                                 {field.state.meta.errors.length > 0 && (
                                     <p className="text-destructive text-xs">
@@ -204,10 +196,7 @@ export function PointEntrySheet({
                             {(field) => (
                                 <div className="flex flex-col gap-3">
                                     <Label htmlFor="amount">
-                                        Quantidade{' '}
-                                        <span className="text-destructive">
-                                            *
-                                        </span>
+                                        Quantidade <span className="text-destructive">*</span>
                                     </Label>
                                     <Input
                                         id="amount"
@@ -235,24 +224,18 @@ export function PointEntrySheet({
                         <form.Field
                             name="entry_date"
                             validators={{
-                                onSubmit: ({ value }) =>
-                                    !value ? 'Data é obrigatória' : undefined
+                                onSubmit: ({ value }) => (!value ? 'Data é obrigatória' : undefined)
                             }}
                         >
                             {(field) => (
                                 <div className="flex flex-col gap-3">
                                     <Label htmlFor="entry_date">
-                                        Data{' '}
-                                        <span className="text-destructive">
-                                            *
-                                        </span>
+                                        Data <span className="text-destructive">*</span>
                                     </Label>
                                     <DatePicker
                                         id="entry_date"
                                         value={field.state.value}
-                                        onChange={(val) =>
-                                            field.handleChange(val)
-                                        }
+                                        onChange={(val) => field.handleChange(val)}
                                         placeholder="Selecionar data..."
                                     />
                                     {field.state.meta.errors.length > 0 && (
@@ -272,14 +255,8 @@ export function PointEntrySheet({
                     </DrawerClose>
                     <form.Subscribe selector={(s) => s.canSubmit}>
                         {(canSubmit) => (
-                            <Button
-                                type="submit"
-                                form="point-entry-form"
-                                disabled={!canSubmit}
-                            >
-                                {isEditing
-                                    ? 'Salvar alterações'
-                                    : 'Registrar pontos'}
+                            <Button type="submit" form="point-entry-form" disabled={!canSubmit}>
+                                {isEditing ? 'Salvar alterações' : 'Registrar pontos'}
                             </Button>
                         )}
                     </form.Subscribe>
