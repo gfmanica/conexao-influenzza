@@ -1,10 +1,9 @@
 import { createFileRoute, redirect } from '@tanstack/react-router';
 
-import { getSession } from '@/server/fn/auth';
-
 import { LoginForm } from '@/components/login/login-form';
 import { OtpForm } from '@/components/login/otp-form';
 import { cn } from '@/lib/utils';
+import { getSession } from '@/server/auth';
 import { useLoginStore } from '@/store/use-login-store';
 
 export const Route = createFileRoute('/_auth/login')({
@@ -60,8 +59,7 @@ function Login() {
                 </div>
 
                 <div className="text-muted-foreground absolute right-0 bottom-6 left-0 text-center text-xs">
-                    &copy; {new Date().getFullYear()} Influenzza Caza. Todos os
-                    direitos reservados.
+                    &copy; {new Date().getFullYear()} Influenzza Caza. Todos os direitos reservados.
                 </div>
             </div>
         </div>

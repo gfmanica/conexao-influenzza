@@ -1,7 +1,7 @@
 import { keepPreviousData, queryOptions, useMutation, useQueryClient } from '@tanstack/react-query';
 
 import { type QueryParams } from '@/lib/schemas/query';
-import { createArchitect, listArchitects, updateArchitect } from '@/server/fn/architects';
+import { createArchitect, listArchitects, updateArchitect } from '@/server/architects';
 
 /**
  * Query options para buscar arquitetos.

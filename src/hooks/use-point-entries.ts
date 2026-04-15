@@ -6,7 +6,7 @@ import {
     deletePointEntry,
     listPointEntries,
     updatePointEntry
-} from '@/server/fn/point-entries';
+} from '@/server/point-entries';
 
 /**
  * Query options para buscar lançamentos de pontos.

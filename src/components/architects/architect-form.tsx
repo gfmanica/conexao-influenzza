@@ -20,7 +20,7 @@ import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { createArchitectSchema, updateArchitectSchema } from '@/lib/schemas/architect';
-import { createArchitect, updateArchitect } from '@/server/fn/architects';
+import { createArchitect, updateArchitect } from '@/server/architects';
 
 import { ArchitectAvatar } from './architect-avatar';
 
@@ -111,7 +111,7 @@ export function ArchitectForm({ architect, trigger, open: openProp, onOpenChange
         >
             {trigger && <DrawerTrigger asChild>{trigger}</DrawerTrigger>}
 
-            <DrawerContent className="flex flex-col sm:max-w-xl">
+            <DrawerContent>
                 <DrawerHeader>
                     <DrawerTitle>{isEditing ? 'Editar Arquiteto' : 'Novo Arquiteto'}</DrawerTitle>
 
@@ -123,7 +123,7 @@ export function ArchitectForm({ architect, trigger, open: openProp, onOpenChange
                 </DrawerHeader>
 
                 <form
-                    className="flex flex-col gap-5 overflow-y-auto px-6 py-2"
+                    className="flex flex-col gap-5 overflow-y-auto px-4 py-2"
                     id="architect-form"
                     onSubmit={(e) => {
                         e.preventDefault();

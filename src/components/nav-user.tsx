@@ -17,7 +17,7 @@ import {
     SidebarMenuItem,
     useSidebar
 } from '@/components/ui/sidebar';
-import { logout } from '@/server/fn/auth';
+import { logout } from '@/server/auth';
 
 export function NavUser({
     user
@@ -53,23 +53,14 @@ export function NavUser({
             <SidebarMenuItem>
                 <DropdownMenu>
                     <DropdownMenuTrigger
-                        render={
-                            <SidebarMenuButton
-                                size="lg"
-                                className="aria-expanded:bg-muted"
-                            />
-                        }
+                        render={<SidebarMenuButton size="lg" className="aria-expanded:bg-muted" />}
                     >
                         <Avatar className="size-8 rounded-lg grayscale">
                             <AvatarImage src={user.avatar} alt={user.name} />
-                            <AvatarFallback className="rounded-lg">
-                                {initials}
-                            </AvatarFallback>
+                            <AvatarFallback className="rounded-lg">{initials}</AvatarFallback>
                         </Avatar>
                         <div className="grid flex-1 text-left text-sm leading-tight">
-                            <span className="truncate font-medium">
-                                {user.name}
-                            </span>
+                            <span className="truncate font-medium">{user.name}</span>
                             <span className="text-foreground/70 truncate text-xs">
                                 {user.email}
                             </span>
@@ -85,18 +76,13 @@ export function NavUser({
                         <DropdownMenuLabel className="p-0 font-normal">
                             <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                                 <Avatar className="size-8">
-                                    <AvatarImage
-                                        src={user.avatar}
-                                        alt={user.name}
-                                    />
+                                    <AvatarImage src={user.avatar} alt={user.name} />
                                     <AvatarFallback className="rounded-lg">
                                         {initials}
                                     </AvatarFallback>
                                 </Avatar>
                                 <div className="grid flex-1 text-left text-sm leading-tight">
-                                    <span className="truncate font-medium">
-                                        {user.name}
-                                    </span>
+                                    <span className="truncate font-medium">{user.name}</span>
                                     <span className="text-muted-foreground truncate text-xs">
                                         {user.email}
                                     </span>

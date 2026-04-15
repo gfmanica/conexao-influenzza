@@ -2,15 +2,10 @@ import { useForm } from '@tanstack/react-form';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
-import {
-    Field,
-    FieldError,
-    FieldGroup,
-    FieldLabel
-} from '@/components/ui/field';
+import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-import { requestOtp } from '@/server/fn/auth';
+import { requestOtp } from '@/server/auth';
 import { useLoginStore } from '@/store/use-login-store';
 
 export function LoginForm({ className }: React.ComponentProps<'form'>) {
@@ -25,9 +20,7 @@ export function LoginForm({ className }: React.ComponentProps<'form'>) {
                 setEmail(value.email);
                 setStep('otp');
             } catch (err) {
-                toast.error(
-                    err instanceof Error ? err.message : 'Erro ao enviar código.'
-                );
+                toast.error(err instanceof Error ? err.message : 'Erro ao enviar código.');
             }
         }
     });
@@ -42,9 +35,7 @@ export function LoginForm({ className }: React.ComponentProps<'form'>) {
         >
             <FieldGroup>
                 <div className="mb-2 flex flex-col items-center gap-2 text-center">
-                    <h1 className="font-heading text-4xl tracking-tight">
-                        Seja bem vindo!
-                    </h1>
+                    <h1 className="font-heading text-4xl tracking-tight">Seja bem vindo!</h1>
 
                     <p className="text-muted-foreground max-w-sm text-sm text-balance">
                         Informe seu e-mail para acessar sua conta.
@@ -56,30 +47,24 @@ export function LoginForm({ className }: React.ComponentProps<'form'>) {
                     validators={{
                         onBlur: ({ value }) => {
                             if (!value) return 'E-mail é obrigatório';
-                            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))
-                                return 'E-mail inválido';
+                            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return 'E-mail inválido';
                             return undefined;
                         }
                     }}
                 >
                     {(field) => {
                         const isInvalid =
-                            field.state.meta.isTouched &&
-                            field.state.meta.errors.length > 0;
+                            field.state.meta.isTouched && field.state.meta.errors.length > 0;
 
                         return (
                             <Field data-invalid={isInvalid}>
-                                <FieldLabel htmlFor={field.name}>
-                                    Email
-                                </FieldLabel>
+                                <FieldLabel htmlFor={field.name}>Email</FieldLabel>
 
                                 <Input
                                     id={field.name}
                                     name={field.name}
                                     onBlur={field.handleBlur}
-                                    onChange={(e) =>
-                                        field.handleChange(e.target.value)
-                                    }
+                                    onChange={(e) => field.handleChange(e.target.value)}
                                     aria-invalid={isInvalid}
                                     type="email"
                                     placeholder="meuemail@email.com"
@@ -88,9 +73,9 @@ export function LoginForm({ className }: React.ComponentProps<'form'>) {
 
                                 {isInvalid && (
                                     <FieldError
-                                        errors={field.state.meta.errors.map(
-                                            (e) => ({ message: String(e) })
-                                        )}
+                                        errors={field.state.meta.errors.map((e) => ({
+                                            message: String(e)
+                                        }))}
                                     />
                                 )}
                             </Field>
@@ -99,9 +84,7 @@ export function LoginForm({ className }: React.ComponentProps<'form'>) {
                 </form.Field>
 
                 <Field>
-                    <form.Subscribe
-                        selector={(s) => s.isSubmitting}
-                    >
+                    <form.Subscribe selector={(s) => s.isSubmitting}>
                         {(isSubmitting) => (
                             <Button
                                 type="submit"

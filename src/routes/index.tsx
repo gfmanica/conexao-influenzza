@@ -1,7 +1,7 @@
 // routes/index.tsx
 import { createFileRoute, redirect } from '@tanstack/react-router';
 
-import { getSession } from '@/server/fn/auth';
+import { getSession } from '@/server/auth';
 
 export const Route = createFileRoute('/')({
     beforeLoad: async () => {

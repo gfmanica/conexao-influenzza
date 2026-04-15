@@ -1,6 +1,6 @@
 import { queryOptions } from '@tanstack/react-query';
 
-import { getRanking } from '@/server/fn/ranking';
+import { getRanking } from '@/server/ranking';
 
 /**
  * Query options para buscar o ranking.
