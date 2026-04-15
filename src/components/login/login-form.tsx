@@ -1,5 +1,4 @@
 import { useForm } from '@tanstack/react-form';
-import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
@@ -14,13 +13,23 @@ export function LoginForm({ className }: React.ComponentProps<'form'>) {
 
     const form = useForm({
         defaultValues: { email: '' },
-        onSubmit: async ({ value }) => {
+        onSubmit: async ({ value, formApi }) => {
+            formApi.setFieldMeta('email', (prev) => ({
+                ...prev,
+                errorMap: { ...prev.errorMap, onServer: undefined }
+            }));
             try {
                 await requestOtp({ data: { email: value.email } });
                 setEmail(value.email);
                 setStep('otp');
             } catch (err) {
-                toast.error(err instanceof Error ? err.message : 'Erro ao enviar código.');
+                formApi.setFieldMeta('email', (prev) => ({
+                    ...prev,
+                    errorMap: {
+                        ...prev.errorMap,
+                        onServer: err instanceof Error ? err.message : 'Erro ao enviar código.'
+                    }
+                }));
             }
         }
     });
@@ -53,8 +62,10 @@ export function LoginForm({ className }: React.ComponentProps<'form'>) {
                     }}
                 >
                     {(field) => {
-                        const isInvalid =
+                        const validationError =
                             field.state.meta.isTouched && field.state.meta.errors.length > 0;
+                        const serverError = field.state.meta.errorMap?.onServer;
+                        const isInvalid = validationError || !!serverError;
 
                         return (
                             <Field data-invalid={isInvalid}>
@@ -71,7 +82,7 @@ export function LoginForm({ className }: React.ComponentProps<'form'>) {
                                     required
                                 />
 
-                                {isInvalid && (
+                                {validationError && (
                                     <FieldError
                                         errors={field.state.meta.errors.map((e) => ({
                                             message: String(e)
