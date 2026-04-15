@@ -27,11 +27,11 @@ interface DataTableProps<TData, TValue> {
     columns: ColumnDef<TData, TValue>[];
     data: TData[];
     toolbar?: ReactNode;
-    total: number;
-    pageIndex: number;
-    pageSize: number;
-    onPageChange: (page: number) => void;
-    onPageSizeChange: (size: number) => void;
+    total?: number;
+    pageIndex?: number;
+    pageSize?: number;
+    onPageChange?: (page: number) => void;
+    onPageSizeChange?: (size: number) => void;
     sort?: SortingState;
     onSortChange?: (sorting: SortingState) => void;
     isLoading?: boolean;
@@ -41,9 +41,9 @@ export function DataTable<TData, TValue>({
     columns,
     data,
     toolbar,
-    total,
-    pageIndex,
-    pageSize,
+    total = 0,
+    pageIndex = 0,
+    pageSize = 10,
     onPageChange,
     onPageSizeChange,
     sort: sortingProp,
@@ -81,9 +81,9 @@ export function DataTable<TData, TValue>({
         onPaginationChange: (updater) => {
             const next = typeof updater === 'function' ? updater(pagination) : updater;
 
-            if (next.pageIndex !== pageIndex) onPageChange(next.pageIndex);
+            if (next.pageIndex !== pageIndex && onPageChange) onPageChange(next.pageIndex);
 
-            if (next.pageSize !== pageSize) onPageSizeChange(next.pageSize);
+            if (next.pageSize !== pageSize && onPageSizeChange) onPageSizeChange(next.pageSize);
         },
         getCoreRowModel: getCoreRowModel()
     });

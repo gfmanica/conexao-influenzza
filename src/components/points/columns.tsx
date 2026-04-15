@@ -1,7 +1,6 @@
 import { type ColumnDef } from '@tanstack/react-table';
 import { ArrowUpDownIcon, EllipsisVerticalIcon } from 'lucide-react';
 
-import { type Architect } from '@/components/architects/architect-sheet';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -13,8 +12,7 @@ import {
     DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 
-import { PointEntrySheet } from './point-entry-sheet';
-import { type PointEntry, type PointEntryFormData } from './types';
+import { type PointEntry } from './types';
 
 function getInitials(name: string) {
     return name
@@ -31,16 +29,11 @@ function formatDate(dateStr: string) {
 }
 
 type ColumnsOptions = {
-    architects: Architect[];
-    onEdit: (id: string, data: PointEntryFormData) => void;
+    onEdit: (entry: PointEntry) => void;
     onDelete: (id: string) => void;
 };
 
-export function buildColumns({
-    architects,
-    onEdit,
-    onDelete
-}: ColumnsOptions): ColumnDef<PointEntry>[] {
+export function buildColumns({ onEdit, onDelete }: ColumnsOptions): ColumnDef<PointEntry>[] {
     return [
         {
             accessorKey: 'entry_date',
@@ -127,18 +120,9 @@ export function buildColumns({
                             <span className="sr-only">Abrir menu</span>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-36">
-                            <PointEntrySheet
-                                entry={entry}
-                                architects={architects}
-                                onSubmit={(data) => onEdit(entry.id, data)}
-                                trigger={
-                                    <DropdownMenuItem
-                                        onSelect={(e) => e.preventDefault()}
-                                    >
-                                        Editar
-                                    </DropdownMenuItem>
-                                }
-                            />
+                            <DropdownMenuItem onSelect={() => onEdit(entry)}>
+                                Editar
+                            </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
                                 variant="destructive"

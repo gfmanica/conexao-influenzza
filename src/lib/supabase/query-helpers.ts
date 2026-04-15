@@ -26,30 +26,36 @@ export function buildPagedResponse<T>(rows: T[], count: number | null, to: numbe
 /**
  * Aplica filtros a uma query do Supabase.
  */
-export function applyFilters(query: any, filters: FilterItem[] = []) {
+export function applyFilters<T>(query: T, filters: FilterItem[] = []): T {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let q: any = query;
+
     filters.forEach((f) => {
         if (f.operator === 'in') {
-            query = query.in(f.field, f.value as (string | number | boolean)[]);
+            q = q.in(f.field, f.value as (string | number | boolean)[]);
         } else if (f.operator === 'is') {
-            query = query.is(f.field, f.value);
+            q = q.is(f.field, f.value);
         } else {
-            query = query[f.operator](f.field, f.value);
+            q = q[f.operator](f.field, f.value);
         }
     });
 
-    return query;
+    return q as T;
 }
 
 /**
  * Aplica ordenação a uma query do Supabase.
  */
-export function applyOrder(query: any, order: OrderItem[] = []) {
+export function applyOrder<T>(query: T, order: OrderItem[] = []): T {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let q: any = query;
+
     order.forEach((o) => {
-        query = query.order(o.field, {
+        q = q.order(o.field, {
             ascending: o.direction === 'asc',
             nullsFirst: o.nullsFirst
         });
     });
 
-    return query;
+    return q as T;
 }

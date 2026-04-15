@@ -26,7 +26,7 @@ export const requestOtp = createServerFn({ method: 'POST' })
         if (!architect) {
             const { data: authUsers } = await supabase.auth.admin.listUsers();
             const authUser = authUsers?.users.find(
-                (u) => u.email === data.email
+                (u: { email?: string }) => u.email === data.email
             );
             if (!authUser) {
                 throw new Error('E-mail não cadastrado no sistema.');

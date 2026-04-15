@@ -3,8 +3,8 @@ import { useEffect, useState } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 import { PlusIcon } from 'lucide-react';
 
-import { ArchitectSheet } from '@/components/architects/architect-sheet';
-import { columns } from '@/components/architects/columns';
+import { ArchitectSheet, type Architect } from '@/components/architects/architect-sheet';
+import { buildColumns } from '@/components/architects/columns';
 import { Button } from '@/components/ui/button';
 import { DataTable } from '@/components/ui/data-table';
 import { Input } from '@/components/ui/input';
@@ -17,17 +17,29 @@ export const Route = createFileRoute('/_app/arquitetos')({
 
 function RouteComponent() {
     const [nameFilter, setNameFilter] = useState('');
+    const [editingArchitect, setEditingArchitect] = useState<Architect | null>(null);
+    const [openDrawer, setOpenDrawer] = useState(false);
+
+    const tableQuery = useTableQuery({
+        queryOptions: architectsQueryOptions
+    });
 
     useEffect(() => {
         const t = setTimeout(
-            () => onFilterChange([{ field: 'name', operator: 'ilike', value: `%${nameFilter}%` }]),
+            () =>
+                tableQuery.onFilterChange([
+                    { field: 'name', operator: 'ilike', value: `%${nameFilter}%` }
+                ]),
             300
         );
         return () => clearTimeout(t);
     }, [nameFilter]);
 
-    const { onFilterChange, ...tableQuery } = useTableQuery({
-        queryOptions: architectsQueryOptions
+    const columns = buildColumns({
+        onEdit: (architect) => {
+            setEditingArchitect(architect);
+            setOpenDrawer(true);
+        }
     });
 
     return (
@@ -38,15 +50,6 @@ function RouteComponent() {
                 <p className="text-muted-foreground text-sm">
                     Gerencie os arquitetos parceiros e acompanhe suas pontuações.
                 </p>
-            </div>
-
-            <div className="flex items-center gap-3 px-4 lg:px-6">
-                <Input
-                    className="max-w-xs"
-                    placeholder="Buscar arquiteto..."
-                    value={nameFilter}
-                    onChange={(e) => setNameFilter(e.target.value)}
-                />
             </div>
 
             <DataTable
@@ -61,15 +64,26 @@ function RouteComponent() {
                 onSortChange={tableQuery.onSortChange}
                 isLoading={tableQuery.isFetching}
                 toolbar={
-                    <ArchitectSheet
-                        trigger={
-                            <Button size="sm">
-                                <PlusIcon />
-                                Novo arquiteto
-                            </Button>
-                        }
-                    />
+                    <div className="flex items-center gap-3 px-4 lg:px-6">
+                        <Input
+                            className="max-w-xs"
+                            placeholder="Buscar arquiteto..."
+                            value={nameFilter}
+                            onChange={(e) => setNameFilter(e.target.value)}
+                        />
+
+                        <Button size="sm" onClick={() => setOpenDrawer(true)}>
+                            <PlusIcon />
+                            Novo arquiteto
+                        </Button>
+                    </div>
                 }
+            />
+
+            <ArchitectSheet
+                architect={editingArchitect ?? undefined}
+                open={openDrawer}
+                onOpenChange={setOpenDrawer}
             />
         </div>
     );

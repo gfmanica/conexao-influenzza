@@ -100,7 +100,7 @@ export const getMyProfile = createServerFn({ method: 'GET' }).handler(
             cau_register: architect.cau_register,
             total_points:
                 architect.point_entries?.reduce(
-                    (sum, e) => sum + e.amount,
+                    (sum: number, e: { amount: number }) => sum + e.amount,
                     0
                 ) ?? 0
         };

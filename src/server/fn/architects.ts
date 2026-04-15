@@ -36,7 +36,7 @@ export const listArchitects = createServerFn({ method: 'GET' })
             rows.map((a) => ({
                 ...a,
                 linked: a.user_id !== null,
-                total_points: a.point_entries?.reduce((sum, e) => sum + e.amount, 0) ?? 0,
+                total_points: a.point_entries?.reduce((sum: number, e: { amount: number }) => sum + e.amount, 0) ?? 0,
                 point_entries: undefined
             })),
             count,
@@ -65,7 +65,7 @@ export const getArchitect = createServerFn({ method: 'GET' })
         return {
             ...architect,
             linked: architect.user_id !== null,
-            total_points: architect.point_entries?.reduce((sum, e) => sum + e.amount, 0) ?? 0
+            total_points: architect.point_entries?.reduce((sum: number, e: { amount: number }) => sum + e.amount, 0) ?? 0
         };
     });
 

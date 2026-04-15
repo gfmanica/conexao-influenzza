@@ -6,28 +6,31 @@ import { type Architect } from '@/components/architects/architect-sheet';
 import { Button } from '@/components/ui/button';
 import { Combobox } from '@/components/ui/combobox';
 import { DatePicker } from '@/components/ui/date-picker';
+import {
+    Drawer,
+    DrawerClose,
+    DrawerContent,
+    DrawerDescription,
+    DrawerFooter,
+    DrawerHeader,
+    DrawerTitle,
+    DrawerTrigger
+} from '@/components/ui/drawer';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import {
-    Sheet,
-    SheetClose,
-    SheetContent,
-    SheetDescription,
-    SheetFooter,
-    SheetHeader,
-    SheetTitle,
-    SheetTrigger
-} from '@/components/ui/sheet';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { createPointEntrySchema } from '@/lib/schemas/point-entry';
 
 import { type PointEntry, type PointEntryFormData } from './types';
 
 type PointEntrySheetProps = {
     entry?: PointEntry;
-    trigger: React.ReactNode;
+    trigger?: React.ReactNode;
     architects: Architect[];
     onSubmit: (data: PointEntryFormData) => void;
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
 };
 
 function today() {
@@ -38,10 +41,16 @@ export function PointEntrySheet({
     entry,
     trigger,
     architects,
-    onSubmit
+    onSubmit,
+    open: openProp,
+    onOpenChange
 }: PointEntrySheetProps) {
     const isEditing = !!entry;
-    const [open, setOpen] = React.useState(false);
+    const isControlled = openProp !== undefined;
+    const isMobile = useIsMobile();
+    const [internalOpen, setInternalOpen] = React.useState(false);
+    const open = isControlled ? openProp : internalOpen;
+    const setOpen = isControlled ? (onOpenChange ?? setInternalOpen) : setInternalOpen;
 
     const form = useForm({
         defaultValues: {
@@ -86,19 +95,19 @@ export function PointEntrySheet({
     }, [open]);
 
     return (
-        <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger render={trigger as React.ReactElement} />
-            <SheetContent className="flex flex-col overflow-y-auto sm:max-w-lg">
-                <SheetHeader>
-                    <SheetTitle>
+        <Drawer direction={isMobile ? 'bottom' : 'right'} open={open} onOpenChange={setOpen}>
+            {trigger && <DrawerTrigger asChild>{trigger}</DrawerTrigger>}
+            <DrawerContent className="flex flex-col sm:max-w-lg">
+                <DrawerHeader>
+                    <DrawerTitle>
                         {isEditing ? 'Editar lançamento' : 'Novo lançamento'}
-                    </SheetTitle>
-                    <SheetDescription>
+                    </DrawerTitle>
+                    <DrawerDescription>
                         {isEditing
                             ? 'Edite os dados do lançamento de pontos.'
                             : 'Registre um novo lançamento de pontos para um arquiteto parceiro.'}
-                    </SheetDescription>
-                </SheetHeader>
+                    </DrawerDescription>
+                </DrawerHeader>
 
                 <form
                     id="point-entry-form"
@@ -257,10 +266,10 @@ export function PointEntrySheet({
                     </div>
                 </form>
 
-                <SheetFooter>
-                    <SheetClose render={<Button variant="outline" />}>
-                        Cancelar
-                    </SheetClose>
+                <DrawerFooter>
+                    <DrawerClose asChild>
+                        <Button variant="outline">Cancelar</Button>
+                    </DrawerClose>
                     <form.Subscribe selector={(s) => s.canSubmit}>
                         {(canSubmit) => (
                             <Button
@@ -274,8 +283,8 @@ export function PointEntrySheet({
                             </Button>
                         )}
                     </form.Subscribe>
-                </SheetFooter>
-            </SheetContent>
-        </Sheet>
+                </DrawerFooter>
+            </DrawerContent>
+        </Drawer>
     );
 }

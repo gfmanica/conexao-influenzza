@@ -1,6 +1,6 @@
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { createFileRoute } from '@tanstack/react-router';
-import { CrownIcon, StarIcon } from 'lucide-react';
+import { CrownIcon, StarIcon, TrophyIcon } from 'lucide-react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -238,6 +238,22 @@ function RouteComponent() {
     const top3 = ranking.slice(0, 3);
     const rest = ranking.slice(3);
     const maxPoints = ranking[0]?.total_points ?? 1;
+
+    if (ranking.length === 0) {
+        return (
+            <div className="flex flex-1 flex-col items-center justify-center gap-4 py-6 text-center">
+                <TrophyIcon className="text-muted-foreground/40 size-16" />
+                <div className="flex flex-col gap-1">
+                    <p className="text-foreground text-base font-semibold">
+                        Nenhuma pontuação registrada
+                    </p>
+                    <p className="text-muted-foreground text-sm">
+                        O ranking aparecerá aqui assim que houver lançamentos de pontos para os arquitetos.
+                    </p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <>

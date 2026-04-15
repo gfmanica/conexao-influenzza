@@ -4,20 +4,21 @@ import { useForm } from '@tanstack/react-form';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import {
+    Drawer,
+    DrawerClose,
+    DrawerContent,
+    DrawerDescription,
+    DrawerFooter,
+    DrawerHeader,
+    DrawerTitle,
+    DrawerTrigger
+} from '@/components/ui/drawer';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import {
-    Sheet,
-    SheetClose,
-    SheetContent,
-    SheetDescription,
-    SheetFooter,
-    SheetHeader,
-    SheetTitle,
-    SheetTrigger
-} from '@/components/ui/sheet';
 import { Textarea } from '@/components/ui/textarea';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { createArchitectSchema, updateArchitectSchema } from '@/lib/schemas/architect';
 import { createArchitect, updateArchitect } from '@/server/fn/architects';
 
@@ -40,17 +41,29 @@ export type Architect = {
 
 type ArchitectSheetProps = {
     architect?: Architect;
-    trigger: React.ReactNode;
+    trigger?: React.ReactNode;
+    open?: boolean;
+    onOpenChange?: (open: boolean) => void;
 };
 
-export function ArchitectSheet({ architect, trigger }: ArchitectSheetProps) {
+export function ArchitectSheet({
+    architect,
+    trigger,
+    open: openProp,
+    onOpenChange
+}: ArchitectSheetProps) {
     const isEditing = !!architect;
+    const isControlled = openProp !== undefined;
+    const isMobile = useIsMobile();
     const [photoPreview, setPhotoPreview] = React.useState<string | undefined>(
         architect?.photo_url ?? undefined
     );
     const [photoFile, setPhotoFile] = React.useState<File>();
 
-    const schema = isEditing ? updateArchitectSchema : createArchitectSchema;
+    React.useEffect(() => {
+        setPhotoPreview(architect?.photo_url ?? undefined);
+        setPhotoFile(undefined);
+    }, [architect?.id]);
 
     const form = useForm({
         defaultValues: {
@@ -73,7 +86,10 @@ export function ArchitectSheet({ architect, trigger }: ArchitectSheetProps) {
         },
         validators: {
             onSubmit: ({ value }) => {
-                const result = schema.safeParse(value);
+                const result = isEditing
+                    ? updateArchitectSchema.safeParse(value)
+                    : createArchitectSchema.safeParse(value);
+
                 if (!result.success) {
                     return result.error.issues[0]?.message ?? 'Formulário inválido';
                 }
@@ -98,29 +114,36 @@ export function ArchitectSheet({ architect, trigger }: ArchitectSheetProps) {
         .toUpperCase();
 
     return (
-        <Sheet>
-            <SheetTrigger render={trigger as React.ReactElement} />
-            <SheetContent className="flex flex-col overflow-y-auto sm:max-w-lg">
-                <SheetHeader>
-                    <SheetTitle>{isEditing ? 'Editar Arquiteto' : 'Novo Arquiteto'}</SheetTitle>
-                    <SheetDescription>
+        <Drawer
+            direction={isMobile ? 'bottom' : 'right'}
+            open={isControlled ? openProp : undefined}
+            onOpenChange={isControlled ? onOpenChange : undefined}
+        >
+            {trigger && <DrawerTrigger asChild>{trigger}</DrawerTrigger>}
+
+            <DrawerContent className="flex flex-col sm:max-w-xl">
+                <DrawerHeader>
+                    <DrawerTitle>{isEditing ? 'Editar Arquiteto' : 'Novo Arquiteto'}</DrawerTitle>
+
+                    <DrawerDescription>
                         {isEditing
                             ? 'Edite os dados do arquiteto parceiro.'
                             : 'Cadastre um novo arquiteto parceiro. O acesso ao portal será liberado no primeiro login via OTP.'}
-                    </SheetDescription>
-                </SheetHeader>
+                    </DrawerDescription>
+                </DrawerHeader>
 
                 <form
+                    className="flex flex-col gap-5 overflow-y-auto px-6 py-2"
+                    id="architect-form"
                     onSubmit={(e) => {
                         e.preventDefault();
                         form.handleSubmit();
                     }}
-                    className="flex flex-col gap-5 overflow-y-auto px-6 py-2"
-                    id="architect-form"
                 >
                     {/* Photo */}
                     <div className="flex flex-col gap-3">
                         <Label htmlFor="photo">Foto</Label>
+
                         <div className="flex items-center gap-4">
                             <Avatar size="lg">
                                 <AvatarImage src={photoPreview} />
@@ -154,6 +177,7 @@ export function ArchitectSheet({ architect, trigger }: ArchitectSheetProps) {
                                 <Label htmlFor="name">
                                     Nome completo <span className="text-destructive">*</span>
                                 </Label>
+
                                 <Input
                                     id="name"
                                     placeholder="Ex: Ana Carolina Mendes"
@@ -161,6 +185,7 @@ export function ArchitectSheet({ architect, trigger }: ArchitectSheetProps) {
                                     onBlur={field.handleBlur}
                                     onChange={(e) => field.handleChange(e.target.value)}
                                 />
+
                                 {field.state.meta.errors.length > 0 && (
                                     <p className="text-destructive text-xs">
                                         {field.state.meta.errors[0]?.toString()}
@@ -324,8 +349,10 @@ export function ArchitectSheet({ architect, trigger }: ArchitectSheetProps) {
                     </form.Field>
                 </form>
 
-                <SheetFooter>
-                    <SheetClose render={<Button variant="outline" />}>Cancelar</SheetClose>
+                <DrawerFooter>
+                    <DrawerClose asChild>
+                        <Button variant="outline">Cancelar</Button>
+                    </DrawerClose>
 
                     <form.Subscribe selector={(s) => s.canSubmit}>
                         {(canSubmit) => (
@@ -334,8 +361,8 @@ export function ArchitectSheet({ architect, trigger }: ArchitectSheetProps) {
                             </Button>
                         )}
                     </form.Subscribe>
-                </SheetFooter>
-            </SheetContent>
-        </Sheet>
+                </DrawerFooter>
+            </DrawerContent>
+        </Drawer>
     );
 }

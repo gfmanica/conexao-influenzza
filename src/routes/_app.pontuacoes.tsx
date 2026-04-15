@@ -6,7 +6,7 @@ import { PlusIcon } from 'lucide-react';
 
 import { buildColumns } from '@/components/points/columns';
 import { PointEntrySheet } from '@/components/points/point-entry-sheet';
-import { type PointEntryFormData } from '@/components/points/types';
+import { type PointEntry, type PointEntryFormData } from '@/components/points/types';
 import { Button } from '@/components/ui/button';
 import { Combobox } from '@/components/ui/combobox';
 import { DataTable } from '@/components/ui/data-table';
@@ -30,6 +30,9 @@ function RouteComponent() {
     const [filterArchitectId, setFilterArchitectId] = useState('');
     const [filterFrom, setFilterFrom] = useState('');
     const [filterTo, setFilterTo] = useState('');
+    const [editingEntry, setEditingEntry] = useState<PointEntry | null>(null);
+    const [editSheetOpen, setEditSheetOpen] = useState(false);
+    const [createSheetOpen, setCreateSheetOpen] = useState(false);
 
     const { onFilterChange, ...tableQuery } = useTableQuery({
         queryOptions: pointEntriesQueryOptions
@@ -84,8 +87,10 @@ function RouteComponent() {
     }
 
     const columns = buildColumns({
-        architects,
-        onEdit: handleEdit,
+        onEdit: (entry) => {
+            setEditingEntry(entry);
+            setEditSheetOpen(true);
+        },
         onDelete: handleDelete
     });
 
@@ -173,17 +178,31 @@ function RouteComponent() {
                 onSortChange={tableQuery.onSortChange}
                 isLoading={tableQuery.isFetching}
                 toolbar={
-                    <PointEntrySheet
-                        architects={architects}
-                        onSubmit={handleCreate}
-                        trigger={
-                            <Button size="sm">
-                                <PlusIcon />
-                                Novo lançamento
-                            </Button>
-                        }
-                    />
+                    <Button size="sm" onClick={() => setCreateSheetOpen(true)}>
+                        <PlusIcon />
+                        Novo lançamento
+                    </Button>
                 }
+            />
+
+            <PointEntrySheet
+                architects={architects}
+                onSubmit={handleCreate}
+                open={createSheetOpen}
+                onOpenChange={setCreateSheetOpen}
+            />
+
+            <PointEntrySheet
+                entry={editingEntry ?? undefined}
+                architects={architects}
+                onSubmit={(data) => {
+                    if (editingEntry) handleEdit(editingEntry.id, data);
+                }}
+                open={editSheetOpen}
+                onOpenChange={(open) => {
+                    setEditSheetOpen(open);
+                    if (!open) setEditingEntry(null);
+                }}
             />
         </div>
     );
