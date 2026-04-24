@@ -19,7 +19,7 @@ import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { useCreateArchitect, useUpdateArchitect } from '@/hooks/use-architects';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { createArchitectSchema, updateArchitectSchema } from '@/lib/schemas/architect';
+import { createArchitectSchema, updateArchitectSchema } from '@/types/architect';
 
 import { ArchitectAvatar } from './architect-avatar';
 
@@ -34,10 +34,9 @@ export type Architect = {
     cau_register?: string | null;
     observation?: string | null;
     photo_url?: string | null;
-    linked: boolean;
     total_points: number;
-    created_at: string;
-    updated_at: string;
+    created_at: Date;
+    updated_at: Date;
 };
 
 type ArchitectForm = {

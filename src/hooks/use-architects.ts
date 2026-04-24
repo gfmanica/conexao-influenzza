@@ -1,8 +1,8 @@
 import { keepPreviousData, queryOptions, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
-import { type QueryParams } from '@/lib/schemas/query';
 import { createArchitect, listArchitects, updateArchitect } from '@/server/architects';
+import { type QueryParams } from '@/types/builders';
 
 /**
  * Query options para buscar arquitetos.

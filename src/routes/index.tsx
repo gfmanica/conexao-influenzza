@@ -1,13 +1,12 @@
-// routes/index.tsx
 import { createFileRoute, redirect } from '@tanstack/react-router';
 
-import { getSession } from '@/server/auth';
+import { authClient } from '@/lib/auth/client';
 
 export const Route = createFileRoute('/')({
     beforeLoad: async () => {
-        const user = await getSession();
+        const { data } = await authClient.getSession();
 
-        if (!user) throw redirect({ to: '/login' });
+        if (!data) throw redirect({ to: '/login' });
 
         throw redirect({ to: '/dashboard' });
     }

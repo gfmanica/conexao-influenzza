@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { useQuery, type UseQueryOptions } from '@tanstack/react-query';
 import { type SortingState } from '@tanstack/react-table';
 
-import { type FilterItem, type QueryParams } from '@/lib/schemas/query';
+import { type FilterItem, type QueryParams } from '@/types/builders';
 
 export function useTableQuery<
     TQueryFnData extends { data: unknown[]; total: number },
@@ -13,9 +13,7 @@ export function useTableQuery<
 >({
     queryOptions: makeQueryOptions
 }: {
-    queryOptions: (
-        params: QueryParams
-    ) => UseQueryOptions<TQueryFnData, TError, TData, TQueryKey>;
+    queryOptions: (params: QueryParams) => UseQueryOptions<TQueryFnData, TError, TData, TQueryKey>;
 }) {
     const [pageIndex, setPageIndex] = useState(0);
     const [pageSize, setPageSize] = useState(10);

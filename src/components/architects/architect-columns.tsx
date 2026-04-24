@@ -1,5 +1,4 @@
 import { type ColumnDef } from '@tanstack/react-table';
-import { LinkIcon, UnlinkIcon } from 'lucide-react';
 
 import { type Architect } from '@/components/architects/architect-form';
 import { Badge } from '@/components/ui/badge';
@@ -52,26 +51,10 @@ export function architectColumns({ onEdit }: ColumnsOptions): ColumnDef<Architec
             cell: ({ row }) => (
                 <div className="text-right">
                     <Badge variant="secondary">
-                        {row.original.total_points.toLocaleString('pt-BR')}
+                        {row.original.total_points?.toLocaleString('pt-BR') || 0}
                     </Badge>
                 </div>
             )
-        },
-        {
-            accessorKey: 'linked',
-            header: 'Vínculo',
-            cell: ({ row }) =>
-                row.original.linked ? (
-                    <Badge className="gap-1.5">
-                        <LinkIcon className="size-3" />
-                        Vinculado
-                    </Badge>
-                ) : (
-                    <Badge variant="outline" className="text-muted-foreground gap-1.5">
-                        <UnlinkIcon className="size-3" />
-                        Pendente
-                    </Badge>
-                )
         },
         {
             id: 'actions',

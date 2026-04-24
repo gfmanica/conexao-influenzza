@@ -1,12 +1,12 @@
 import { keepPreviousData, queryOptions, useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { type QueryParams } from '@/lib/schemas/query';
 import {
     createPointEntry,
     deletePointEntry,
     listPointEntries,
     updatePointEntry
 } from '@/server/point-entries';
+import { type QueryParams } from '@/types/builders';
 
 /**
  * Query options para buscar lançamentos de pontos.

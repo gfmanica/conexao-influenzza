@@ -20,7 +20,7 @@ import {
     useUpdatePointEntry
 } from '@/hooks/use-point-entries';
 import { useTableQuery } from '@/hooks/use-table-query';
-import { type FilterItem } from '@/lib/schemas/query';
+import { type FilterItem } from '@/types/builders';
 
 export const Route = createFileRoute('/_app/pontuacoes')({
     component: RouteComponent
@@ -58,19 +58,14 @@ function RouteComponent() {
         deleteEntry.mutate({ data: { id } });
     }
 
-    function handleFilterChange(overrides?: {
-        architectId?: string;
-        from?: string;
-        to?: string;
-    }) {
+    function handleFilterChange(overrides?: { architectId?: string; from?: string; to?: string }) {
         const architectId = overrides?.architectId ?? filterArchitectId;
         const from = overrides?.from ?? filterFrom;
         const to = overrides?.to ?? filterTo;
 
         const items: FilterItem[] = [];
 
-        if (architectId)
-            items.push({ field: 'architect_id', operator: 'eq', value: architectId });
+        if (architectId) items.push({ field: 'architect_id', operator: 'eq', value: architectId });
 
         if (from) items.push({ field: 'entry_date', operator: 'gte', value: from });
 
@@ -164,6 +159,13 @@ function RouteComponent() {
                         Limpar filtros
                     </Button>
                 )}
+
+                <div className="self-end">
+                    <Button size="sm" onClick={() => setCreateSheetOpen(true)}>
+                        <PlusIcon />
+                        Novo lançamento
+                    </Button>
+                </div>
             </div>
 
             <DataTable

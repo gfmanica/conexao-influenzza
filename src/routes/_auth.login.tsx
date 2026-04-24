@@ -1,22 +1,18 @@
 import { createFileRoute, redirect } from '@tanstack/react-router';
 
 import { LoginForm } from '@/components/login/login-form';
-import { OtpForm } from '@/components/login/otp-form';
-import { cn } from '@/lib/utils';
-import { getSession } from '@/server/auth';
-import { useLoginStore } from '@/store/use-login-store';
+import { authClient } from '@/lib/auth/client';
 
 export const Route = createFileRoute('/_auth/login')({
     beforeLoad: async () => {
-        const user = await getSession();
-        if (user) throw redirect({ to: '/dashboard' });
+        const { data } = await authClient.getSession();
+
+        if (data) throw redirect({ to: '/dashboard' });
     },
     component: Login
 });
 
 function Login() {
-    const step = useLoginStore((state) => state.step);
-
     return (
         <div className="grid min-h-svh lg:grid-cols-2">
             <div className="bg-foreground hidden items-center justify-center lg:flex">
@@ -34,28 +30,8 @@ function Login() {
                     className="-mt-16 block h-22 object-cover [image-rendering:-webkit-optimize-contrast] lg:hidden dark:brightness-[0.2] dark:grayscale"
                 />
 
-                <div className="grid w-full max-w-xs">
-                    <div
-                        className={cn(
-                            'col-start-1 row-start-1 transition-all duration-300 ease-out',
-                            step === 'email'
-                                ? 'pointer-events-auto z-10 scale-100 opacity-100 blur-none'
-                                : 'pointer-events-none z-0 scale-95 opacity-0 blur-[2px]'
-                        )}
-                    >
-                        <LoginForm />
-                    </div>
-
-                    <div
-                        className={cn(
-                            'col-start-1 row-start-1 transition-all duration-300 ease-out',
-                            step === 'otp'
-                                ? 'pointer-events-auto z-10 scale-100 opacity-100 blur-none'
-                                : 'pointer-events-none z-0 scale-95 opacity-0 blur-[2px]'
-                        )}
-                    >
-                        <OtpForm />
-                    </div>
+                <div className="w-full max-w-xs">
+                    <LoginForm />
                 </div>
 
                 <div className="text-muted-foreground absolute right-0 bottom-6 left-0 text-center text-xs">

@@ -1,36 +1,66 @@
+import { useState } from 'react';
+
 import { useForm } from '@tanstack/react-form';
 
 import { Button } from '@/components/ui/button';
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import { authClient } from '@/lib/auth/client';
 import { cn } from '@/lib/utils';
-import { requestOtp } from '@/server/auth';
-import { useLoginStore } from '@/store/use-login-store';
+
+function MagicLinkSent({ email, onBack }: { email: string; onBack: () => void }) {
+    return (
+        <div className="flex flex-col items-center gap-4 text-center">
+            <h1 className="font-heading text-3xl tracking-tight">Verifique seu e-mail</h1>
+
+            <p className="text-muted-foreground max-w-sm text-sm text-balance">
+                Enviamos um link de acesso para <br />
+                <strong className="text-foreground">{email}</strong>
+            </p>
+
+            <p className="text-muted-foreground text-xs">O link expira em 15 minutos.</p>
+
+            <Button
+                type="button"
+                variant="ghost"
+                onClick={onBack}
+                className="transition-transform duration-160 ease-out active:scale-[0.97]"
+            >
+                Usar outro e-mail
+            </Button>
+        </div>
+    );
+}
 
 export function LoginForm({ className }: React.ComponentProps<'form'>) {
-    const setStep = useLoginStore((state) => state.setStep);
-    const setEmail = useLoginStore((state) => state.setEmail);
+    const [sentEmail, setSentEmail] = useState<string | null>(null);
 
     const form = useForm({
         defaultValues: { email: '' },
         onSubmit: async ({ value, formApi }) => {
-            try {
-                await requestOtp({ data: { email: value.email } });
+            const { error } = await authClient.signIn.magicLink({
+                email: value.email,
+                callbackURL: '/dashboard'
+            });
 
-                setEmail(value.email);
-
-                setStep('otp');
-            } catch (err) {
+            if (error) {
                 formApi.setErrorMap({
                     onSubmit: {
                         fields: {
-                            email: err instanceof Error ? err.message : 'Erro ao enviar código.'
+                            email: error.message ?? 'Erro ao enviar link.'
                         }
                     }
                 });
+                return;
             }
+
+            setSentEmail(value.email);
         }
     });
+
+    if (sentEmail) {
+        return <MagicLinkSent email={sentEmail} onBack={() => setSentEmail(null)} />;
+    }
 
     return (
         <form
@@ -100,7 +130,7 @@ export function LoginForm({ className }: React.ComponentProps<'form'>) {
                                 loading={isSubmitting}
                                 className="transition-transform duration-160 ease-out active:scale-[0.97]"
                             >
-                                Continuar
+                                Enviar link de acesso
                             </Button>
                         )}
                     </form.Subscribe>
