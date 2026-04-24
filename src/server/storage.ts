@@ -1,34 +1,25 @@
 import { createServerFn } from '@tanstack/react-start';
 
-import { getSupabaseAdminClient } from '@/lib/supabase/server';
-
 export const uploadAvatar = createServerFn({ method: 'POST' })
     .inputValidator((data: FormData) => data)
-    .handler(async ({ data }) => {
-        const file = data.get('file') as File;
-        const architectId = data.get('architect_id') as string;
-
-        if (!file || !architectId)
-            throw new Error('Arquivo e ID do arquiteto são obrigatórios.');
-
-        const supabase = getSupabaseAdminClient();
-        const ext = file.name.split('.').pop();
-        const path = `${architectId}/avatar.${ext}`;
-
-        const { error: uploadError } = await supabase.storage
-            .from('avatars')
-            .upload(path, file, { upsert: true });
-
-        if (uploadError) throw new Error(uploadError.message);
-
-        const {
-            data: { publicUrl }
-        } = supabase.storage.from('avatars').getPublicUrl(path);
-
-        await supabase
-            .from('architects')
-            .update({ photo_url: publicUrl })
-            .eq('id', architectId);
-
-        return { photo_url: publicUrl };
+    .handler(async () => {
+        // const file = data.get('file') as File;
+        // const architectId = data.get('architect_id') as string;
+        // if (!file || !architectId) {
+        //     throw new Error('Arquivo e ID do arquiteto são obrigatórios.');
+        // }
+        // const r2 = getR2();
+        // const ext = file.name.split('.').pop();
+        // const key = `${architectId}/avatar.${ext}`;
+        // await r2.put(key, file.stream(), {
+        //     httpMetadata: { contentType: file.type }
+        // });
+        // // R2_PUBLIC_URL: URL pública do bucket R2 (configurar após criar bucket)
+        // const publicUrl = `${getCloudflareEnv().R2_PUBLIC_URL}/${key}`;
+        // const db = getDb();
+        // await db
+        //     .update(architects)
+        //     .set({ photoUrl: publicUrl })
+        //     .where(eq(architects.id, architectId));
+        // return { photo_url: publicUrl };
     });

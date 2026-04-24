@@ -1,89 +1,116 @@
 import { createServerFn } from '@tanstack/react-start';
+import { getRequest } from '@tanstack/react-start/server';
+import { count, eq } from 'drizzle-orm';
 import { z } from 'zod/v4';
 
-import { createPointEntrySchema, updatePointEntrySchema } from '@/lib/schemas/point-entry';
-import { queryParamsSchema } from '@/lib/schemas/query';
+import { auth } from '@/lib/auth';
+import { db } from '@/lib/db';
 import {
-    applyFilters,
-    applyOrder,
+    buildOrderByClause,
     buildPagedResponse,
+    buildWhereConditions,
     getPaginationRange
-} from '@/lib/supabase/query-helpers';
-import { getSupabaseAdminClient } from '@/lib/supabase/server';
+} from '@/lib/db/builders';
+import { pointEntries, user } from '@/lib/db/schema';
+import { queryParamsSchema } from '@/types/builders';
+import { createPointEntrySchema, updatePointEntrySchema } from '@/types/point-entry';
+
+const pointEntryColumns = {
+    id: pointEntries.id,
+    userId: pointEntries.userId,
+    point_type: pointEntries.pointType,
+    amount: pointEntries.amount,
+    entry_date: pointEntries.entryDate,
+    created_by: pointEntries.createdBy,
+    created_at: pointEntries.createdAt,
+    updated_at: pointEntries.updatedAt
+};
 
 /**
- * Lista lançamentos de pontos com paginação, filtros dinâmicos e ordenação.
+ * Faz um findAll dos lançamentos de pontos.
  */
 export const listPointEntries = createServerFn({ method: 'GET' })
     .inputValidator(queryParamsSchema)
     .handler(async ({ data }) => {
-        const supabase = getSupabaseAdminClient();
-        const { from, to } = getPaginationRange(data?.page, data?.pageSize);
+        const { offset, limit } = getPaginationRange(data?.page, data?.pageSize);
+        const where = buildWhereConditions(data?.filter, pointEntryColumns);
+        const orderBy = buildOrderByClause(data?.order ?? [], pointEntryColumns);
 
-        let query = supabase
-            .from('point_entries')
-            .select('*, architects ( id, name, photo_url )', { count: 'exact' })
-            .range(from, to);
+        const [{ total }] = await db.select({ total: count() }).from(pointEntries).where(where);
 
-        query = applyFilters(query, data?.filter);
-        query = applyOrder(query, data?.order);
+        const rows = await db
+            .select({
+                ...pointEntryColumns,
+                architects: {
+                    id: user.id,
+                    name: user.name,
+                    photo_url: user.photoUrl
+                }
+            })
+            .from(pointEntries)
+            .leftJoin(user, eq(pointEntries.userId, user.id))
+            .where(where)
+            .orderBy(...(orderBy.length ? orderBy : [pointEntries.entryDate]))
+            .limit(limit)
+            .offset(offset);
 
-        const { data: rows, count, error } = await query;
-
-        if (error) throw new Error(error.message);
-
-        return buildPagedResponse(rows, count, to);
+        return buildPagedResponse(rows, total, offset, limit);
     });
 
 /**
- * Cria um novo lançamento de pontos.
+ * Faz um insert de um novo lançamento de pontos.
  */
 export const createPointEntry = createServerFn({ method: 'POST' })
     .inputValidator(createPointEntrySchema)
     .handler(async ({ data }) => {
-        const supabase = getSupabaseAdminClient();
+        const session = await auth.api.getSession({ headers: getRequest().headers });
 
-        const { data: entry, error } = await supabase
-            .from('point_entries')
-            .insert(data)
-            .select()
-            .single();
+        if (!session) throw new Error('Não autenticado.');
 
-        if (error) throw new Error(error.message);
+        const [entry] = await db
+            .insert(pointEntries)
+            .values({
+                id: crypto.randomUUID(),
+                userId: data.user_id,
+                pointType: data.point_type,
+                amount: data.amount,
+                entryDate: new Date(data.entry_date),
+                createdBy: session.user.id
+            })
+            .returning(pointEntryColumns);
+
         return entry;
     });
 
 /**
- * Atualiza um lançamento de pontos.
+ * Faz um update de um lançamento de pontos.
  */
 export const updatePointEntry = createServerFn({ method: 'POST' })
     .inputValidator(updatePointEntrySchema)
     .handler(async ({ data }) => {
-        const { id, ...updates } = data;
-        const supabase = getSupabaseAdminClient();
+        const [entry] = await db
+            .update(pointEntries)
+            .set({
+                userId: data.user_id,
+                pointType: data.point_type,
+                amount: data.amount,
+                entryDate: new Date(data.entry_date)
+            })
+            .where(eq(pointEntries.id, data.id))
+            .returning(pointEntryColumns);
 
-        const { data: entry, error } = await supabase
-            .from('point_entries')
-            .update(updates)
-            .eq('id', id)
-            .select()
-            .single();
+        if (!entry) throw new Error('Lançamento não encontrado.');
 
-        if (error) throw new Error(error.message);
         return entry;
     });
 
 /**
- * Deleta um lançamento de pontos.
+ * Faz um delete de um lançamento de pontos.
  */
 export const deletePointEntry = createServerFn({ method: 'POST' })
-    .inputValidator(z.object({ id: z.string().uuid() }))
+    .inputValidator(z.object({ id: z.uuid() }))
     .handler(async ({ data }) => {
-        const supabase = getSupabaseAdminClient();
-
-        const { error } = await supabase.from('point_entries').delete().eq('id', data.id);
-
-        if (error) throw new Error(error.message);
+        await db.delete(pointEntries).where(eq(pointEntries.id, data.id));
 
         return { success: true };
     });

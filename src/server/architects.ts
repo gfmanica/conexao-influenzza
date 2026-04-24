@@ -1,124 +1,153 @@
 import { createServerFn } from '@tanstack/react-start';
+import { and, count, eq, sum } from 'drizzle-orm';
 import { z } from 'zod/v4';
 
-import { createArchitectSchema, updateArchitectSchema } from '@/lib/schemas/architect';
-import { queryParamsSchema } from '@/lib/schemas/query';
+import { db } from '@/lib/db';
 import {
-    applyFilters,
-    applyOrder,
+    buildOrderByClause,
     buildPagedResponse,
+    buildWhereConditions,
     getPaginationRange
-} from '@/lib/supabase/query-helpers';
-import { getSupabaseAdminClient } from '@/lib/supabase/server';
+} from '@/lib/db/builders';
+import { pointEntries, user } from '@/lib/db/schema';
+import { createArchitectSchema, updateArchitectSchema } from '@/types/architect';
+import { queryParamsSchema } from '@/types/builders';
+
+const architectColumns = {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    office_email: user.officeEmail,
+    phone: user.phone,
+    office_address: user.officeAddress,
+    birthdate: user.birthdate,
+    cau_register: user.cauRegister,
+    observation: user.observation,
+    photo_url: user.photoUrl,
+    created_at: user.createdAt,
+    updated_at: user.updatedAt,
+    role: user.role
+};
 
 /**
- * Lista arquitetos com paginação, filtros dinâmicos e ordenação.
+ * Faz um findAll dos usuários arquitetos.
  */
 export const listArchitects = createServerFn({ method: 'GET' })
     .inputValidator(queryParamsSchema)
     .handler(async ({ data }) => {
-        const supabase = getSupabaseAdminClient();
-        const { from, to } = getPaginationRange(data?.page, data?.pageSize);
+        const filter = data?.filter ?? [];
 
-        let query = supabase
-            .from('architects')
-            .select('*, point_entries ( amount )', { count: 'exact' })
-            .range(from, to);
+        filter.push({
+            field: 'role',
+            operator: 'eq',
+            value: 'architect'
+        });
 
-        query = applyFilters(query, data?.filter);
-        query = applyOrder(query, data?.order);
+        const { offset, limit } = getPaginationRange(data?.page, data?.pageSize);
+        const where = buildWhereConditions(filter, architectColumns);
+        const orderBy = buildOrderByClause(data?.order ?? [], architectColumns);
 
-        const { data: rows, count, error } = await query;
+        const [{ total }] = await db.select({ total: count() }).from(user).where(where);
 
-        if (error) throw new Error(error.message);
+        const rows = await db
+            .select({
+                ...architectColumns,
+                total_points: sum(pointEntries.amount)
+            })
+            .from(user)
+            .leftJoin(pointEntries, eq(user.id, pointEntries.userId))
+            .where(where)
+            .groupBy(user.id)
+            .orderBy(...(orderBy.length ? orderBy : [user.name]))
+            .limit(limit)
+            .offset(offset);
 
-        return buildPagedResponse(
-            rows.map((a) => ({
-                ...a,
-                linked: a.user_id !== null,
-                total_points:
-                    a.point_entries?.reduce(
-                        (sum: number, e: { amount: number }) => sum + e.amount,
-                        0
-                    ) ?? 0,
-                point_entries: undefined
-            })),
-            count,
-            to
-        );
+        return buildPagedResponse(rows, total, offset, limit);
     });
 
 /**
- * Retorna dados completos de um arquiteto + histórico de pontuações.
+ * Faz um findOne do usuário arquiteto pelo id.
  */
 export const getArchitect = createServerFn({ method: 'GET' })
     .inputValidator(z.object({ id: z.uuid() }))
     .handler(async ({ data }) => {
-        const supabase = getSupabaseAdminClient();
+        const architect = await db.query.user.findFirst({
+            where: and(eq(user.id, data.id), eq(user.role, 'architect'))
+        });
 
-        const { data: architect, error } = await supabase
-            .from('architects')
-            .select(
-                '*, point_entries ( id, point_type, amount, entry_date, created_at, updated_at )'
-            )
-            .eq('id', data.id)
-            .single();
-
-        if (error) throw new Error(error.message);
+        if (!architect) throw new Error('Arquiteto não encontrado.');
 
         return {
-            ...architect,
-            linked: architect.user_id !== null,
-            total_points:
-                architect.point_entries?.reduce(
-                    (sum: number, e: { amount: number }) => sum + e.amount,
-                    0
-                ) ?? 0
+            id: architect.id,
+            name: architect.name,
+            email: architect.email,
+            office_email: architect.officeEmail,
+            phone: architect.phone,
+            office_address: architect.officeAddress,
+            birthdate: architect.birthdate,
+            cau_register: architect.cauRegister,
+            observation: architect.observation,
+            photo_url: architect.photoUrl,
+            created_at: architect.createdAt,
+            updated_at: architect.updatedAt
         };
     });
-
 /**
- * Cadastra novo arquiteto. Cria apenas o registro profissional, sem criar usuário.
+ * Insere um novo arquiteto.
  */
 export const createArchitect = createServerFn({ method: 'POST' })
     .inputValidator(createArchitectSchema)
     .handler(async ({ data }) => {
-        const supabase = getSupabaseAdminClient();
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { photo: _photo, ...insertData } = data;
+        try {
+            const [architect] = await db
+                .insert(user)
+                .values({
+                    name: data.name,
+                    email: data.email,
+                    emailVerified: false,
+                    role: 'architect',
+                    officeEmail: data.office_email,
+                    phone: data.phone,
+                    officeAddress: data.office_address,
+                    birthdate: data.birthdate,
+                    cauRegister: data.cau_register,
+                    observation: data.observation,
+                    photoUrl: data.photo_url
+                })
+                .returning(architectColumns);
 
-        const { data: architect, error } = await supabase
-            .from('architects')
-            .insert(insertData)
-            .select()
-            .single();
+            return architect;
+        } catch (e: unknown) {
+            if (e instanceof Error && e.message.includes('UNIQUE')) {
+                throw new Error('E-mail já cadastrado.');
+            }
 
-        if (error) {
-            if (error.code === '23505') throw new Error('E-mail já cadastrado.');
-
-            throw new Error(error.message);
+            throw e;
         }
-
-        return { ...architect, linked: false, total_points: 0 };
     });
 
 /**
- * Atualiza dados do arquiteto.
+ * Atualiza um arquiteto.
  */
 export const updateArchitect = createServerFn({ method: 'POST' })
     .inputValidator(updateArchitectSchema)
     .handler(async ({ data }) => {
-        const { id, photo: _photo, ...updates } = data;
-        const supabase = getSupabaseAdminClient();
+        const [architect] = await db
+            .update(user)
+            .set({
+                name: data.name,
+                officeEmail: data.office_email,
+                phone: data.phone,
+                officeAddress: data.office_address,
+                birthdate: data.birthdate,
+                cauRegister: data.cau_register,
+                observation: data.observation,
+                updatedAt: new Date()
+            })
+            .where(and(eq(user.id, data.id), eq(user.role, 'architect')))
+            .returning(architectColumns);
 
-        const { data: architect, error } = await supabase
-            .from('architects')
-            .update(updates)
-            .eq('id', id)
-            .select()
-            .single();
-
-        if (error) throw new Error(error.message);
+        if (!architect) throw new Error('Arquiteto não encontrado.');
 
         return architect;
     });

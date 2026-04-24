@@ -1,145 +1,77 @@
 import { createServerFn } from '@tanstack/react-start';
+import { getRequest } from '@tanstack/react-start/server';
+import { and, desc, eq, gte, lte, sum } from 'drizzle-orm';
 
-import {
-    getSupabaseAdminClient,
-    getSupabaseServerClient
-} from '@/lib/supabase/server';
-
-/**
- * Top 10 arquitetos por pontuação no ano vigente.
- */
-export const getRanking = createServerFn({ method: 'GET' }).handler(
-    async () => {
-        const supabase = getSupabaseAdminClient();
-        const year = new Date().getFullYear();
-        const startOfYear = `${year}-01-01`;
-        const endOfYear = `${year}-12-31`;
-
-        const { data, error } = await supabase
-            .from('point_entries')
-            .select('architect_id, amount, architects ( name, photo_url )')
-            .gte('entry_date', startOfYear)
-            .lte('entry_date', endOfYear);
-
-        if (error) throw new Error(error.message);
-
-        const totals = new Map<
-            string,
-            { name: string; photo_url: string | null; total: number }
-        >();
-
-        for (const entry of data) {
-            const current = totals.get(entry.architect_id);
-            const arch = entry.architects as {
-                name: string;
-                photo_url: string | null;
-            };
-            if (current) {
-                current.total += entry.amount;
-            } else {
-                totals.set(entry.architect_id, {
-                    name: arch.name,
-                    photo_url: arch.photo_url,
-                    total: entry.amount
-                });
-            }
-        }
-
-        const ranking = Array.from(totals.entries())
-            .sort((a, b) => b[1].total - a[1].total)
-            .slice(0, 10)
-            .map(([architect_id, info], i) => ({
-                position: i + 1,
-                architect_id,
-                name: info.name,
-                photo_url: info.photo_url,
-                total_points: info.total
-            }));
-
-        return { ranking, year };
-    }
-);
+import { auth } from '@/lib/auth';
+import { db } from '@/lib/db';
+import { pointEntries, user as userTable } from '@/lib/db/schema';
 
 /**
- * Perfil do arquiteto logado + saldo total de pontos.
+ * Lista o ranking de arquitetos com mais pontos (top 10) do ano atual.
  */
-export const getMyProfile = createServerFn({ method: 'GET' }).handler(
-    async () => {
-        const supabase = getSupabaseServerClient();
+export const getRanking = createServerFn({ method: 'GET' }).handler(async () => {
+    const year = new Date().getFullYear();
+    const startOfYear = new Date(`${year}-01-01`);
+    const endOfYear = new Date(`${year}-12-31`);
 
-        const {
-            data: { user }
-        } = await supabase.auth.getUser();
-        if (!user) throw new Error('Não autenticado.');
+    const ranking = await db
+        .select({
+            architect_id: pointEntries.userId,
+            name: userTable.name,
+            photo_url: userTable.photoUrl,
+            total_points: sum(pointEntries.amount)
+        })
+        .from(pointEntries)
+        .leftJoin(userTable, eq(pointEntries.userId, userTable.id))
+        .where(
+            and(gte(pointEntries.entryDate, startOfYear), lte(pointEntries.entryDate, endOfYear))
+        )
+        .groupBy(pointEntries.userId, userTable.id, userTable.name, userTable.photoUrl)
+        .orderBy(desc(sum(pointEntries.amount)))
+        .limit(10);
 
-        const admin = getSupabaseAdminClient();
-
-        const { data: profile } = await admin
-            .from('user_profiles')
-            .select('id')
-            .eq('auth_user_id', user.id)
-            .single();
-
-        if (!profile) throw new Error('Perfil não encontrado.');
-
-        const { data: architect } = await admin
-            .from('architects')
-            .select(
-                'id, name, email, photo_url, cau_register, point_entries ( amount )'
-            )
-            .eq('user_id', profile.id)
-            .single();
-
-        if (!architect) throw new Error('Arquiteto não encontrado.');
-
-        return {
-            id: architect.id,
-            name: architect.name,
-            email: architect.email,
-            photo_url: architect.photo_url,
-            cau_register: architect.cau_register,
-            total_points:
-                architect.point_entries?.reduce(
-                    (sum: number, e: { amount: number }) => sum + e.amount,
-                    0
-                ) ?? 0
-        };
-    }
-);
+    return ranking.map((item, i) => ({
+        position: i + 1,
+        architect_id: item.architect_id,
+        name: item.name ?? '',
+        photo_url: item.photo_url ?? null,
+        total_points: Number(item.total_points)
+    }));
+});
 
 /**
- * Histórico de lançamentos do próprio arquiteto.
+ * Obtém o total de pontos do usuário logado.
  */
-export const getMyEntries = createServerFn({ method: 'GET' }).handler(
-    async () => {
-        const supabase = getSupabaseServerClient();
+export const getTotalPointsUser = createServerFn({ method: 'GET' }).handler(async () => {
+    const session = await auth.api.getSession({ headers: getRequest().headers });
 
-        const {
-            data: { user }
-        } = await supabase.auth.getUser();
-        if (!user) throw new Error('Não autenticado.');
+    if (!session) throw new Error('Não autenticado.');
 
-        const admin = getSupabaseAdminClient();
+    const [result] = await db
+        .select({ total_points: sum(pointEntries.amount) })
+        .from(pointEntries)
+        .where(eq(pointEntries.userId, session.user.id));
 
-        const { data: profile } = await admin
-            .from('user_profiles')
-            .select('id')
-            .eq('auth_user_id', user.id)
-            .single();
+    return Number(result?.total_points) || 0;
+});
 
-        const { data: architect } = await admin
-            .from('architects')
-            .select('id')
-            .eq('user_id', profile!.id)
-            .single();
+/**
+ * Lista todas as entradas de pontos do user logado.
+ */
+export const listPointsUser = createServerFn({ method: 'GET' }).handler(async () => {
+    const session = await auth.api.getSession({ headers: getRequest().headers });
 
-        const { data: entries, error } = await admin
-            .from('point_entries')
-            .select('id, point_type, amount, entry_date, created_at')
-            .eq('architect_id', architect!.id)
-            .order('entry_date', { ascending: false });
+    if (!session) throw new Error('Não autenticado.');
 
-        if (error) throw new Error(error.message);
-        return entries;
-    }
-);
+    return await db
+        .select({
+            id: pointEntries.id,
+            point_type: pointEntries.pointType,
+            amount: pointEntries.amount,
+            entry_date: pointEntries.entryDate,
+            created_at: pointEntries.createdAt
+        })
+        .from(pointEntries)
+        .where(eq(pointEntries.userId, session.user.id))
+        .orderBy(desc(pointEntries.entryDate));
+});
