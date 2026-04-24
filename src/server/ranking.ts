@@ -1,15 +1,16 @@
 import { createServerFn } from '@tanstack/react-start';
-import { getRequest } from '@tanstack/react-start/server';
 import { and, desc, eq, gte, lte, sum } from 'drizzle-orm';
 
-import { auth } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { pointEntries, user as userTable } from '@/lib/db/schema';
+import { authMiddleware } from '@/lib/middleware';
 
 /**
  * Lista o ranking de arquitetos com mais pontos (top 10) do ano atual.
  */
-export const getRanking = createServerFn({ method: 'GET' }).handler(async () => {
+export const getRanking = createServerFn({ method: 'GET' })
+    .middleware([authMiddleware])
+    .handler(async () => {
     const year = new Date().getFullYear();
     const startOfYear = new Date(`${year}-01-01`);
     const endOfYear = new Date(`${year}-12-31`);
@@ -42,36 +43,32 @@ export const getRanking = createServerFn({ method: 'GET' }).handler(async () => 
 /**
  * Obtém o total de pontos do usuário logado.
  */
-export const getTotalPointsUser = createServerFn({ method: 'GET' }).handler(async () => {
-    const session = await auth.api.getSession({ headers: getRequest().headers });
+export const getTotalPointsUser = createServerFn({ method: 'GET' })
+    .middleware([authMiddleware])
+    .handler(async ({ context }) => {
+        const [result] = await db
+            .select({ total_points: sum(pointEntries.amount) })
+            .from(pointEntries)
+            .where(eq(pointEntries.userId, context.session.user.id));
 
-    if (!session) throw new Error('Não autenticado.');
-
-    const [result] = await db
-        .select({ total_points: sum(pointEntries.amount) })
-        .from(pointEntries)
-        .where(eq(pointEntries.userId, session.user.id));
-
-    return Number(result?.total_points) || 0;
-});
+        return Number(result?.total_points) || 0;
+    });
 
 /**
  * Lista todas as entradas de pontos do user logado.
  */
-export const listPointsUser = createServerFn({ method: 'GET' }).handler(async () => {
-    const session = await auth.api.getSession({ headers: getRequest().headers });
-
-    if (!session) throw new Error('Não autenticado.');
-
-    return await db
-        .select({
-            id: pointEntries.id,
-            point_type: pointEntries.pointType,
-            amount: pointEntries.amount,
-            entry_date: pointEntries.entryDate,
-            created_at: pointEntries.createdAt
-        })
-        .from(pointEntries)
-        .where(eq(pointEntries.userId, session.user.id))
-        .orderBy(desc(pointEntries.entryDate));
-});
+export const listPointsUser = createServerFn({ method: 'GET' })
+    .middleware([authMiddleware])
+    .handler(async ({ context }) => {
+        return await db
+            .select({
+                id: pointEntries.id,
+                point_type: pointEntries.pointType,
+                amount: pointEntries.amount,
+                entry_date: pointEntries.entryDate,
+                created_at: pointEntries.createdAt
+            })
+            .from(pointEntries)
+            .where(eq(pointEntries.userId, context.session.user.id))
+            .orderBy(desc(pointEntries.entryDate));
+    });

@@ -1,9 +1,7 @@
 import { createServerFn } from '@tanstack/react-start';
-import { getRequest } from '@tanstack/react-start/server';
 import { count, eq } from 'drizzle-orm';
 import { z } from 'zod/v4';
 
-import { auth } from '@/lib/auth';
 import { db } from '@/lib/db';
 import {
     buildOrderByClause,
@@ -12,6 +10,7 @@ import {
     getPaginationRange
 } from '@/lib/db/builders';
 import { pointEntries, user } from '@/lib/db/schema';
+import { adminMiddleware } from '@/lib/middleware';
 import { queryParamsSchema } from '@/types/builders';
 import { createPointEntrySchema, updatePointEntrySchema } from '@/types/point-entry';
 
@@ -30,6 +29,7 @@ const pointEntryColumns = {
  * Faz um findAll dos lançamentos de pontos.
  */
 export const listPointEntries = createServerFn({ method: 'GET' })
+    .middleware([adminMiddleware])
     .inputValidator(queryParamsSchema)
     .handler(async ({ data }) => {
         const { offset, limit } = getPaginationRange(data?.page, data?.pageSize);
@@ -61,12 +61,9 @@ export const listPointEntries = createServerFn({ method: 'GET' })
  * Faz um insert de um novo lançamento de pontos.
  */
 export const createPointEntry = createServerFn({ method: 'POST' })
+    .middleware([adminMiddleware])
     .inputValidator(createPointEntrySchema)
-    .handler(async ({ data }) => {
-        const session = await auth.api.getSession({ headers: getRequest().headers });
-
-        if (!session) throw new Error('Não autenticado.');
-
+    .handler(async ({ data, context }) => {
         const [entry] = await db
             .insert(pointEntries)
             .values({
@@ -75,7 +72,7 @@ export const createPointEntry = createServerFn({ method: 'POST' })
                 pointType: data.point_type,
                 amount: data.amount,
                 entryDate: new Date(data.entry_date),
-                createdBy: session.user.id
+                createdBy: context.session.user.id
             })
             .returning(pointEntryColumns);
 
@@ -86,6 +83,7 @@ export const createPointEntry = createServerFn({ method: 'POST' })
  * Faz um update de um lançamento de pontos.
  */
 export const updatePointEntry = createServerFn({ method: 'POST' })
+    .middleware([adminMiddleware])
     .inputValidator(updatePointEntrySchema)
     .handler(async ({ data }) => {
         const [entry] = await db
@@ -108,6 +106,7 @@ export const updatePointEntry = createServerFn({ method: 'POST' })
  * Faz um delete de um lançamento de pontos.
  */
 export const deletePointEntry = createServerFn({ method: 'POST' })
+    .middleware([adminMiddleware])
     .inputValidator(z.object({ id: z.uuid() }))
     .handler(async ({ data }) => {
         await db.delete(pointEntries).where(eq(pointEntries.id, data.id));

@@ -7,13 +7,17 @@ import { eq } from 'drizzle-orm';
 import { sendMagicLinkEmail } from '@/lib/email';
 
 import { db } from '../db';
-import { user } from '../db/schema';
+import { user, userRoleEnum } from '../db/schema';
 
 export const auth = betterAuth({
     database: drizzleAdapter(db, { provider: 'pg' }),
     user: {
         additionalFields: {
-            role: { type: 'string', defaultValue: 'architect', input: false },
+            role: {
+                type: userRoleEnum.enumValues,
+                defaultValue: 'architect',
+                input: false
+            },
             officeEmail: { type: 'string', required: false },
             phone: { type: 'string', required: false },
             officeAddress: { type: 'string', required: false },
@@ -39,7 +43,7 @@ export const auth = betterAuth({
         })
     ],
     session: {
-        cookieCache: { enabled: true, maxAge: 60 * 60 * 24 * 7 }
+        cookieCache: { enabled: true, maxAge: 60 * 3 }
     },
     advanced: {
         database: {

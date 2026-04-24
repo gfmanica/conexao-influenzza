@@ -39,8 +39,7 @@ function getInitials(name: string) {
 const BAR_CONFIG = {
     1: {
         barClass: 'bg-gradient-to-t from-amber-600 via-amber-400 to-amber-300',
-        ringClass:
-            'ring-2 ring-amber-400/90 ring-offset-2 ring-offset-background',
+        ringClass: 'ring-2 ring-amber-400/90 ring-offset-2 ring-offset-background',
         ptsClass: 'text-amber-600 dark:text-amber-400',
         rankClass: 'text-white/90',
         avatarSize: 'size-18',
@@ -51,8 +50,7 @@ const BAR_CONFIG = {
     },
     2: {
         barClass: 'bg-gradient-to-t from-zinc-500 via-zinc-400 to-zinc-300',
-        ringClass:
-            'ring-2 ring-zinc-400/70 ring-offset-2 ring-offset-background',
+        ringClass: 'ring-2 ring-zinc-400/70 ring-offset-2 ring-offset-background',
         ptsClass: 'text-zinc-500 dark:text-zinc-400',
         rankClass: 'text-white/90',
         avatarSize: 'size-14',
@@ -63,8 +61,7 @@ const BAR_CONFIG = {
     },
     3: {
         barClass: 'bg-gradient-to-t from-amber-800 via-amber-700 to-amber-500',
-        ringClass:
-            'ring-2 ring-amber-700/70 ring-offset-2 ring-offset-background',
+        ringClass: 'ring-2 ring-amber-700/70 ring-offset-2 ring-offset-background',
         ptsClass: 'text-amber-700 dark:text-amber-600',
         rankClass: 'text-white/90',
         avatarSize: 'size-14',
@@ -106,10 +103,7 @@ function PodiumBar({
                 <Avatar className={cn(cfg.avatarSize, cfg.ringClass)}>
                     <AvatarImage src={entry.photo_url ?? undefined} />
                     <AvatarFallback
-                        className={cn(
-                            'font-semibold',
-                            rank === 1 ? 'text-sm' : 'text-xs'
-                        )}
+                        className={cn('font-semibold', rank === 1 ? 'text-sm' : 'text-xs')}
                     >
                         {getInitials(entry.name)}
                     </AvatarFallback>
@@ -132,9 +126,7 @@ function PodiumBar({
                         )}
                     >
                         {entry.total_points.toLocaleString('pt-BR')}
-                        <span className="ml-1 text-xs font-normal opacity-60">
-                            pts
-                        </span>
+                        <span className="ml-1 text-xs font-normal opacity-60">pts</span>
                     </p>
                 </div>
             </div>
@@ -153,9 +145,7 @@ function PodiumBar({
                 }
             >
                 {/* Shine sweep for 1st */}
-                {cfg.showShine && (
-                    <div className="bar-shine absolute inset-0" />
-                )}
+                {cfg.showShine && <div className="bar-shine absolute inset-0" />}
 
                 {/* Rank number at top center */}
                 <span
@@ -203,9 +193,7 @@ function RankingRow({
             </Avatar>
 
             <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-                <span className="truncate text-sm font-medium">
-                    {entry.name}
-                </span>
+                <span className="truncate text-sm font-medium">{entry.name}</span>
                 <div className="bg-muted h-1.5 w-full overflow-hidden rounded-full">
                     <div
                         className="bar-fill h-full rounded-full bg-gradient-to-r from-amber-500/80 to-amber-400/40"
@@ -233,13 +221,13 @@ function RankingRow({
 
 function RouteComponent() {
     const { data } = useSuspenseQuery(rankingQueryOptions);
-    const { ranking, year: YEAR } = data;
+    const year = new Date().getFullYear();
 
-    const top3 = ranking.slice(0, 3);
-    const rest = ranking.slice(3);
-    const maxPoints = ranking[0]?.total_points ?? 1;
+    const top3 = data.slice(0, 3);
+    const rest = data.slice(3);
+    const maxPoints = data[0]?.total_points ?? 1;
 
-    if (ranking.length === 0) {
+    if (data.length === 0) {
         return (
             <div className="flex flex-1 flex-col items-center justify-center gap-4 py-6 text-center">
                 <TrophyIcon className="text-muted-foreground/40 size-16" />
@@ -248,7 +236,8 @@ function RouteComponent() {
                         Nenhuma pontuação registrada
                     </p>
                     <p className="text-muted-foreground text-sm">
-                        O ranking aparecerá aqui assim que houver lançamentos de pontos para os arquitetos.
+                        O ranking aparecerá aqui assim que houver lançamentos de pontos para os
+                        arquitetos.
                     </p>
                 </div>
             </div>
@@ -310,15 +299,12 @@ function RouteComponent() {
                             Ranking de Pontuação
                         </h1>
                         <p className="text-muted-foreground text-sm">
-                            Top 10 arquitetos com mais pontos em {YEAR}
+                            Top 10 arquitetos com mais pontos em {year}
                         </p>
                     </div>
-                    <Badge
-                        variant="outline"
-                        className="gap-1.5 px-3 py-1 text-xs"
-                    >
+                    <Badge variant="outline" className="gap-1.5 px-3 py-1 text-xs">
                         <span className="size-1.5 animate-pulse rounded-full bg-amber-400" />
-                        {YEAR}
+                        {year}
                     </Badge>
                 </div>
 
@@ -330,8 +316,7 @@ function RouteComponent() {
                             style={{
                                 WebkitMaskImage:
                                     'linear-gradient(to top, transparent 0%, black 22%)',
-                                maskImage:
-                                    'linear-gradient(to top, transparent 0%, black 22%)'
+                                maskImage: 'linear-gradient(to top, transparent 0%, black 22%)'
                             }}
                         >
                             <PodiumBar

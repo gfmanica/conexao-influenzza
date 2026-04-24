@@ -10,6 +10,7 @@ import {
     getPaginationRange
 } from '@/lib/db/builders';
 import { pointEntries, user } from '@/lib/db/schema';
+import { adminMiddleware } from '@/lib/middleware';
 import { createArchitectSchema, updateArchitectSchema } from '@/types/architect';
 import { queryParamsSchema } from '@/types/builders';
 
@@ -33,6 +34,7 @@ const architectColumns = {
  * Faz um findAll dos usuários arquitetos.
  */
 export const listArchitects = createServerFn({ method: 'GET' })
+    .middleware([adminMiddleware])
     .inputValidator(queryParamsSchema)
     .handler(async ({ data }) => {
         const filter = data?.filter ?? [];
@@ -69,6 +71,7 @@ export const listArchitects = createServerFn({ method: 'GET' })
  * Faz um findOne do usuário arquiteto pelo id.
  */
 export const getArchitect = createServerFn({ method: 'GET' })
+    .middleware([adminMiddleware])
     .inputValidator(z.object({ id: z.uuid() }))
     .handler(async ({ data }) => {
         const architect = await db.query.user.findFirst({
@@ -96,6 +99,7 @@ export const getArchitect = createServerFn({ method: 'GET' })
  * Insere um novo arquiteto.
  */
 export const createArchitect = createServerFn({ method: 'POST' })
+    .middleware([adminMiddleware])
     .inputValidator(createArchitectSchema)
     .handler(async ({ data }) => {
         try {
@@ -130,6 +134,7 @@ export const createArchitect = createServerFn({ method: 'POST' })
  * Atualiza um arquiteto.
  */
 export const updateArchitect = createServerFn({ method: 'POST' })
+    .middleware([adminMiddleware])
     .inputValidator(updateArchitectSchema)
     .handler(async ({ data }) => {
         const [architect] = await db
