@@ -42,7 +42,6 @@
         "lucide-react": "1.9.0",
         "next-themes": "0.4.6",
         "nitro": "latest",
-        "npm": "11.13.0",
         "postgres": "^3.4.9",
         "react": "19.2.5",
         "react-day-picker": "9.14.0",
