@@ -17,10 +17,10 @@ export const getRanking = createServerFn({ method: 'GET' })
 
     const ranking = await db
         .select({
-            architect_id: pointEntries.userId,
+            architectId: pointEntries.userId,
             name: userTable.name,
-            photo_url: userTable.photoUrl,
-            total_points: sum(pointEntries.amount)
+            photoUrl: userTable.photoUrl,
+            totalPoints: sum(pointEntries.amount)
         })
         .from(pointEntries)
         .leftJoin(userTable, eq(pointEntries.userId, userTable.id))
@@ -33,10 +33,10 @@ export const getRanking = createServerFn({ method: 'GET' })
 
     return ranking.map((item, i) => ({
         position: i + 1,
-        architect_id: item.architect_id,
+        architectId: item.architectId,
         name: item.name ?? '',
-        photo_url: item.photo_url ?? null,
-        total_points: Number(item.total_points)
+        photoUrl: item.photoUrl ?? null,
+        totalPoints: Number(item.totalPoints)
     }));
 });
 
@@ -47,11 +47,11 @@ export const getTotalPointsUser = createServerFn({ method: 'GET' })
     .middleware([authMiddleware])
     .handler(async ({ context }) => {
         const [result] = await db
-            .select({ total_points: sum(pointEntries.amount) })
+            .select({ totalPoints: sum(pointEntries.amount) })
             .from(pointEntries)
             .where(eq(pointEntries.userId, context.session.user.id));
 
-        return Number(result?.total_points) || 0;
+        return Number(result?.totalPoints) || 0;
     });
 
 /**
@@ -63,10 +63,10 @@ export const listPointsUser = createServerFn({ method: 'GET' })
         return await db
             .select({
                 id: pointEntries.id,
-                point_type: pointEntries.pointType,
+                pointType: pointEntries.pointType,
                 amount: pointEntries.amount,
-                entry_date: pointEntries.entryDate,
-                created_at: pointEntries.createdAt
+                entryDate: pointEntries.entryDate,
+                createdAt: pointEntries.createdAt
             })
             .from(pointEntries)
             .where(eq(pointEntries.userId, context.session.user.id))

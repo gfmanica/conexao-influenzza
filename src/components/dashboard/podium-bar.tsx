@@ -1,10 +1,9 @@
 import { CrownIcon } from 'lucide-react';
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
+import type { ArchitectRanking } from '@/types/ranking';
 
-import { type RankingEntry } from './types';
-import { getInitials } from './utils';
+import { ArchitectAvatar } from '../architects/architect-avatar';
 
 const BAR_CONFIG = {
     1: {
@@ -44,14 +43,14 @@ const BAR_CONFIG = {
 
 type PodiumBarProps = {
     rank: 1 | 2 | 3;
-    entry: RankingEntry;
+    entry: ArchitectRanking[number];
     maxPoints: number;
     animDelay: number;
 };
 
 export function PodiumBar({ rank, entry, maxPoints, animDelay }: PodiumBarProps) {
     const cfg = BAR_CONFIG[rank];
-    const ratio = entry.total_points / maxPoints;
+    const ratio = entry.totalPoints / maxPoints;
     const barH = Math.round(cfg.maxBarH * ratio);
 
     return (
@@ -66,14 +65,7 @@ export function PodiumBar({ rank, entry, maxPoints, animDelay }: PodiumBarProps)
                     </div>
                 )}
 
-                <Avatar className={cn(cfg.avatarSize, cfg.ringClass)}>
-                    <AvatarImage src={entry.photo_url ?? undefined} />
-                    <AvatarFallback
-                        className={cn('font-semibold', rank === 1 ? 'text-sm' : 'text-xs')}
-                    >
-                        {getInitials(entry.name)}
-                    </AvatarFallback>
-                </Avatar>
+                <ArchitectAvatar name={entry.name} photoUrl={entry.photoUrl} />
 
                 <div>
                     <p
@@ -91,7 +83,7 @@ export function PodiumBar({ rank, entry, maxPoints, animDelay }: PodiumBarProps)
                             cfg.ptsClass
                         )}
                     >
-                        {entry.total_points.toLocaleString('pt-BR')}
+                        {entry.totalPoints.toLocaleString('pt-BR')}
                         <span className="ml-1 text-xs font-normal opacity-60">pts</span>
                     </p>
                 </div>

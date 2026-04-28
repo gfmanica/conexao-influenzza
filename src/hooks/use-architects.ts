@@ -44,9 +44,6 @@ export function useUpdateArchitect() {
 
             toast.success('Arquiteto salvo com sucesso!');
         },
-        onError: (error) => {
-            console.error(error);
-            toast.error(error.message);
-        }
+        onError: (error) => toast.error(error.message)
     });
 }

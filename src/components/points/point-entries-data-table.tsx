@@ -9,26 +9,20 @@ import { DataTable } from '@/components/ui/data-table';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Label } from '@/components/ui/label';
 import { architectsQueryOptions } from '@/hooks/use-architects';
-import {
-    pointEntriesQueryOptions,
-    useCreatePointEntry,
-    useDeletePointEntry,
-    useUpdatePointEntry
-} from '@/hooks/use-point-entries';
+import { pointEntriesQueryOptions, useDeletePointEntry } from '@/hooks/use-point-entries';
 import { useTableQuery } from '@/hooks/use-table-query';
 import { type FilterItem } from '@/types/builders';
+import type { PointEntry } from '@/types/point-entry';
 
-import { buildColumns } from './columns';
-import { PointEntrySheet } from './point-entry-sheet';
-import { type PointEntry, type PointEntryFormData } from './types';
+import { pointEntriesColumns } from './point-entries-columns';
+import { PointEntryForm } from './point-entry-form';
 
 export function PointEntriesDataTable() {
     const [filterArchitectId, setFilterArchitectId] = useState('');
     const [filterFrom, setFilterFrom] = useState('');
     const [filterTo, setFilterTo] = useState('');
     const [editingEntry, setEditingEntry] = useState<PointEntry | null>(null);
-    const [editSheetOpen, setEditSheetOpen] = useState(false);
-    const [createSheetOpen, setCreateSheetOpen] = useState(false);
+    const [openDrawer, setOpenDrawer] = useState(false);
 
     const { onFilterChange, ...tableQuery } = useTableQuery({
         queryOptions: pointEntriesQueryOptions
@@ -37,8 +31,6 @@ export function PointEntriesDataTable() {
     const { data: architectsData } = useQuery(architectsQueryOptions());
     const architects = architectsData?.data ?? [];
 
-    const createEntry = useCreatePointEntry();
-    const updateEntry = useUpdatePointEntry();
     const deleteEntry = useDeletePointEntry();
 
     function applyFilters(overrides?: { architectId?: string; from?: string; to?: string }) {
@@ -54,34 +46,13 @@ export function PointEntriesDataTable() {
         onFilterChange(items);
     }
 
-    function clearFilters() {
-        setFilterArchitectId('');
-        setFilterFrom('');
-        setFilterTo('');
-        onFilterChange([]);
-    }
-
-    function handleCreate(formData: PointEntryFormData) {
-        createEntry.mutate({ data: formData });
-    }
-
-    function handleEdit(id: string, formData: PointEntryFormData) {
-        updateEntry.mutate({ data: { id, ...formData } });
-    }
-
-    function handleDelete(id: string) {
-        deleteEntry.mutate({ data: { id } });
-    }
-
-    const columns = buildColumns({
+    const columns = pointEntriesColumns({
         onEdit: (entry) => {
             setEditingEntry(entry);
-            setEditSheetOpen(true);
+            setOpenDrawer(true);
         },
-        onDelete: handleDelete
+        onDelete: (entry) => deleteEntry.mutate({ data: { id: entry.id } })
     });
-
-    const hasFilters = !!(filterArchitectId || filterFrom || filterTo);
 
     return (
         <>
@@ -97,64 +68,58 @@ export function PointEntriesDataTable() {
                 onSortChange={tableQuery.onSortChange}
                 isLoading={tableQuery.isFetching}
                 toolbar={
-                    <div className="flex flex-wrap items-end gap-3 px-4 lg:px-6">
-                        <div className="flex flex-col gap-1.5">
-                            <Label className="text-xs">Arquiteto</Label>
-                            <Combobox
-                                value={filterArchitectId}
-                                onChange={(value) => {
-                                    setFilterArchitectId(value);
-                                    applyFilters({ architectId: value });
-                                }}
-                                placeholder="Todos"
-                                searchPlaceholder="Buscar arquiteto..."
-                                emptyText="Nenhum arquiteto encontrado."
-                                className="h-8 w-48 text-sm"
-                                options={architects.map((a) => ({ value: a.id, label: a.name }))}
-                            />
-                        </div>
+                    <div className="flex w-full flex-wrap justify-between items-end gap-3 px-4 lg:px-6">
+                        <div className="flex flex-wrap items-end gap-3">
+                            <div className="flex flex-col gap-1.5">
+                                <Label className="text-xs">Arquiteto</Label>
+                                <Combobox
+                                    value={filterArchitectId}
+                                    onChange={(value) => {
+                                        setFilterArchitectId(value);
+                                        applyFilters({ architectId: value });
+                                    }}
+                                    placeholder="Todos"
+                                    searchPlaceholder="Buscar arquiteto..."
+                                    emptyText="Nenhum arquiteto encontrado."
+                                    className="h-8 w-48 text-sm"
+                                    options={architects.map((a) => ({
+                                        value: a.id,
+                                        label: a.name
+                                    }))}
+                                />
+                            </div>
 
-                        <div className="flex flex-col gap-1.5">
-                            <Label className="text-xs">De</Label>
-                            <DatePicker
-                                value={filterFrom}
-                                onChange={(value) => {
-                                    setFilterFrom(value);
-                                    applyFilters({ from: value });
-                                }}
-                                placeholder="Data inicial"
-                                className="h-8 w-44 text-sm"
-                            />
-                        </div>
+                            <div className="flex flex-col gap-1.5">
+                                <Label className="text-xs">De</Label>
+                                <DatePicker
+                                    value={filterFrom}
+                                    onChange={(value) => {
+                                        setFilterFrom(value);
+                                        applyFilters({ from: value });
+                                    }}
+                                    placeholder="Data inicial"
+                                    className="h-8 w-44 text-sm"
+                                />
+                            </div>
 
-                        <div className="flex flex-col gap-1.5">
-                            <Label className="text-xs">Até</Label>
-                            <DatePicker
-                                value={filterTo}
-                                onChange={(value) => {
-                                    setFilterTo(value);
-                                    applyFilters({ to: value });
-                                }}
-                                placeholder="Data final"
-                                className="h-8 w-44 text-sm"
-                            />
+                            <div className="flex flex-col gap-1.5">
+                                <Label className="text-xs">Até</Label>
+                                <DatePicker
+                                    value={filterTo}
+                                    onChange={(value) => {
+                                        setFilterTo(value);
+                                        applyFilters({ to: value });
+                                    }}
+                                    placeholder="Data final"
+                                    className="h-8 w-44 text-sm"
+                                />
+                            </div>
                         </div>
-
-                        {hasFilters && (
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-8 self-end"
-                                onClick={clearFilters}
-                            >
-                                Limpar filtros
-                            </Button>
-                        )}
 
                         <Button
                             size="sm"
                             className="h-8 self-end"
-                            onClick={() => setCreateSheetOpen(true)}
+                            onClick={() => setOpenDrawer(true)}
                         >
                             <PlusIcon />
                             Novo lançamento
@@ -163,22 +128,12 @@ export function PointEntriesDataTable() {
                 }
             />
 
-            <PointEntrySheet
-                architects={architects}
-                onSubmit={handleCreate}
-                open={createSheetOpen}
-                onOpenChange={setCreateSheetOpen}
-            />
-
-            <PointEntrySheet
+            <PointEntryForm
                 entry={editingEntry ?? undefined}
-                architects={architects}
-                onSubmit={(data) => {
-                    if (editingEntry) handleEdit(editingEntry.id, data);
-                }}
-                open={editSheetOpen}
+                open={openDrawer}
                 onOpenChange={(open) => {
-                    setEditSheetOpen(open);
+                    setOpenDrawer(open);
+
                     if (!open) setEditingEntry(null);
                 }}
             />

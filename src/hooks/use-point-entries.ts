@@ -1,4 +1,5 @@
 import { keepPreviousData, queryOptions, useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 import {
     createPointEntry,
@@ -31,7 +32,9 @@ export function useCreatePointEntry() {
             queryClient.invalidateQueries({ queryKey: ['point-entries'] });
             queryClient.invalidateQueries({ queryKey: ['architects'] });
             queryClient.invalidateQueries({ queryKey: ['ranking'] });
-        }
+            toast.success('Lançamento salvo com sucesso!');
+        },
+        onError: (error) => toast.error(error.message)
     });
 }
 
@@ -47,7 +50,9 @@ export function useUpdatePointEntry() {
             queryClient.invalidateQueries({ queryKey: ['point-entries'] });
             queryClient.invalidateQueries({ queryKey: ['architects'] });
             queryClient.invalidateQueries({ queryKey: ['ranking'] });
-        }
+            toast.success('Lançamento salvo com sucesso!');
+        },
+        onError: (error) => toast.error(error.message)
     });
 }
 
@@ -63,6 +68,8 @@ export function useDeletePointEntry() {
             queryClient.invalidateQueries({ queryKey: ['point-entries'] });
             queryClient.invalidateQueries({ queryKey: ['architects'] });
             queryClient.invalidateQueries({ queryKey: ['ranking'] });
-        }
+            toast.success('Lançamento excluído com sucesso!');
+        },
+        onError: (error) => toast.error(error.message)
     });
 }

@@ -1,52 +1,37 @@
 import { type ColumnDef } from '@tanstack/react-table';
-import { ArrowUpDownIcon, EllipsisVerticalIcon } from 'lucide-react';
 
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu';
+import type { PointEntry } from '@/types/point-entry';
 
 import { ArchitectAvatar } from '../architects/architect-avatar';
 import { DataTableActionCell } from '../ui/data-table-action-cell';
 import { DataTableColumnHeader } from '../ui/data-table-column-header';
-import { type PointEntry } from './types';
-
-function formatDate(dateStr: string) {
-    const [year, month, day] = dateStr.split('-');
-    return `${day}/${month}/${year}`;
-}
 
 type ColumnsOptions = {
-    onEdit: (entry: PointEntry) => void;
-    onDelete: (id: string) => void;
+    onEdit(entry: PointEntry): void;
+    onDelete(entry: PointEntry): void;
 };
 
-export function buildColumns({ onEdit, onDelete }: ColumnsOptions): ColumnDef<PointEntry>[] {
+export function pointEntriesColumns({ onEdit, onDelete }: ColumnsOptions): ColumnDef<PointEntry>[] {
     return [
         {
-            accessorKey: 'entry_date',
+            accessorKey: 'entryDate',
             header: ({ column }) => <DataTableColumnHeader column={column} title="Data" />,
             cell: ({ row }) => (
                 <span className="text-muted-foreground tabular-nums">
-                    {formatDate(row.original.entry_date)}
+                    {row.original.entryDate.toLocaleDateString('pt-BR')}
                 </span>
             )
         },
         {
-            accessorKey: 'architect_id',
+            accessorKey: 'userId',
             header: 'Arquiteto',
             cell: ({ row }) => {
-                const arch = row.original.architects;
+                const arch = row.original.architect;
 
                 return (
                     <div className="flex items-center gap-3">
-                        <ArchitectAvatar name={arch?.name || ''} photoUrl={arch?.photo_url || ''} />
+                        <ArchitectAvatar name={arch?.name || ''} photoUrl={arch?.photoUrl || ''} />
 
                         <span className="font-medium">{arch?.name}</span>
                     </div>
@@ -54,9 +39,9 @@ export function buildColumns({ onEdit, onDelete }: ColumnsOptions): ColumnDef<Po
             }
         },
         {
-            accessorKey: 'point_type',
+            accessorKey: 'pointType',
             header: 'Tipo',
-            cell: ({ row }) => <Badge variant="outline">{row.original.point_type}</Badge>
+            cell: ({ row }) => <Badge variant="outline">{row.original.pointType}</Badge>
         },
         {
             accessorKey: 'amount',
@@ -69,13 +54,7 @@ export function buildColumns({ onEdit, onDelete }: ColumnsOptions): ColumnDef<Po
         },
         {
             id: 'actions',
-            cell: ({ row }) => (
-                <DataTableActionCell
-                    row={row}
-                    onEdit={() => onEdit(row.original)}
-                    onDelete={() => onDelete(row.original.id)}
-                />
-            )
+            cell: ({ row }) => <DataTableActionCell row={row} onEdit={onEdit} onDelete={onDelete} />
         }
     ];
 }

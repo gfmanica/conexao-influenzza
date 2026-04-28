@@ -1,6 +1,6 @@
 import { type ColumnDef } from '@tanstack/react-table';
 
-import { type Architect } from '@/components/architects/architect-form';
+import { type Architect } from '@/types/architect';
 import { Badge } from '@/components/ui/badge';
 
 import { DataTableActionCell } from '../ui/data-table-action-cell';
@@ -19,7 +19,7 @@ export function architectColumns({ onEdit }: ColumnsOptions): ColumnDef<Architec
             cell: ({ row }) => (
                 <div className="flex items-center gap-3">
                     <ArchitectAvatar
-                        photoUrl={row.original.photo_url || ''}
+                        photoUrl={row.original.photoUrl || ''}
                         name={row.original.name}
                     />
 
@@ -39,19 +39,21 @@ export function architectColumns({ onEdit }: ColumnsOptions): ColumnDef<Architec
             )
         },
         {
-            accessorKey: 'cau_register',
+            accessorKey: 'cauRegister',
             header: 'CAU',
             cell: ({ row }) => (
-                <span className="font-mono text-sm">{row.original.cau_register ?? '—'}</span>
+                <span className="font-mono text-sm">{row.original.cauRegister ?? '—'}</span>
             )
         },
         {
-            accessorKey: 'total_points',
+            accessorKey: 'totalPoints',
             header: ({ column }) => <DataTableColumnHeader column={column} title="Pontos" />,
             cell: ({ row }) => (
                 <div className="text-right">
                     <Badge variant="secondary">
-                        {row.original.total_points?.toLocaleString('pt-BR') || 0}
+                        {row.original.totalPoints
+                            ? Number(row.original.totalPoints).toLocaleString('pt-BR')
+                            : 0}
                     </Badge>
                 </div>
             )

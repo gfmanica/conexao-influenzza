@@ -1,4 +1,4 @@
-import * as React from 'react';
+import { type ReactNode } from 'react';
 
 import { useForm } from '@tanstack/react-form';
 
@@ -19,68 +19,48 @@ import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { useCreateArchitect, useUpdateArchitect } from '@/hooks/use-architects';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { createArchitectSchema, updateArchitectSchema } from '@/types/architect';
+import { createArchitectSchema, updateArchitectSchema, type Architect } from '@/types/architect';
 
 import { ArchitectAvatar } from './architect-avatar';
 
-export type Architect = {
-    id: string;
-    name: string;
-    email: string;
-    office_email?: string | null;
-    phone?: string | null;
-    office_address?: string | null;
-    birthdate?: string | null;
-    cau_register?: string | null;
-    observation?: string | null;
-    photo_url?: string | null;
-    total_points: number;
-    created_at: Date;
-    updated_at: Date;
-};
+export type { Architect };
 
 type ArchitectForm = {
     architect?: Architect;
-    trigger?: React.ReactNode;
-    open?: boolean;
-    onOpenChange?: (open: boolean) => void;
+    trigger?: ReactNode;
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
 };
 
-export function ArchitectForm({ architect, trigger, open: openProp, onOpenChange }: ArchitectForm) {
+export function ArchitectForm({ architect, trigger, open, onOpenChange }: ArchitectForm) {
     const isEditing = !!architect;
-    const isControlled = openProp !== undefined;
     const isMobile = useIsMobile();
-    const [photoPreview, setPhotoPreview] = React.useState<string | undefined>(
-        architect?.photo_url ?? undefined
-    );
-    const [photoFile, setPhotoFile] = React.useState<File>();
+
+    // const [photoFile, setPhotoFile] = useState<File>();
     const createArchitectMutation = useCreateArchitect();
     const updateArchitectMutation = useUpdateArchitect();
-
-    React.useEffect(() => {
-        setPhotoPreview(architect?.photo_url ?? undefined);
-        setPhotoFile(undefined);
-    }, [architect?.id]);
 
     const form = useForm({
         defaultValues: {
             id: architect?.id ?? '',
             name: architect?.name ?? '',
             email: architect?.email ?? '',
-            office_email: architect?.office_email ?? '',
+            officeEmail: architect?.officeEmail ?? '',
             phone: architect?.phone ?? '',
-            office_address: architect?.office_address ?? '',
+            officeAddress: architect?.officeAddress ?? '',
             birthdate: architect?.birthdate ?? '',
-            cau_register: architect?.cau_register ?? '',
+            cauRegister: architect?.cauRegister ?? '',
             observation: architect?.observation ?? '',
-            photo: photoFile
+            photoUrl: architect?.photoUrl ?? ''
         },
-        onSubmit: ({ value }) => {
+        onSubmit: async ({ value }) => {
             if (isEditing) {
-                updateArchitectMutation.mutate({ data: { ...value, id: architect.id } });
+                await updateArchitectMutation.mutateAsync({ data: { ...value, id: architect.id } });
             } else {
-                createArchitectMutation.mutate({ data: value });
+                await createArchitectMutation.mutateAsync({ data: value });
             }
+
+            onOpenChange(false);
         },
         validators: {
             onSubmit: ({ value }) => {
@@ -91,25 +71,23 @@ export function ArchitectForm({ architect, trigger, open: openProp, onOpenChange
                 if (!result.success) {
                     return result.error.issues[0]?.message ?? 'Formulário inválido';
                 }
+
                 return undefined;
             }
         }
     });
 
-    function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
-        const file = e.target.files?.[0];
-        if (file) {
-            setPhotoPreview(URL.createObjectURL(file));
-            setPhotoFile(file);
-        }
-    }
+    // function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    //     const file = e.target.files?.[0];
+    //     if (file) {
+    //         form.setFieldValue('photoUrl', URL.createObjectURL(file));
+
+    //         setPhotoFile(file);
+    //     }
+    // }
 
     return (
-        <Drawer
-            direction={isMobile ? 'bottom' : 'right'}
-            open={isControlled ? openProp : undefined}
-            onOpenChange={isControlled ? onOpenChange : undefined}
-        >
+        <Drawer direction={isMobile ? 'bottom' : 'right'} open={open} onOpenChange={onOpenChange}>
             {trigger && <DrawerTrigger asChild>{trigger}</DrawerTrigger>}
 
             <DrawerContent>
@@ -137,7 +115,7 @@ export function ArchitectForm({ architect, trigger, open: openProp, onOpenChange
 
                         <div className="flex items-center gap-4">
                             <ArchitectAvatar
-                                photoUrl={photoPreview}
+                                photoUrl={form.state.values.photoUrl}
                                 name={form.state.values.name}
                             />
 
@@ -147,7 +125,7 @@ export function ArchitectForm({ architect, trigger, open: openProp, onOpenChange
                                 type="file"
                                 accept="image/*"
                                 className="cursor-pointer"
-                                onChange={handlePhotoChange}
+                                // onChange={handlePhotoChange}
                             />
                         </div>
                     </div>
@@ -229,7 +207,7 @@ export function ArchitectForm({ architect, trigger, open: openProp, onOpenChange
 
                     {/* E-mail do escritório */}
                     <form.Field
-                        name="office_email"
+                        name="officeEmail"
                         validators={{
                             onBlur: ({ value }) => {
                                 if (value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))
@@ -240,9 +218,9 @@ export function ArchitectForm({ architect, trigger, open: openProp, onOpenChange
                     >
                         {(field) => (
                             <div className="flex flex-col gap-3">
-                                <Label htmlFor="office_email">E-mail do escritório</Label>
+                                <Label htmlFor="officeEmail">E-mail do escritório</Label>
                                 <Input
-                                    id="office_email"
+                                    id="officeEmail"
                                     type="email"
                                     placeholder="contato@escritorio.com"
                                     value={field.state.value}
@@ -293,12 +271,12 @@ export function ArchitectForm({ architect, trigger, open: openProp, onOpenChange
                     </div>
 
                     {/* Registro CAU */}
-                    <form.Field name="cau_register">
+                    <form.Field name="cauRegister">
                         {(field) => (
                             <div className="flex flex-col gap-3">
-                                <Label htmlFor="cau_register">Registro CAU</Label>
+                                <Label htmlFor="cauRegister">Registro CAU</Label>
                                 <Input
-                                    id="cau_register"
+                                    id="cauRegister"
                                     placeholder="Ex: A123456-0"
                                     value={field.state.value}
                                     onBlur={field.handleBlur}
@@ -309,12 +287,12 @@ export function ArchitectForm({ architect, trigger, open: openProp, onOpenChange
                     </form.Field>
 
                     {/* Endereço do escritório */}
-                    <form.Field name="office_address">
+                    <form.Field name="officeAddress">
                         {(field) => (
                             <div className="flex flex-col gap-3">
-                                <Label htmlFor="office_address">Endereço do escritório</Label>
+                                <Label htmlFor="officeAddress">Endereço do escritório</Label>
                                 <Input
-                                    id="office_address"
+                                    id="officeAddress"
                                     placeholder="Rua das Flores, 123, São Paulo - SP"
                                     value={field.state.value}
                                     onBlur={field.handleBlur}
@@ -346,9 +324,14 @@ export function ArchitectForm({ architect, trigger, open: openProp, onOpenChange
                         <Button variant="outline">Cancelar</Button>
                     </DrawerClose>
 
-                    <form.Subscribe selector={(s) => s.canSubmit}>
-                        {(canSubmit) => (
-                            <Button type="submit" form="architect-form" disabled={!canSubmit}>
+                    <form.Subscribe selector={(s) => [s.canSubmit, s.isSubmitting]}>
+                        {([canSubmit, isSubmitting]) => (
+                            <Button
+                                type="submit"
+                                form="architect-form"
+                                disabled={!canSubmit}
+                                loading={isSubmitting}
+                            >
                                 {isEditing ? 'Salvar alterações' : 'Cadastrar arquiteto'}
                             </Button>
                         )}

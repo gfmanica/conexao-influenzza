@@ -1,10 +1,10 @@
 import { TrophyIcon } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
+import type { ArchitectRanking } from '@/types/ranking';
 
 import { PodiumBar } from './podium-bar';
 import { RankingRow } from './ranking-row';
-import { type RankingEntry } from './types';
 
 const RANKING_STYLES = `
     @keyframes crown-pulse {
@@ -51,15 +51,11 @@ const RANKING_STYLES = `
     .size-18 { width: 4.5rem; height: 4.5rem; }
 `;
 
-type RankingDashboardProps = {
-    data: RankingEntry[];
-};
-
-export function RankingDashboard({ data }: RankingDashboardProps) {
+export function RankingDashboard({ data }: { data: ArchitectRanking }) {
     const year = new Date().getFullYear();
     const top3 = data.slice(0, 3);
     const rest = data.slice(3);
-    const maxPoints = data[0]?.total_points ?? 1;
+    const maxPoints = data[0]?.totalPoints ?? 1;
 
     if (data.length === 0) {
         return (
@@ -108,9 +104,24 @@ export function RankingDashboard({ data }: RankingDashboardProps) {
                                 maskImage: 'linear-gradient(to top, transparent 0%, black 22%)'
                             }}
                         >
-                            <PodiumBar rank={2} entry={top3[1]} maxPoints={maxPoints} animDelay={80} />
-                            <PodiumBar rank={1} entry={top3[0]} maxPoints={maxPoints} animDelay={0} />
-                            <PodiumBar rank={3} entry={top3[2]} maxPoints={maxPoints} animDelay={160} />
+                            <PodiumBar
+                                rank={2}
+                                entry={top3[1]}
+                                maxPoints={maxPoints}
+                                animDelay={80}
+                            />
+                            <PodiumBar
+                                rank={1}
+                                entry={top3[0]}
+                                maxPoints={maxPoints}
+                                animDelay={0}
+                            />
+                            <PodiumBar
+                                rank={3}
+                                entry={top3[2]}
+                                maxPoints={maxPoints}
+                                animDelay={160}
+                            />
                         </div>
                     </div>
                 )}
@@ -122,7 +133,7 @@ export function RankingDashboard({ data }: RankingDashboardProps) {
                         </p>
                         {rest.map((entry, i) => (
                             <RankingRow
-                                key={entry.architect_id}
+                                key={entry.architectId}
                                 rank={i + 4}
                                 entry={entry}
                                 maxPoints={maxPoints}

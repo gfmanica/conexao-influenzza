@@ -17,12 +17,12 @@ import { createPointEntrySchema, updatePointEntrySchema } from '@/types/point-en
 const pointEntryColumns = {
     id: pointEntries.id,
     userId: pointEntries.userId,
-    point_type: pointEntries.pointType,
+    pointType: pointEntries.pointType,
     amount: pointEntries.amount,
-    entry_date: pointEntries.entryDate,
-    created_by: pointEntries.createdBy,
-    created_at: pointEntries.createdAt,
-    updated_at: pointEntries.updatedAt
+    entryDate: pointEntries.entryDate,
+    createdBy: pointEntries.createdBy,
+    createdAt: pointEntries.createdAt,
+    updatedAt: pointEntries.updatedAt
 };
 
 /**
@@ -41,10 +41,10 @@ export const listPointEntries = createServerFn({ method: 'GET' })
         const rows = await db
             .select({
                 ...pointEntryColumns,
-                architects: {
+                architect: {
                     id: user.id,
                     name: user.name,
-                    photo_url: user.photoUrl
+                    photoUrl: user.photoUrl
                 }
             })
             .from(pointEntries)
@@ -68,10 +68,10 @@ export const createPointEntry = createServerFn({ method: 'POST' })
             .insert(pointEntries)
             .values({
                 id: crypto.randomUUID(),
-                userId: data.user_id,
-                pointType: data.point_type,
+                userId: data.userId,
+                pointType: data.pointType,
                 amount: data.amount,
-                entryDate: new Date(data.entry_date),
+                entryDate: new Date(data.entryDate),
                 createdBy: context.session.user.id
             })
             .returning(pointEntryColumns);
@@ -89,10 +89,10 @@ export const updatePointEntry = createServerFn({ method: 'POST' })
         const [entry] = await db
             .update(pointEntries)
             .set({
-                userId: data.user_id,
-                pointType: data.point_type,
+                userId: data.userId,
+                pointType: data.pointType,
                 amount: data.amount,
-                entryDate: new Date(data.entry_date)
+                entryDate: new Date(data.entryDate)
             })
             .where(eq(pointEntries.id, data.id))
             .returning(pointEntryColumns);

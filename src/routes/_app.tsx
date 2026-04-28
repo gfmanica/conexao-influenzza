@@ -19,6 +19,7 @@ function RouteComponent() {
     return (
         <SidebarProvider>
             <AppSidebar />
+            
             <SidebarInset>
                 <Outlet />
             </SidebarInset>

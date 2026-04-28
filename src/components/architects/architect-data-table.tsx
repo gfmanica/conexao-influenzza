@@ -16,9 +16,7 @@ export function ArchitectDataTable() {
     const [editingArchitect, setEditingArchitect] = useState<Architect | null>(null);
     const [openDrawer, setOpenDrawer] = useState(false);
 
-    const tableQuery = useTableQuery({
-        queryOptions: architectsQueryOptions
-    });
+    const tableQuery = useTableQuery({ queryOptions: architectsQueryOptions });
 
     useEffect(() => {
         const t = setTimeout(
@@ -28,6 +26,7 @@ export function ArchitectDataTable() {
                 ]),
             300
         );
+
         return () => clearTimeout(t);
     }, [nameFilter]);
 
@@ -40,22 +39,6 @@ export function ArchitectDataTable() {
 
     return (
         <>
-            <div className="flex items-center px-4 lg:px-6">
-                <div className="flex flex-1 items-center justify-between gap-3">
-                    <Input
-                        className="w-xs"
-                        placeholder="Buscar arquiteto..."
-                        value={nameFilter}
-                        onChange={(e) => setNameFilter(e.target.value)}
-                    />
-
-                    <Button size="sm" onClick={() => setOpenDrawer(true)}>
-                        <PlusIcon />
-                        Novo arquiteto
-                    </Button>
-                </div>
-            </div>
-
             <DataTable
                 columns={columns}
                 data={tableQuery.data}
@@ -68,7 +51,7 @@ export function ArchitectDataTable() {
                 onSortChange={tableQuery.onSortChange}
                 isLoading={tableQuery.isFetching}
                 toolbar={
-                    <div className="flex items-center gap-3 px-4 lg:px-6">
+                    <div className="flex w-full items-center justify-between gap-3 px-4 lg:px-6">
                         <Input
                             className="max-w-xs"
                             placeholder="Buscar arquiteto..."
@@ -87,7 +70,11 @@ export function ArchitectDataTable() {
             <ArchitectForm
                 architect={editingArchitect ?? undefined}
                 open={openDrawer}
-                onOpenChange={setOpenDrawer}
+                onOpenChange={(open) => {
+                    setOpenDrawer(open);
+
+                    if (!open) setEditingArchitect(null);
+                }}
             />
         </>
     );

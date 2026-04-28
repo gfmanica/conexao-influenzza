@@ -2,7 +2,7 @@ import { UserIcon } from 'lucide-react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
 
-export function ArchitectAvatar({ photoUrl, name }: { photoUrl?: string; name: string }) {
+export function ArchitectAvatar({ photoUrl, name }: { photoUrl?: string | null; name: string }) {
     const initials = name
         ?.split(' ')
         .slice(0, 2)
@@ -12,7 +12,7 @@ export function ArchitectAvatar({ photoUrl, name }: { photoUrl?: string; name: s
 
     return (
         <Avatar size="lg">
-            <AvatarImage src={photoUrl} />
+            <AvatarImage src={photoUrl ?? undefined} />
 
             <AvatarFallback>
                 {initials} {!initials && <UserIcon className="size-4" />}

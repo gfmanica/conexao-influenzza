@@ -1,9 +1,13 @@
 import { z } from 'zod/v4';
 
+import type { listArchitects } from '@/server/architects';
+
+export type Architect = Awaited<ReturnType<typeof listArchitects>>['data'][number];
+
 export const createArchitectSchema = z.object({
     name: z.string().min(1, 'Nome é obrigatório'),
     email: z.email('E-mail inválido'),
-    office_email: z
+    officeEmail: z
         .string()
         .transform((v) => v || undefined)
         .pipe(z.email('E-mail inválido').optional()),
@@ -11,7 +15,7 @@ export const createArchitectSchema = z.object({
         .string()
         .transform((v) => v || undefined)
         .pipe(z.string().optional()),
-    office_address: z
+    officeAddress: z
         .string()
         .transform((v) => v || undefined)
         .pipe(z.string().optional()),
@@ -19,7 +23,7 @@ export const createArchitectSchema = z.object({
         .string()
         .transform((v) => v || undefined)
         .pipe(z.string().optional()),
-    cau_register: z
+    cauRegister: z
         .string()
         .transform((v) => v || undefined)
         .pipe(z.string().optional()),
@@ -27,7 +31,7 @@ export const createArchitectSchema = z.object({
         .string()
         .transform((v) => v || undefined)
         .pipe(z.string().optional()),
-    photo_url: z.string()
+    photoUrl: z.string()
 });
 
 export const updateArchitectSchema = createArchitectSchema.extend({ id: z.uuid() });

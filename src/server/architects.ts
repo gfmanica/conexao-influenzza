@@ -18,15 +18,15 @@ const architectColumns = {
     id: user.id,
     name: user.name,
     email: user.email,
-    office_email: user.officeEmail,
+    officeEmail: user.officeEmail,
     phone: user.phone,
-    office_address: user.officeAddress,
+    officeAddress: user.officeAddress,
     birthdate: user.birthdate,
-    cau_register: user.cauRegister,
+    cauRegister: user.cauRegister,
     observation: user.observation,
-    photo_url: user.photoUrl,
-    created_at: user.createdAt,
-    updated_at: user.updatedAt,
+    photoUrl: user.photoUrl,
+    createdAt: user.createdAt,
+    updatedAt: user.updatedAt,
     role: user.role
 };
 
@@ -54,7 +54,7 @@ export const listArchitects = createServerFn({ method: 'GET' })
         const rows = await db
             .select({
                 ...architectColumns,
-                total_points: sum(pointEntries.amount)
+                totalPoints: sum(pointEntries.amount)
             })
             .from(user)
             .leftJoin(pointEntries, eq(user.id, pointEntries.userId))
@@ -84,15 +84,15 @@ export const getArchitect = createServerFn({ method: 'GET' })
             id: architect.id,
             name: architect.name,
             email: architect.email,
-            office_email: architect.officeEmail,
+            officeEmail: architect.officeEmail,
             phone: architect.phone,
-            office_address: architect.officeAddress,
+            officeAddress: architect.officeAddress,
             birthdate: architect.birthdate,
-            cau_register: architect.cauRegister,
+            cauRegister: architect.cauRegister,
             observation: architect.observation,
-            photo_url: architect.photoUrl,
-            created_at: architect.createdAt,
-            updated_at: architect.updatedAt
+            photoUrl: architect.photoUrl,
+            createdAt: architect.createdAt,
+            updatedAt: architect.updatedAt
         };
     });
 /**
@@ -110,13 +110,13 @@ export const createArchitect = createServerFn({ method: 'POST' })
                     email: data.email,
                     emailVerified: false,
                     role: 'architect',
-                    officeEmail: data.office_email,
+                    officeEmail: data.officeEmail,
                     phone: data.phone,
-                    officeAddress: data.office_address,
+                    officeAddress: data.officeAddress,
                     birthdate: data.birthdate,
-                    cauRegister: data.cau_register,
+                    cauRegister: data.cauRegister,
                     observation: data.observation,
-                    photoUrl: data.photo_url
+                    photoUrl: data.photoUrl
                 })
                 .returning(architectColumns);
 
@@ -141,12 +141,13 @@ export const updateArchitect = createServerFn({ method: 'POST' })
             .update(user)
             .set({
                 name: data.name,
-                officeEmail: data.office_email,
+                officeEmail: data.officeEmail,
                 phone: data.phone,
-                officeAddress: data.office_address,
+                officeAddress: data.officeAddress,
                 birthdate: data.birthdate,
-                cauRegister: data.cau_register,
+                cauRegister: data.cauRegister,
                 observation: data.observation,
+                photoUrl: data.photoUrl,
                 updatedAt: new Date()
             })
             .where(and(eq(user.id, data.id), eq(user.role, 'architect')))

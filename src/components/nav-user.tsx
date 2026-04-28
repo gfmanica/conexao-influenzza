@@ -33,17 +33,15 @@ export function NavUser({
     const { isMobile } = useSidebar();
     const router = useRouter();
 
-    const initials = user.name
-        .split(' ')
-        .slice(0, 2)
-        .map((n) => n[0])
-        .join('')
-        .toUpperCase();
-
+    /**
+     * Realiza o logout do usuário e navega para a tela de login.
+     */
     async function handleLogout() {
         try {
             await logout();
+
             await router.invalidate();
+
             router.navigate({ to: '/login' });
         } catch {
             toast.error('Erro ao sair. Tente novamente.');
@@ -61,6 +59,7 @@ export function NavUser({
 
                         <div className="grid flex-1 text-left text-sm leading-tight">
                             <span className="truncate font-medium">{user.name}</span>
+
                             <span className="text-foreground/70 truncate text-xs">
                                 {user.email}
                             </span>
@@ -88,7 +87,9 @@ export function NavUser({
                                     </div>
                                 </div>
                             </DropdownMenuLabel>
+
                             <DropdownMenuSeparator />
+
                             <DropdownMenuItem onClick={handleLogout}>
                                 <LogOutIcon />
                                 Sair
