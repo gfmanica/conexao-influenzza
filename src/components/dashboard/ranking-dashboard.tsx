@@ -94,7 +94,7 @@ export function RankingDashboard({ data }: { data: ArchitectRanking }) {
                     </Badge>
                 </div>
 
-                {top3.length >= 3 && (
+                {top3.length > 0 && (
                     <div className="relative px-4 lg:px-6">
                         <div
                             className="flex items-end justify-center gap-4"
@@ -104,24 +104,28 @@ export function RankingDashboard({ data }: { data: ArchitectRanking }) {
                                 maskImage: 'linear-gradient(to top, transparent 0%, black 22%)'
                             }}
                         >
-                            <PodiumBar
-                                rank={2}
-                                entry={top3[1]}
-                                maxPoints={maxPoints}
-                                animDelay={80}
-                            />
+                            {top3[1] && (
+                                <PodiumBar
+                                    rank={2}
+                                    entry={top3[1]}
+                                    maxPoints={maxPoints}
+                                    animDelay={80}
+                                />
+                            )}
                             <PodiumBar
                                 rank={1}
                                 entry={top3[0]}
                                 maxPoints={maxPoints}
                                 animDelay={0}
                             />
-                            <PodiumBar
-                                rank={3}
-                                entry={top3[2]}
-                                maxPoints={maxPoints}
-                                animDelay={160}
-                            />
+                            {top3[2] && (
+                                <PodiumBar
+                                    rank={3}
+                                    entry={top3[2]}
+                                    maxPoints={maxPoints}
+                                    animDelay={160}
+                                />
+                            )}
                         </div>
                     </div>
                 )}
