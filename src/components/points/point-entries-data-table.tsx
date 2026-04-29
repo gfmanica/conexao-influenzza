@@ -15,7 +15,7 @@ import { type FilterItem } from '@/types/builders';
 import type { PointEntry } from '@/types/point-entry';
 
 import { pointEntriesColumns } from './point-entries-columns';
-import { PointEntryForm } from './point-entry-form';
+import { PointEntryForm } from './point-entries-form';
 
 export function PointEntriesDataTable() {
     const [filterArchitectId, setFilterArchitectId] = useState('');
@@ -74,9 +74,10 @@ export function PointEntriesDataTable() {
                                 <Label className="text-xs">Arquiteto</Label>
                                 <Combobox
                                     value={filterArchitectId}
-                                    onChange={(value) => {
-                                        setFilterArchitectId(value);
-                                        applyFilters({ architectId: value });
+                                    onChange={(option) => {
+                                        const id = option?.value ?? '';
+                                        setFilterArchitectId(id);
+                                        applyFilters({ architectId: id });
                                     }}
                                     placeholder="Todos"
                                     searchPlaceholder="Buscar arquiteto..."
@@ -84,7 +85,8 @@ export function PointEntriesDataTable() {
                                     className="h-8 w-48 text-sm"
                                     options={architects.map((a) => ({
                                         value: a.id,
-                                        label: a.name
+                                        label: a.name,
+                                        data: a
                                     }))}
                                 />
                             </div>

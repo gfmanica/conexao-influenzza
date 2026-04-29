@@ -25,7 +25,8 @@ import { useCreatePointEntry, useUpdatePointEntry } from '@/hooks/use-point-entr
 import {
     createPointEntrySchema,
     updatePointEntrySchema,
-    type PointEntry
+    type PointEntry,
+    type PointEntryArchitect
 } from '@/types/point-entry';
 
 export type { PointEntry };
@@ -53,7 +54,7 @@ export function PointEntryForm({ entry, trigger, open, onOpenChange }: PointEntr
 
     const form = useForm({
         defaultValues: {
-            userId: entry?.userId ?? '',
+            architect: (entry?.architect ?? null) as PointEntryArchitect | null,
             pointType: entry?.pointType ?? '',
             amount: entry?.amount ?? ('' as unknown as number),
             entryDate:
@@ -62,7 +63,12 @@ export function PointEntryForm({ entry, trigger, open, onOpenChange }: PointEntr
                     : (entry?.entryDate ?? today())
         },
         onSubmit: async ({ value }) => {
-            const payload = { ...value, amount: Number(value.amount) };
+            const payload = {
+                userId: value.architect!.id,
+                pointType: value.pointType,
+                amount: Number(value.amount),
+                entryDate: value.entryDate
+            };
 
             if (isEditing) {
                 await updateMutation.mutateAsync({ data: { ...payload, id: entry.id } });
@@ -74,7 +80,13 @@ export function PointEntryForm({ entry, trigger, open, onOpenChange }: PointEntr
         },
         validators: {
             onSubmit: ({ value }) => {
-                const parsed = { ...value, amount: Number(value.amount) };
+                const parsed = {
+                    userId: value.architect?.id,
+                    pointType: value.pointType,
+                    amount: Number(value.amount),
+                    entryDate: value.entryDate
+                };
+
                 const result = isEditing
                     ? updatePointEntrySchema.safeParse({ ...parsed, id: entry.id })
                     : createPointEntrySchema.safeParse(parsed);
@@ -112,25 +124,24 @@ export function PointEntryForm({ entry, trigger, open, onOpenChange }: PointEntr
                     }}
                 >
                     {/* Arquiteto */}
-                    <form.Field
-                        name="userId"
-                        validators={{
-                            onSubmit: ({ value }) =>
-                                !value ? 'Arquiteto é obrigatório' : undefined
-                        }}
-                    >
+                    <form.Field name="architect">
                         {(field) => (
                             <div className="flex flex-col gap-3">
-                                <Label htmlFor="userId">
+                                <Label htmlFor="architect">
                                     Arquiteto <span className="text-destructive">*</span>
                                 </Label>
 
                                 <Combobox
-                                    value={field.state.value}
-                                    onChange={(val) => field.handleChange(val)}
+                                    value={field.state.value?.id ?? ''}
+                                    onChange={(option) => field.handleChange(option?.data ?? null)}
                                     options={architects.map((a) => ({
                                         value: a.id,
-                                        label: a.name
+                                        label: a.name,
+                                        data: {
+                                            id: a.id,
+                                            name: a.name,
+                                            photoUrl: a.photoUrl
+                                        }
                                     }))}
                                     placeholder="Selecionar arquiteto..."
                                     searchPlaceholder="Buscar arquiteto..."
@@ -139,7 +150,7 @@ export function PointEntryForm({ entry, trigger, open, onOpenChange }: PointEntr
 
                                 {field.state.meta.errors.length > 0 && (
                                     <p className="text-destructive text-xs">
-                                        {field.state.meta.errors[0]?.toString()}
+                                        {field.state.meta.errors[0]}
                                     </p>
                                 )}
                             </div>
@@ -149,13 +160,7 @@ export function PointEntryForm({ entry, trigger, open, onOpenChange }: PointEntr
                     <Separator />
 
                     {/* Tipo de ponto */}
-                    <form.Field
-                        name="pointType"
-                        validators={{
-                            onBlur: ({ value }) =>
-                                !value.trim() ? 'Tipo de ponto é obrigatório' : undefined
-                        }}
-                    >
+                    <form.Field name="pointType">
                         {(field) => (
                             <div className="flex flex-col gap-3">
                                 <Label htmlFor="pointType">
@@ -172,7 +177,7 @@ export function PointEntryForm({ entry, trigger, open, onOpenChange }: PointEntr
 
                                 {field.state.meta.errors.length > 0 && (
                                     <p className="text-destructive text-xs">
-                                        {field.state.meta.errors[0]?.toString()}
+                                        {field.state.meta.errors[0]}
                                     </p>
                                 )}
                             </div>
@@ -181,17 +186,7 @@ export function PointEntryForm({ entry, trigger, open, onOpenChange }: PointEntr
 
                     <div className="grid grid-cols-2 gap-4">
                         {/* Quantidade */}
-                        <form.Field
-                            name="amount"
-                            validators={{
-                                onBlur: ({ value }) => {
-                                    const n = Number(value);
-                                    if (!value || isNaN(n) || n <= 0)
-                                        return 'Quantidade deve ser maior que zero';
-                                    return undefined;
-                                }
-                            }}
-                        >
+                        <form.Field name="amount">
                             {(field) => (
                                 <div className="flex flex-col gap-3">
                                     <Label htmlFor="amount">
@@ -214,7 +209,7 @@ export function PointEntryForm({ entry, trigger, open, onOpenChange }: PointEntr
 
                                     {field.state.meta.errors.length > 0 && (
                                         <p className="text-destructive text-xs">
-                                            {field.state.meta.errors[0]?.toString()}
+                                            {field.state.meta.errors[0]}
                                         </p>
                                     )}
                                 </div>
@@ -222,31 +217,29 @@ export function PointEntryForm({ entry, trigger, open, onOpenChange }: PointEntr
                         </form.Field>
 
                         {/* Data */}
-                        <form.Field
-                            name="entryDate"
-                            validators={{
-                                onSubmit: ({ value }) => (!value ? 'Data é obrigatória' : undefined)
+                        <form.Field name="entryDate">
+                            {(field) => {
+                                console.log(field.state.meta);
+                                return (
+                                    <div className="flex flex-col gap-3">
+                                        <Label htmlFor="entryDate">
+                                            Data <span className="text-destructive">*</span>
+                                        </Label>
+
+                                        <DatePicker
+                                            value={field.state.value}
+                                            onChange={(val) => field.handleChange(val)}
+                                            placeholder="Selecionar data..."
+                                        />
+
+                                        {field.state.meta.errors.length > 0 && (
+                                            <p className="text-destructive text-xs">
+                                                {field.state.meta.errors[0]}
+                                            </p>
+                                        )}
+                                    </div>
+                                );
                             }}
-                        >
-                            {(field) => (
-                                <div className="flex flex-col gap-3">
-                                    <Label htmlFor="entryDate">
-                                        Data <span className="text-destructive">*</span>
-                                    </Label>
-
-                                    <DatePicker
-                                        value={field.state.value}
-                                        onChange={(val) => field.handleChange(val)}
-                                        placeholder="Selecionar data..."
-                                    />
-
-                                    {field.state.meta.errors.length > 0 && (
-                                        <p className="text-destructive text-xs">
-                                            {field.state.meta.errors[0]?.toString()}
-                                        </p>
-                                    )}
-                                </div>
-                            )}
                         </form.Field>
                     </div>
                 </form>

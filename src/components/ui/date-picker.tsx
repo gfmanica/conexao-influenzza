@@ -6,11 +6,7 @@ import { CalendarIcon } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
-import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger
-} from '@/components/ui/popover';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 
 type DatePickerProps = {
@@ -47,9 +43,7 @@ export function DatePicker({
                 }
             >
                 <CalendarIcon className="size-4 shrink-0" />
-                {date
-                    ? format(date, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })
-                    : placeholder}
+                {date ? format(date, 'dd/MM/yyyy', { locale: ptBR }) : placeholder}
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
                 <Calendar

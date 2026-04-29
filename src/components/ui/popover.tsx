@@ -2,6 +2,7 @@ import * as React from 'react';
 
 import { Popover as PopoverPrimitive } from '@base-ui/react/popover';
 
+import { useDrawerContainer } from '@/components/ui/drawer';
 import { cn } from '@/lib/utils';
 
 function Popover({ ...props }: PopoverPrimitive.Root.Props) {
@@ -18,14 +19,18 @@ function PopoverContent({
     alignOffset = 0,
     side = 'bottom',
     sideOffset = 4,
+    container: containerProp,
     ...props
 }: PopoverPrimitive.Popup.Props &
     Pick<
         PopoverPrimitive.Positioner.Props,
         'align' | 'alignOffset' | 'side' | 'sideOffset'
-    >) {
+    > & { container?: PopoverPrimitive.Portal.Props['container'] }) {
+    const drawerContainer = useDrawerContainer();
+    const container = containerProp ?? drawerContainer;
+
     return (
-        <PopoverPrimitive.Portal>
+        <PopoverPrimitive.Portal container={container}>
             <PopoverPrimitive.Positioner
                 align={align}
                 alignOffset={alignOffset}

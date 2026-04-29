@@ -6,6 +6,14 @@ import { Drawer as DrawerPrimitive } from 'vaul';
 
 import { cn } from '@/lib/utils';
 
+const DrawerContainerContext = React.createContext<React.RefObject<HTMLDivElement | null>>({
+    current: null
+});
+
+export function useDrawerContainer() {
+    return React.useContext(DrawerContainerContext);
+}
+
 function Drawer({ ...props }: React.ComponentProps<typeof DrawerPrimitive.Root>) {
     return <DrawerPrimitive.Root data-slot="drawer" {...props} />;
 }
@@ -43,6 +51,8 @@ function DrawerContent({
     children,
     ...props
 }: React.ComponentProps<typeof DrawerPrimitive.Content>) {
+    const containerRef = React.useRef<HTMLDivElement>(null);
+
     return (
         <DrawerPortal data-slot="drawer-portal">
             <DrawerOverlay />
@@ -55,7 +65,10 @@ function DrawerContent({
                 {...props}
             >
                 <div className="bg-muted mx-auto mt-4 hidden h-1.5 w-[100px] shrink-0 rounded-full group-data-[vaul-drawer-direction=bottom]/drawer-content:block" />
-                {children}
+                <DrawerContainerContext.Provider value={containerRef}>
+                    {children}
+                </DrawerContainerContext.Provider>
+                <div ref={containerRef} />
             </DrawerPrimitive.Content>
         </DrawerPortal>
     );
