@@ -14,6 +14,5 @@ export const Route = createFileRoute('/_app/dashboard')({
 function RouteComponent() {
     const { data } = useSuspenseQuery(rankingQueryOptions);
 
-    console.log(data);
     return <RankingDashboard data={data} />;
 }

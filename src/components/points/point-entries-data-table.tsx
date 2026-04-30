@@ -11,14 +11,16 @@ import { Label } from '@/components/ui/label';
 import { architectsQueryOptions } from '@/hooks/use-architects';
 import { pointEntriesQueryOptions, useDeletePointEntry } from '@/hooks/use-point-entries';
 import { useTableQuery } from '@/hooks/use-table-query';
+import type { Architect } from '@/types/architect';
 import { type FilterItem } from '@/types/builders';
 import type { PointEntry } from '@/types/point-entry';
 
+import { ArchitectCombobox } from '../architects/architect-combobox';
 import { pointEntriesColumns } from './point-entries-columns';
 import { PointEntryForm } from './point-entries-form';
 
 export function PointEntriesDataTable() {
-    const [filterArchitectId, setFilterArchitectId] = useState('');
+    const [filterArchitect, setFilterArchitect] = useState<Architect | null>(null);
     const [filterFrom, setFilterFrom] = useState('');
     const [filterTo, setFilterTo] = useState('');
     const [editingEntry, setEditingEntry] = useState<PointEntry | null>(null);
@@ -34,7 +36,7 @@ export function PointEntriesDataTable() {
     const deleteEntry = useDeletePointEntry();
 
     function applyFilters(overrides?: { architectId?: string; from?: string; to?: string }) {
-        const architectId = overrides?.architectId ?? filterArchitectId;
+        const architectId = overrides?.architectId ?? filterArchitect?.id ?? '';
         const from = overrides?.from ?? filterFrom;
         const to = overrides?.to ?? filterTo;
 
@@ -68,26 +70,21 @@ export function PointEntriesDataTable() {
                 onSortChange={tableQuery.onSortChange}
                 isLoading={tableQuery.isFetching}
                 toolbar={
-                    <div className="flex w-full flex-wrap justify-between items-end gap-3 px-4 lg:px-6">
+                    <div className="flex w-full flex-wrap items-end justify-between gap-3 px-4 lg:px-6">
                         <div className="flex flex-wrap items-end gap-3">
                             <div className="flex flex-col gap-1.5">
                                 <Label className="text-xs">Arquiteto</Label>
-                                <Combobox
-                                    value={filterArchitectId}
-                                    onChange={(option) => {
-                                        const id = option?.value ?? '';
-                                        setFilterArchitectId(id);
-                                        applyFilters({ architectId: id });
+
+                                <ArchitectCombobox
+                                    value={filterArchitect}
+                                    onChange={(architect) => {
+                                        setFilterArchitect(architect);
+                                        applyFilters({ architectId: architect?.id ?? '' });
                                     }}
                                     placeholder="Todos"
                                     searchPlaceholder="Buscar arquiteto..."
                                     emptyText="Nenhum arquiteto encontrado."
                                     className="h-8 w-48 text-sm"
-                                    options={architects.map((a) => ({
-                                        value: a.id,
-                                        label: a.name,
-                                        data: a
-                                    }))}
                                 />
                             </div>
 

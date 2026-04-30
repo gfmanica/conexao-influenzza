@@ -1,10 +1,8 @@
 import { type ReactNode } from 'react';
 
 import { useForm } from '@tanstack/react-form';
-import { useQuery } from '@tanstack/react-query';
 
 import { Button } from '@/components/ui/button';
-import { Combobox } from '@/components/ui/combobox';
 import { DatePicker } from '@/components/ui/date-picker';
 import {
     Drawer,
@@ -19,15 +17,17 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { architectsQueryOptions } from '@/hooks/use-architects';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useCreatePointEntry, useUpdatePointEntry } from '@/hooks/use-point-entries';
+import type { Architect } from '@/types/architect';
 import {
     createPointEntrySchema,
     updatePointEntrySchema,
     type PointEntry,
     type PointEntryArchitect
 } from '@/types/point-entry';
+
+import { ArchitectCombobox } from '../architects/architect-combobox';
 
 export type { PointEntry };
 
@@ -45,9 +45,6 @@ function today() {
 export function PointEntryForm({ entry, trigger, open, onOpenChange }: PointEntryFormProps) {
     const isEditing = !!entry;
     const isMobile = useIsMobile();
-
-    const { data: architectsData } = useQuery(architectsQueryOptions());
-    const architects = architectsData?.data ?? [];
 
     const createMutation = useCreatePointEntry();
     const updateMutation = useUpdatePointEntry();
@@ -131,21 +128,9 @@ export function PointEntryForm({ entry, trigger, open, onOpenChange }: PointEntr
                                     Arquiteto <span className="text-destructive">*</span>
                                 </Label>
 
-                                <Combobox
-                                    value={field.state.value?.id ?? ''}
-                                    onChange={(option) => field.handleChange(option?.data ?? null)}
-                                    options={architects.map((a) => ({
-                                        value: a.id,
-                                        label: a.name,
-                                        data: {
-                                            id: a.id,
-                                            name: a.name,
-                                            photoUrl: a.photoUrl
-                                        }
-                                    }))}
-                                    placeholder="Selecionar arquiteto..."
-                                    searchPlaceholder="Buscar arquiteto..."
-                                    emptyText="Nenhum arquiteto encontrado."
+                                <ArchitectCombobox
+                                    value={field.state.value as Architect | null}
+                                    onChange={(architect) => field.handleChange(architect)}
                                 />
 
                                 {field.state.meta.errors.length > 0 && (
@@ -219,7 +204,6 @@ export function PointEntryForm({ entry, trigger, open, onOpenChange }: PointEntr
                         {/* Data */}
                         <form.Field name="entryDate">
                             {(field) => {
-                                console.log(field.state.meta);
                                 return (
                                     <div className="flex flex-col gap-3">
                                         <Label htmlFor="entryDate">
