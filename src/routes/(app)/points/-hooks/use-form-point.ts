@@ -1,8 +1,7 @@
 import { useForm } from '@tanstack/react-form';
 
-import { createPointEntrySchema, updatePointEntrySchema } from '@/types/point-entry';
-
-import { useCreatePointEntry, useUpdatePointEntry } from './use-point-entries';
+import { useCreatePointEntry, useUpdatePointEntry } from '@/routes/(app)/points/-hooks/use-points';
+import { createPointEntrySchema, updatePointEntrySchema } from '@/routes/(app)/points/-types';
 
 export function useFormPoint() {
     const createMutation = useCreatePointEntry();

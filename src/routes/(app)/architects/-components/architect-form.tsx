@@ -15,11 +15,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
-import { useFormArchitect } from '@/hooks/architects/use-form-architect';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { type Architect } from '@/types/architect';
-
-import { ArchitectAvatar } from './architect-avatar';
+import { ArchitectAvatar } from '@/routes/(app)/architects/-components/architect-avatar';
+import { useFormArchitect } from '@/routes/(app)/architects/-hooks/use-form-architect';
+import type { Architect } from '@/routes/(app)/architects/-types';
 
 export type { Architect };
 

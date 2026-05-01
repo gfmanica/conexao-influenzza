@@ -1,6 +1,6 @@
 import { z } from 'zod/v4';
 
-import type { listPointEntries } from '@/server/point-entries';
+import type { listPointEntries } from '@/routes/(app)/points/-server';
 
 export type PointEntry = Awaited<ReturnType<typeof listPointEntries>>['data'][number];
 

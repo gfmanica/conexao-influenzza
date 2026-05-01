@@ -1,6 +1,6 @@
 import { UserIcon } from 'lucide-react';
 
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 export function ArchitectAvatar({ photoUrl, name }: { photoUrl?: string | null; name: string }) {
     const initials = name

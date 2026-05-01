@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 
-import { PointEntriesDataTable } from '@/components/points/point-entries-data-table';
+import { PointEntriesDataTable } from '@/routes/(app)/points/-components/points-data-table';
 
 export const Route = createFileRoute('/(app)/points/')({
     component: RouteComponent

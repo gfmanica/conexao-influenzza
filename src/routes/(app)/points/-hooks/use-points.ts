@@ -6,7 +6,7 @@ import {
     deletePointEntry,
     listPointEntries,
     updatePointEntry
-} from '@/server/point-entries';
+} from '@/routes/(app)/points/-server';
 import { type QueryParams } from '@/types/builders';
 
 /**

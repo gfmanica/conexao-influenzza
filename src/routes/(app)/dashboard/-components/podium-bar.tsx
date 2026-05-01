@@ -1,9 +1,8 @@
 import { CrownIcon } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
-import type { ArchitectRanking } from '@/types/ranking';
-
-import { ArchitectAvatar } from '../architects/architect-avatar';
+import { ArchitectAvatar } from '@/routes/(app)/architects/-components/architect-avatar';
+import type { ArchitectRanking } from '@/routes/(app)/dashboard/-types';
 
 const BAR_CONFIG = {
     1: {

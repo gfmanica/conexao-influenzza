@@ -1,8 +1,8 @@
 import { createServerFn } from '@tanstack/react-start';
 import { z } from 'zod/v4';
 
-import { supabaseAdmin } from '@/lib/supabase-admin';
 import { adminMiddleware } from '@/lib/middleware';
+import { supabaseAdmin } from '@/lib/supabase-admin';
 
 const BUCKET = 'conexao-influenzza-dev';
 
@@ -13,7 +13,7 @@ export const uploadAvatar = createServerFn({ method: 'POST' })
             fileBase64: z.string(),
             fileName: z.string(),
             contentType: z.string(),
-            email: z.string().email()
+            email: z.email()
         })
     )
     .handler(async ({ data }) => {

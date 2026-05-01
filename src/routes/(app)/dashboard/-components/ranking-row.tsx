@@ -1,8 +1,7 @@
 import { StarIcon } from 'lucide-react';
 
-import type { ArchitectRanking } from '@/types/ranking';
-
-import { ArchitectAvatar } from '../architects/architect-avatar';
+import { ArchitectAvatar } from '@/routes/(app)/architects/-components/architect-avatar';
+import type { ArchitectRanking } from '@/routes/(app)/dashboard/-types';
 
 type RankingRowProps = {
     rank: number;

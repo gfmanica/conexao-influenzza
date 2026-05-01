@@ -1,7 +1,5 @@
 import { type ReactNode } from 'react';
 
-import { useForm } from '@tanstack/react-form';
-
 import { Button } from '@/components/ui/button';
 import { DatePicker } from '@/components/ui/date-picker';
 import {
@@ -17,17 +15,12 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
-import { useCreatePointEntry, useUpdatePointEntry } from '@/hooks/points/use-point-entries';
 import { useIsMobile } from '@/hooks/use-mobile';
-import type { Architect } from '@/types/architect';
-import {
-    createPointEntrySchema,
-    updatePointEntrySchema,
-    type PointEntry,
-    type PointEntryArchitect
-} from '@/types/point-entry';
+import { ArchitectCombobox } from '@/routes/(app)/architects/-components/architect-combobox';
+import type { Architect } from '@/routes/(app)/architects/-types';
+import { type PointEntry } from '@/routes/(app)/points/-types';
 
-import { ArchitectCombobox } from '../architects/architect-combobox';
+import { useFormPoint } from '../-hooks/use-form-point';
 
 export type { PointEntry };
 
@@ -38,15 +31,10 @@ type PointEntryFormProps = {
     onOpenChange: (open: boolean) => void;
 };
 
-function today() {
-    return new Date().toISOString().split('T')[0];
-}
-
 export function PointEntryForm({ entry, trigger, open, onOpenChange }: PointEntryFormProps) {
     const isEditing = !!entry;
     const isMobile = useIsMobile();
-
-    
+    const form = useFormPoint();
 
     return (
         <Drawer direction={isMobile ? 'bottom' : 'right'} open={open} onOpenChange={onOpenChange}>

@@ -1,3 +1,3 @@
-import type { getRanking } from '@/server/ranking';
+import type { getRanking } from '@/routes/(app)/dashboard/-server';
 
 export type ArchitectRanking = Awaited<ReturnType<typeof getRanking>>;

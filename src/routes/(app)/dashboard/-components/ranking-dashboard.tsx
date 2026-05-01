@@ -1,7 +1,7 @@
 import { TrophyIcon } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
-import type { ArchitectRanking } from '@/types/ranking';
+import type { ArchitectRanking } from '@/routes/(app)/dashboard/-types';
 
 import { PodiumBar } from './podium-bar';
 import { RankingRow } from './ranking-row';

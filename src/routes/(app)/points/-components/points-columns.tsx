@@ -1,11 +1,10 @@
 import { type ColumnDef } from '@tanstack/react-table';
 
 import { Badge } from '@/components/ui/badge';
-import type { PointEntry } from '@/types/point-entry';
-
-import { ArchitectAvatar } from '../architects/architect-avatar';
-import { DataTableActionCell } from '../ui/data-table-action-cell';
-import { DataTableColumnHeader } from '../ui/data-table-column-header';
+import { DataTableActionCell } from '@/components/ui/data-table-action-cell';
+import { DataTableColumnHeader } from '@/components/ui/data-table-column-header';
+import { ArchitectAvatar } from '@/routes/(app)/architects/-components/architect-avatar';
+import type { PointEntry } from '@/routes/(app)/points/-types';
 
 type ColumnsOptions = {
     onEdit(entry: PointEntry): void;

@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 
-import { ArchitectDataTable } from '@/components/architects/architect-data-table';
+import { ArchitectDataTable } from '@/routes/(app)/architects/-components/architect-data-table';
 
 export const Route = createFileRoute('/(app)/architects/')({
     component: RouteComponent

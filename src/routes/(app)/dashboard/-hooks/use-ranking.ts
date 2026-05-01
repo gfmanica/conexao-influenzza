@@ -1,6 +1,6 @@
 import { queryOptions } from '@tanstack/react-query';
 
-import { getRanking } from '@/server/ranking';
+import { getRanking } from '@/routes/(app)/dashboard/-server';
 
 /**
  * Query options para buscar o ranking.

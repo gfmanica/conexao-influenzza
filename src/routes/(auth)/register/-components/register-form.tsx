@@ -7,8 +7,8 @@ import { CheckCircle2Icon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import { registerArchitect } from '@/server/architects';
-import { registerArchitectSchema } from '@/types/architect';
+import { registerArchitect } from '@/routes/(app)/architects/-server';
+import { registerArchitectSchema } from '@/routes/(app)/architects/-types';
 
 function RegisterSuccess({ name }: { name: string }) {
     return (

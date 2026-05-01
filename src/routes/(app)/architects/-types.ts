@@ -1,6 +1,6 @@
 import { z } from 'zod/v4';
 
-import type { listArchitects } from '@/server/architects';
+import type { listArchitects } from '@/routes/(app)/architects/-server';
 
 export type Architect = Awaited<ReturnType<typeof listArchitects>>['data'][number];
 

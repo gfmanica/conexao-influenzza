@@ -2,8 +2,8 @@ import type { RefObject } from 'react';
 
 import { useForm } from '@tanstack/react-form';
 
+import { createArchitectSchema, updateArchitectSchema } from '@/routes/(app)/architects/-types';
 import { uploadAvatar } from '@/server/storage';
-import { createArchitectSchema, updateArchitectSchema } from '@/types/architect';
 
 import { useCreateArchitect, useUpdateArchitect } from './use-architects';
 

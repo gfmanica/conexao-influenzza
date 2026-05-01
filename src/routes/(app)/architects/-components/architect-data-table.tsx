@@ -2,14 +2,14 @@ import { useEffect, useState } from 'react';
 
 import { PlusIcon } from 'lucide-react';
 
-import { architectColumns } from '@/components/architects/architect-columns';
-import { ArchitectForm, type Architect } from '@/components/architects/architect-form';
 import { Button } from '@/components/ui/button';
+import { DataTable } from '@/components/ui/data-table';
 import { Input } from '@/components/ui/input';
-import { architectsQueryOptions } from '@/hooks/architects/use-architects';
 import { useTableQuery } from '@/hooks/use-table-query';
-
-import { DataTable } from '../ui/data-table';
+import { architectColumns } from '@/routes/(app)/architects/-components/architect-columns';
+import { ArchitectForm } from '@/routes/(app)/architects/-components/architect-form';
+import { architectsQueryOptions } from '@/routes/(app)/architects/-hooks/use-architects';
+import type { Architect } from '@/routes/(app)/architects/-types';
 
 export function ArchitectDataTable() {
     const [nameFilter, setNameFilter] = useState('');

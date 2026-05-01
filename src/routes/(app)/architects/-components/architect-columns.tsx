@@ -1,11 +1,10 @@
 import { type ColumnDef } from '@tanstack/react-table';
 
-import { type Architect } from '@/types/architect';
 import { Badge } from '@/components/ui/badge';
-
-import { DataTableActionCell } from '../ui/data-table-action-cell';
-import { DataTableColumnHeader } from '../ui/data-table-column-header';
-import { ArchitectAvatar } from './architect-avatar';
+import { DataTableActionCell } from '@/components/ui/data-table-action-cell';
+import { DataTableColumnHeader } from '@/components/ui/data-table-column-header';
+import { ArchitectAvatar } from '@/routes/(app)/architects/-components/architect-avatar';
+import type { Architect } from '@/routes/(app)/architects/-types';
 
 type ColumnsOptions = {
     onEdit(architect: Architect): void;

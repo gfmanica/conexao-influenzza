@@ -11,8 +11,8 @@ import {
 } from '@/lib/db/builders';
 import { pointEntries, user } from '@/lib/db/schema';
 import { adminMiddleware } from '@/lib/middleware';
+import { createPointEntrySchema, updatePointEntrySchema } from '@/routes/(app)/points/-types';
 import { queryParamsSchema } from '@/types/builders';
-import { createPointEntrySchema, updatePointEntrySchema } from '@/types/point-entry';
 
 const pointEntryColumns = {
     id: pointEntries.id,

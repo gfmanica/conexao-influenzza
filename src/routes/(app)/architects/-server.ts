@@ -15,7 +15,7 @@ import {
     createArchitectSchema,
     registerArchitectSchema,
     updateArchitectSchema
-} from '@/types/architect';
+} from '@/routes/(app)/architects/-types';
 import { queryParamsSchema } from '@/types/builders';
 
 const architectColumns = {

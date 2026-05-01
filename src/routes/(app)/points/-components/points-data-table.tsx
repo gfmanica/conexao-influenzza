@@ -1,23 +1,22 @@
 import { useState } from 'react';
 
-import { useQuery } from '@tanstack/react-query';
 import { PlusIcon } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
-import { Combobox } from '@/components/ui/combobox';
 import { DataTable } from '@/components/ui/data-table';
 import { DatePicker } from '@/components/ui/date-picker';
 import { Label } from '@/components/ui/label';
-import { architectsQueryOptions } from '@/hooks/architects/use-architects';
-import { pointEntriesQueryOptions, useDeletePointEntry } from '@/hooks/points/use-point-entries';
 import { useTableQuery } from '@/hooks/use-table-query';
-import type { Architect } from '@/types/architect';
+import { ArchitectCombobox } from '@/routes/(app)/architects/-components/architect-combobox';
+import type { Architect } from '@/routes/(app)/architects/-types';
+import { pointEntriesColumns } from '@/routes/(app)/points/-components/points-columns';
+import { PointEntryForm } from '@/routes/(app)/points/-components/points-form';
+import {
+    pointEntriesQueryOptions,
+    useDeletePointEntry
+} from '@/routes/(app)/points/-hooks/use-points';
+import type { PointEntry } from '@/routes/(app)/points/-types';
 import { type FilterItem } from '@/types/builders';
-import type { PointEntry } from '@/types/point-entry';
-
-import { ArchitectCombobox } from '../architects/architect-combobox';
-import { pointEntriesColumns } from './point-entries-columns';
-import { PointEntryForm } from './point-entries-form';
 
 export function PointEntriesDataTable() {
     const [filterArchitect, setFilterArchitect] = useState<Architect | null>(null);
@@ -29,9 +28,6 @@ export function PointEntriesDataTable() {
     const { onFilterChange, ...tableQuery } = useTableQuery({
         queryOptions: pointEntriesQueryOptions
     });
-
-    const { data: architectsData } = useQuery(architectsQueryOptions());
-    const architects = architectsData?.data ?? [];
 
     const deleteEntry = useDeletePointEntry();
 
