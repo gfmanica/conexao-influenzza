@@ -7,7 +7,7 @@ export type PointEntry = Awaited<ReturnType<typeof listPointEntries>>['data'][nu
 export type PointEntryArchitect = NonNullable<PointEntry['architect']>;
 
 export const createPointEntrySchema = z.object({
-    userId: z.uuid('Arquiteto é obrigatório'),
+    architect: z.nullable(z.object({ id: z.uuid() })),
     pointType: z.string().min(1, 'Tipo de ponto é obrigatório'),
     amount: z.number().int().positive('Quantidade deve ser maior que zero'),
     entryDate: z.string().min(1, 'Data é obrigatória')

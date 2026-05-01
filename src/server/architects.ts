@@ -11,7 +11,11 @@ import {
 } from '@/lib/db/builders';
 import { pointEntries, user } from '@/lib/db/schema';
 import { adminMiddleware } from '@/lib/middleware';
-import { createArchitectSchema, updateArchitectSchema } from '@/types/architect';
+import {
+    createArchitectSchema,
+    registerArchitectSchema,
+    updateArchitectSchema
+} from '@/types/architect';
 import { queryParamsSchema } from '@/types/builders';
 
 const architectColumns = {
@@ -102,6 +106,7 @@ export const createArchitect = createServerFn({ method: 'POST' })
     .middleware([adminMiddleware])
     .inputValidator(createArchitectSchema)
     .handler(async ({ data }) => {
+        console.log(data);
         try {
             const [architect] = await db
                 .insert(user)
@@ -117,6 +122,38 @@ export const createArchitect = createServerFn({ method: 'POST' })
                     cauRegister: data.cauRegister,
                     observation: data.observation,
                     photoUrl: data.photoUrl
+                })
+                .returning(architectColumns);
+
+            return architect;
+        } catch (e: unknown) {
+            if (e instanceof Error && e.message.includes('UNIQUE')) {
+                throw new Error('E-mail já cadastrado.');
+            }
+
+            throw e;
+        }
+    });
+
+/**
+ * Cadastro público de arquiteto (sem autenticação).
+ */
+export const registerArchitect = createServerFn({ method: 'POST' })
+    .inputValidator(registerArchitectSchema)
+    .handler(async ({ data }) => {
+        try {
+            const [architect] = await db
+                .insert(user)
+                .values({
+                    name: data.name,
+                    email: data.email,
+                    emailVerified: false,
+                    role: 'architect',
+                    officeEmail: data.officeEmail,
+                    phone: data.phone,
+                    officeAddress: data.officeAddress,
+                    birthdate: data.birthdate,
+                    cauRegister: data.cauRegister
                 })
                 .returning(architectColumns);
 

@@ -63,16 +63,13 @@ export const listPointEntries = createServerFn({ method: 'GET' })
 export const createPointEntry = createServerFn({ method: 'POST' })
     .middleware([adminMiddleware])
     .inputValidator(createPointEntrySchema)
-    .handler(async ({ data, context }) => {
+    .handler(async ({ data }) => {
         const [entry] = await db
             .insert(pointEntries)
             .values({
-                id: crypto.randomUUID(),
-                userId: data.userId,
                 pointType: data.pointType,
                 amount: data.amount,
-                entryDate: new Date(data.entryDate),
-                createdBy: context.session.user.id
+                entryDate: new Date(data.entryDate)
             })
             .returning(pointEntryColumns);
 
@@ -89,7 +86,7 @@ export const updatePointEntry = createServerFn({ method: 'POST' })
         const [entry] = await db
             .update(pointEntries)
             .set({
-                userId: data.userId,
+                userId: data.architect?.id,
                 pointType: data.pointType,
                 amount: data.amount,
                 entryDate: new Date(data.entryDate)

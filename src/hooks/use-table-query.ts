@@ -33,40 +33,26 @@ export function useTableQuery<
     );
 
     return {
-        /** Índice da página atual (base 0). */
         pageIndex,
-        /** Número de itens por página. */
         pageSize,
-        /** Estado de sorting no formato do TanStack Table. */
         sort,
-        /** `true` enquanto qualquer requisição estiver em andamento. */
         isFetching,
-        /** Lista de itens da página atual. Sempre um array (nunca `undefined`). */
         data: (data?.data ?? []) as (TData extends { data: (infer U)[] } ? U : any)[],
-        /** Total de registros do servidor para cálculo de páginas. Padrão: `0`. */
         total: data?.total ?? 0,
-        /**
-         * Volta `pageIndex` para `0`.
-         * Deve ser chamado sempre que um filtro externo for alterado.
-         */
         resetPage() {
             setPageIndex(0);
         },
-        /** Navega para a página informada (base 0). */
         onPageChange(page: number) {
             setPageIndex(page);
         },
-        /** Altera o tamanho da página e reseta para a primeira automaticamente. */
         onPageSizeChange(size: number) {
             setPageSize(size);
             setPageIndex(0);
         },
-        /** Atualiza o sorting e reseta para a primeira página automaticamente. */
         onSortChange(newSort: SortingState) {
             setSort(newSort);
             setPageIndex(0);
         },
-        /** Filtros externos gerenciados pela rota. */
         onFilterChange(newFilter: FilterItem[]) {
             setFilter(newFilter);
             setPageIndex(0);

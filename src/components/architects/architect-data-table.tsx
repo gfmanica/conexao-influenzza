@@ -6,7 +6,7 @@ import { architectColumns } from '@/components/architects/architect-columns';
 import { ArchitectForm, type Architect } from '@/components/architects/architect-form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { architectsQueryOptions } from '@/hooks/use-architects';
+import { architectsQueryOptions } from '@/hooks/architects/use-architects';
 import { useTableQuery } from '@/hooks/use-table-query';
 
 import { DataTable } from '../ui/data-table';

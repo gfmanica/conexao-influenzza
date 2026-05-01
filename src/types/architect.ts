@@ -36,5 +36,31 @@ export const createArchitectSchema = z.object({
 
 export const updateArchitectSchema = createArchitectSchema.extend({ id: z.uuid() });
 
+export const registerArchitectSchema = z.object({
+    name: z.string().min(1, 'Nome é obrigatório'),
+    email: z.email('E-mail inválido'),
+    officeEmail: z
+        .string()
+        .transform((v) => v || undefined)
+        .pipe(z.email('E-mail inválido').optional()),
+    phone: z
+        .string()
+        .transform((v) => v || undefined)
+        .pipe(z.string().optional()),
+    officeAddress: z
+        .string()
+        .transform((v) => v || undefined)
+        .pipe(z.string().optional()),
+    birthdate: z
+        .string()
+        .transform((v) => v || undefined)
+        .pipe(z.string().optional()),
+    cauRegister: z
+        .string()
+        .transform((v) => v || undefined)
+        .pipe(z.string().optional())
+});
+
 export type CreateArchitectInput = z.infer<typeof createArchitectSchema>;
 export type UpdateArchitectInput = z.infer<typeof updateArchitectSchema>;
+export type RegisterArchitectInput = z.infer<typeof registerArchitectSchema>;

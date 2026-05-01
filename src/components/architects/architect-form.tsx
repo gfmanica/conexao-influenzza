@@ -1,6 +1,4 @@
-import { type ReactNode } from 'react';
-
-import { useForm } from '@tanstack/react-form';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -17,9 +15,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
-import { useCreateArchitect, useUpdateArchitect } from '@/hooks/use-architects';
+import { useFormArchitect } from '@/hooks/architects/use-form-architect';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { createArchitectSchema, updateArchitectSchema, type Architect } from '@/types/architect';
+import { type Architect } from '@/types/architect';
 
 import { ArchitectAvatar } from './architect-avatar';
 
@@ -36,12 +34,14 @@ export function ArchitectForm({ architect, trigger, open, onOpenChange }: Archit
     const isEditing = !!architect;
     const isMobile = useIsMobile();
 
-    // const [photoFile, setPhotoFile] = useState<File>();
-    const createArchitectMutation = useCreateArchitect();
-    const updateArchitectMutation = useUpdateArchitect();
+    const [photoPreview, setPhotoPreview] = useState<string>('');
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    const photoFileRef = useRef<File | null>(null);
 
-    const form = useForm({
-        defaultValues: {
+    const form = useFormArchitect({ photoFileRef });
+
+    useEffect(() => {
+        form.reset({
             id: architect?.id ?? '',
             name: architect?.name ?? '',
             email: architect?.email ?? '',
@@ -52,39 +52,22 @@ export function ArchitectForm({ architect, trigger, open, onOpenChange }: Archit
             cauRegister: architect?.cauRegister ?? '',
             observation: architect?.observation ?? '',
             photoUrl: architect?.photoUrl ?? ''
-        },
-        onSubmit: async ({ value }) => {
-            if (isEditing) {
-                await updateArchitectMutation.mutateAsync({ data: { ...value, id: architect.id } });
-            } else {
-                await createArchitectMutation.mutateAsync({ data: value });
-            }
+        });
 
-            onOpenChange(false);
-        },
-        validators: {
-            onSubmit: ({ value }) => {
-                const result = isEditing
-                    ? updateArchitectSchema.safeParse(value)
-                    : createArchitectSchema.safeParse(value);
+        // Limpa o estado de foto ao abrir/fechar
+        photoFileRef.current = null;
+        setPhotoPreview('');
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    }, [open, architect]);
 
-                if (!result.success) {
-                    return result.error.issues[0]?.message ?? 'Formulário inválido';
-                }
+    function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0];
 
-                return undefined;
-            }
-        }
-    });
+        if (!file) return;
 
-    // function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
-    //     const file = e.target.files?.[0];
-    //     if (file) {
-    //         form.setFieldValue('photoUrl', URL.createObjectURL(file));
-
-    //         setPhotoFile(file);
-    //     }
-    // }
+        photoFileRef.current = file;
+        setPhotoPreview(URL.createObjectURL(file));
+    }
 
     return (
         <Drawer direction={isMobile ? 'bottom' : 'right'} open={open} onOpenChange={onOpenChange}>
@@ -115,18 +98,25 @@ export function ArchitectForm({ architect, trigger, open, onOpenChange }: Archit
 
                         <div className="flex items-center gap-4">
                             <ArchitectAvatar
-                                photoUrl={form.state.values.photoUrl}
+                                photoUrl={photoPreview || form.state.values.photoUrl}
                                 name={form.state.values.name}
                             />
 
-                            <Input
-                                id="photo"
-                                name="photo"
-                                type="file"
-                                accept="image/*"
-                                className="cursor-pointer"
-                                // onChange={handlePhotoChange}
-                            />
+                            <div className="flex flex-1 flex-col gap-1">
+                                <Input
+                                    ref={fileInputRef}
+                                    id="photo"
+                                    name="photo"
+                                    type="file"
+                                    accept="image/jpeg,image/png,image/webp,image/gif"
+                                    className="cursor-pointer"
+                                    onChange={handlePhotoChange}
+                                />
+
+                                {/* {uploadError && (
+                                    <p className="text-destructive text-xs">{uploadError}</p>
+                                )} */}
+                            </div>
                         </div>
                     </div>
 

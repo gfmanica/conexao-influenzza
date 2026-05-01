@@ -17,8 +17,8 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
+import { useCreatePointEntry, useUpdatePointEntry } from '@/hooks/points/use-point-entries';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useCreatePointEntry, useUpdatePointEntry } from '@/hooks/use-point-entries';
 import type { Architect } from '@/types/architect';
 import {
     createPointEntrySchema,
@@ -46,56 +46,7 @@ export function PointEntryForm({ entry, trigger, open, onOpenChange }: PointEntr
     const isEditing = !!entry;
     const isMobile = useIsMobile();
 
-    const createMutation = useCreatePointEntry();
-    const updateMutation = useUpdatePointEntry();
-
-    const form = useForm({
-        defaultValues: {
-            architect: (entry?.architect ?? null) as PointEntryArchitect | null,
-            pointType: entry?.pointType ?? '',
-            amount: entry?.amount ?? ('' as unknown as number),
-            entryDate:
-                entry?.entryDate instanceof Date
-                    ? entry.entryDate.toISOString().split('T')[0]
-                    : (entry?.entryDate ?? today())
-        },
-        onSubmit: async ({ value }) => {
-            const payload = {
-                userId: value.architect!.id,
-                pointType: value.pointType,
-                amount: Number(value.amount),
-                entryDate: value.entryDate
-            };
-
-            if (isEditing) {
-                await updateMutation.mutateAsync({ data: { ...payload, id: entry.id } });
-            } else {
-                await createMutation.mutateAsync({ data: payload });
-            }
-
-            onOpenChange(false);
-        },
-        validators: {
-            onSubmit: ({ value }) => {
-                const parsed = {
-                    userId: value.architect?.id,
-                    pointType: value.pointType,
-                    amount: Number(value.amount),
-                    entryDate: value.entryDate
-                };
-
-                const result = isEditing
-                    ? updatePointEntrySchema.safeParse({ ...parsed, id: entry.id })
-                    : createPointEntrySchema.safeParse(parsed);
-
-                if (!result.success) {
-                    return result.error.issues[0]?.message ?? 'Formulário inválido';
-                }
-
-                return undefined;
-            }
-        }
-    });
+    
 
     return (
         <Drawer direction={isMobile ? 'bottom' : 'right'} open={open} onOpenChange={onOpenChange}>

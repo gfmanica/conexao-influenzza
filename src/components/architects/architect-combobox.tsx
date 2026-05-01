@@ -1,6 +1,6 @@
 import type { ComponentProps } from 'react';
 
-import { architectsQueryOptions } from '@/hooks/use-architects';
+import { architectsQueryOptions } from '@/hooks/architects/use-architects';
 import { useComboboxQuery } from '@/hooks/use-combobox-query';
 
 import { Combobox } from '../ui/combobox';

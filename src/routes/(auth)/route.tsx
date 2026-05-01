@@ -1,18 +1,10 @@
-import { createFileRoute, redirect } from '@tanstack/react-router';
+import { createFileRoute, Outlet } from '@tanstack/react-router';
 
-import { LoginForm } from '@/components/login/login-form';
-import { getSession } from '@/server/auth';
-
-export const Route = createFileRoute('/_auth/login')({
-    beforeLoad: async () => {
-        const data = await getSession();
-
-        if (data) throw redirect({ to: '/dashboard' });
-    },
-    component: Login
+export const Route = createFileRoute('/(auth)')({
+    component: RouteComponent
 });
 
-function Login() {
+function RouteComponent() {
     return (
         <div className="grid min-h-svh lg:grid-cols-2">
             <div className="bg-foreground hidden items-center justify-center lg:flex">
@@ -31,7 +23,7 @@ function Login() {
                 />
 
                 <div className="w-full max-w-xs">
-                    <LoginForm />
+                    <Outlet />
                 </div>
 
                 <div className="text-muted-foreground absolute right-0 bottom-6 left-0 text-center text-xs">

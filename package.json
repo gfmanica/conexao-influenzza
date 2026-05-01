@@ -22,6 +22,7 @@
         "@fontsource-variable/playfair-display": "5.2.8",
         "@libsql/client": "0.17.3",
         "@rsbuild/core": "^2.0.1",
+        "@supabase/supabase-js": "^2.105.1",
         "@tailwindcss/vite": "4.2.4",
         "@tanstack/react-devtools": "0.10.2",
         "@tanstack/react-form-start": "1.29.1",
