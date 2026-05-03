@@ -9,7 +9,7 @@ import {
     buildWhereConditions,
     getPaginationRange
 } from '@/lib/db/builders';
-import { pointEntries, user } from '@/lib/db/schema';
+import { points, user } from '@/lib/db/schema';
 import { adminMiddleware } from '@/lib/middleware';
 import {
     createArchitectSchema,
@@ -58,10 +58,10 @@ export const listArchitects = createServerFn({ method: 'GET' })
         const rows = await db
             .select({
                 ...architectColumns,
-                totalPoints: sum(pointEntries.amount)
+                totalPoints: sum(points.amount)
             })
             .from(user)
-            .leftJoin(pointEntries, eq(user.id, pointEntries.userId))
+            .leftJoin(points, eq(user.id, points.userId))
             .where(where)
             .groupBy(user.id)
             .orderBy(...(orderBy.length ? orderBy : [user.name]))

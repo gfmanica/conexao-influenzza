@@ -4,14 +4,14 @@ import { Badge } from '@/components/ui/badge';
 import { DataTableActionCell } from '@/components/ui/data-table-action-cell';
 import { DataTableColumnHeader } from '@/components/ui/data-table-column-header';
 import { ArchitectAvatar } from '@/routes/(app)/architects/-components/architect-avatar';
-import type { PointEntry } from '@/routes/(app)/points/-types';
+import type { Point } from '@/routes/(app)/points/-types';
 
 type ColumnsOptions = {
-    onEdit(entry: PointEntry): void;
-    onDelete(entry: PointEntry): void;
+    onEdit(entry: Point): void;
+    onDelete(entry: Point): void;
 };
 
-export function pointEntriesColumns({ onEdit, onDelete }: ColumnsOptions): ColumnDef<PointEntry>[] {
+export function pointsColumns({ onEdit, onDelete }: ColumnsOptions): ColumnDef<Point>[] {
     return [
         {
             accessorKey: 'entryDate',
@@ -46,9 +46,7 @@ export function pointEntriesColumns({ onEdit, onDelete }: ColumnsOptions): Colum
             accessorKey: 'amount',
             header: ({ column }) => <DataTableColumnHeader column={column} title="Pontos" />,
             cell: ({ row }) => (
-                // <div className="text-right">
                 <Badge variant="secondary">{row.original.amount.toLocaleString('pt-BR')}</Badge>
-                // </div>
             )
         },
         {

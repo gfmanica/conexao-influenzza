@@ -2,20 +2,20 @@ import { keepPreviousData, queryOptions, useMutation, useQueryClient } from '@ta
 import { toast } from 'sonner';
 
 import {
-    createPointEntry,
-    deletePointEntry,
-    listPointEntries,
-    updatePointEntry
+    createPoint,
+    deletePoint,
+    listPoints,
+    updatePoint
 } from '@/routes/(app)/points/-server';
 import { type QueryParams } from '@/types/builders';
 
 /**
  * Query options para buscar lançamentos de pontos.
  */
-export function pointEntriesQueryOptions(params: QueryParams = {}) {
+export function pointsQueryOptions(params: QueryParams = {}) {
     return queryOptions({
-        queryKey: ['point-entries', 'list', params],
-        queryFn: () => listPointEntries({ data: params }),
+        queryKey: ['points', 'list', params],
+        queryFn: () => listPoints({ data: params }),
         placeholderData: keepPreviousData
     });
 }
@@ -23,13 +23,13 @@ export function pointEntriesQueryOptions(params: QueryParams = {}) {
 /**
  * Cria um novo lançamento de pontos.
  */
-export function useCreatePointEntry() {
+export function useCreatePoint() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: createPointEntry,
+        mutationFn: createPoint,
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['point-entries'] });
+            queryClient.invalidateQueries({ queryKey: ['points'] });
             queryClient.invalidateQueries({ queryKey: ['architects'] });
             queryClient.invalidateQueries({ queryKey: ['ranking'] });
             toast.success('Lançamento salvo com sucesso!');
@@ -41,13 +41,13 @@ export function useCreatePointEntry() {
 /**
  * Atualiza um lançamento de pontos.
  */
-export function useUpdatePointEntry() {
+export function useUpdatePoint() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: updatePointEntry,
+        mutationFn: updatePoint,
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['point-entries'] });
+            queryClient.invalidateQueries({ queryKey: ['points'] });
             queryClient.invalidateQueries({ queryKey: ['architects'] });
             queryClient.invalidateQueries({ queryKey: ['ranking'] });
             toast.success('Lançamento salvo com sucesso!');
@@ -59,13 +59,13 @@ export function useUpdatePointEntry() {
 /**
  * Deleta um lançamento de pontos.
  */
-export function useDeletePointEntry() {
+export function useDeletePoint() {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: deletePointEntry,
+        mutationFn: deletePoint,
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['point-entries'] });
+            queryClient.invalidateQueries({ queryKey: ['points'] });
             queryClient.invalidateQueries({ queryKey: ['architects'] });
             queryClient.invalidateQueries({ queryKey: ['ranking'] });
             toast.success('Lançamento excluído com sucesso!');

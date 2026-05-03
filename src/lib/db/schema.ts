@@ -95,7 +95,7 @@ export const verification = pgTable(
     (table) => [index('verification_identifier_idx').on(table.identifier)]
 );
 
-export const pointEntries = pgTable('point_entries', {
+export const points = pgTable('points', {
     id: uuid('id').primaryKey().defaultRandom(),
     userId: uuid('user_id')
         .notNull()
@@ -130,9 +130,9 @@ export const accountRelations = relations(account, ({ one }) => ({
     })
 }));
 
-export const pointEntriesRelations = relations(pointEntries, ({ one }) => ({
+export const pointsRelations = relations(points, ({ one }) => ({
     architect: one(user, {
-        fields: [pointEntries.userId],
+        fields: [points.userId],
         references: [user.id]
     })
 }));

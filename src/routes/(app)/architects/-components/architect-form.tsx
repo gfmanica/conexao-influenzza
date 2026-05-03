@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 
+import { CameraIcon, FileImageIcon, RotateCcwIcon, Trash2Icon } from 'lucide-react';
+
 import { Button } from '@/components/ui/button';
 import {
     Drawer,
@@ -22,24 +24,27 @@ import type { Architect } from '@/routes/(app)/architects/-types';
 
 export type { Architect };
 
-type ArchitectForm = {
+type ArchitectFormProps = {
     architect?: Architect;
     trigger?: ReactNode;
     open: boolean;
     onOpenChange: (open: boolean) => void;
 };
 
-export function ArchitectForm({ architect, trigger, open, onOpenChange }: ArchitectForm) {
-    const isEditing = !!architect;
+export function ArchitectForm({ architect, trigger, open, onOpenChange }: ArchitectFormProps) {
     const isMobile = useIsMobile();
+    const isEditing = !!architect;
 
     const [photoPreview, setPhotoPreview] = useState<string>('');
-    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [photoFileName, setPhotoFileName] = useState<string>('');
     const photoFileRef = useRef<File | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const form = useFormArchitect({ photoFileRef });
+    const form = useFormArchitect({ architect, photoFileRef });
 
     useEffect(() => {
+        if (!open) return;
+
         form.reset({
             id: architect?.id ?? '',
             name: architect?.name ?? '',
@@ -53,11 +58,12 @@ export function ArchitectForm({ architect, trigger, open, onOpenChange }: Archit
             photoUrl: architect?.photoUrl ?? ''
         });
 
-        // Limpa o estado de foto ao abrir/fechar
         photoFileRef.current = null;
         setPhotoPreview('');
+        setPhotoFileName('');
+
         if (fileInputRef.current) fileInputRef.current.value = '';
-    }, [open, architect]);
+    }, [open, architect?.id]);
 
     function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0];
@@ -66,6 +72,23 @@ export function ArchitectForm({ architect, trigger, open, onOpenChange }: Archit
 
         photoFileRef.current = file;
         setPhotoPreview(URL.createObjectURL(file));
+        setPhotoFileName(file.name);
+    }
+
+    function handleDeletePhoto() {
+        photoFileRef.current = null;
+        setPhotoPreview('');
+        setPhotoFileName('');
+        form.setFieldValue('photoUrl', '');
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+
+    function handleRestorePhoto() {
+        photoFileRef.current = null;
+        setPhotoPreview('');
+        setPhotoFileName('');
+        form.setFieldValue('photoUrl', architect?.photoUrl ?? '');
+        if (fileInputRef.current) fileInputRef.current.value = '';
     }
 
     return (
@@ -95,28 +118,86 @@ export function ArchitectForm({ architect, trigger, open, onOpenChange }: Archit
                     <div className="flex flex-col gap-3">
                         <Label htmlFor="photo">Foto</Label>
 
-                        <div className="flex items-center gap-4">
-                            <ArchitectAvatar
-                                photoUrl={photoPreview || form.state.values.photoUrl}
-                                name={form.state.values.name}
-                            />
+                        <input
+                            ref={fileInputRef}
+                            id="photo"
+                            name="photo"
+                            type="file"
+                            accept="image/jpeg,image/png,image/webp,image/gif"
+                            className="hidden"
+                            onChange={handlePhotoChange}
+                        />
 
-                            <div className="flex flex-1 flex-col gap-1">
-                                <Input
-                                    ref={fileInputRef}
-                                    id="photo"
-                                    name="photo"
-                                    type="file"
-                                    accept="image/jpeg,image/png,image/webp,image/gif"
-                                    className="cursor-pointer"
-                                    onChange={handlePhotoChange}
-                                />
+                        <form.Subscribe
+                            selector={(s) => [s.values.photoUrl, s.values.name] as const}
+                        >
+                            {([photoUrl, name]) => {
+                                const currentPhoto = photoPreview || photoUrl;
+                                const hasPhoto = !!currentPhoto;
+                                const originalPhotoUrl = architect?.photoUrl ?? '';
+                                const isDirty = !!photoFileName || photoUrl !== originalPhotoUrl;
+                                const canRestore = isEditing && isDirty;
 
-                                {/* {uploadError && (
-                                    <p className="text-destructive text-xs">{uploadError}</p>
-                                )} */}
-                            </div>
-                        </div>
+                                return (
+                                    <div className="bg-muted/40 flex flex-col items-center gap-4 rounded-xl border border-dashed p-6">
+                                        <div className="relative">
+                                            <ArchitectAvatar photoUrl={currentPhoto} name={name} />
+
+                                            <button
+                                                type="button"
+                                                onClick={() => fileInputRef.current?.click()}
+                                                className="bg-background hover:bg-muted border-border absolute -right-1 -bottom-1 flex size-7 items-center justify-center rounded-full border shadow-sm transition-colors"
+                                            >
+                                                <CameraIcon className="text-muted-foreground size-3.5" />
+                                            </button>
+                                        </div>
+
+                                        {photoFileName ? (
+                                            <div className="flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs">
+                                                <FileImageIcon className="text-muted-foreground size-3.5 shrink-0" />
+                                                <span className="text-foreground max-w-45 truncate font-medium">
+                                                    {photoFileName}
+                                                </span>
+                                            </div>
+                                        ) : (
+                                            <p className="text-muted-foreground text-xs">
+                                                {hasPhoto
+                                                    ? 'Clique na câmera para alterar'
+                                                    : 'Nenhuma foto selecionada'}
+                                            </p>
+                                        )}
+
+                                        {(hasPhoto || canRestore) && (
+                                            <div className="flex gap-2">
+                                                {hasPhoto && (
+                                                    <Button
+                                                        type="button"
+                                                        variant="destructive"
+                                                        size="xs"
+                                                        onClick={handleDeletePhoto}
+                                                    >
+                                                        <Trash2Icon data-icon="inline-start" />
+                                                        Excluir foto
+                                                    </Button>
+                                                )}
+
+                                                {canRestore && (
+                                                    <Button
+                                                        type="button"
+                                                        variant="outline"
+                                                        size="xs"
+                                                        onClick={handleRestorePhoto}
+                                                    >
+                                                        <RotateCcwIcon data-icon="inline-start" />
+                                                        Restaurar original
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            }}
+                        </form.Subscribe>
                     </div>
 
                     <Separator />

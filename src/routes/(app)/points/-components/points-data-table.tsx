@@ -9,27 +9,24 @@ import { Label } from '@/components/ui/label';
 import { useTableQuery } from '@/hooks/use-table-query';
 import { ArchitectCombobox } from '@/routes/(app)/architects/-components/architect-combobox';
 import type { Architect } from '@/routes/(app)/architects/-types';
-import { pointEntriesColumns } from '@/routes/(app)/points/-components/points-columns';
-import { PointEntryForm } from '@/routes/(app)/points/-components/points-form';
-import {
-    pointEntriesQueryOptions,
-    useDeletePointEntry
-} from '@/routes/(app)/points/-hooks/use-points';
-import type { PointEntry } from '@/routes/(app)/points/-types';
+import { pointsColumns } from '@/routes/(app)/points/-components/points-columns';
+import { PointForm } from '@/routes/(app)/points/-components/points-form';
+import { pointsQueryOptions, useDeletePoint } from '@/routes/(app)/points/-hooks/use-points';
+import type { Point } from '@/routes/(app)/points/-types';
 import { type FilterItem } from '@/types/builders';
 
-export function PointEntriesDataTable() {
+export function PointsDataTable() {
     const [filterArchitect, setFilterArchitect] = useState<Architect | null>(null);
     const [filterFrom, setFilterFrom] = useState('');
     const [filterTo, setFilterTo] = useState('');
-    const [editingEntry, setEditingEntry] = useState<PointEntry | null>(null);
+    const [editingEntry, setEditingEntry] = useState<Point | null>(null);
     const [openDrawer, setOpenDrawer] = useState(false);
 
     const { onFilterChange, ...tableQuery } = useTableQuery({
-        queryOptions: pointEntriesQueryOptions
+        queryOptions: pointsQueryOptions
     });
 
-    const deleteEntry = useDeletePointEntry();
+    const deleteEntry = useDeletePoint();
 
     function applyFilters(overrides?: { architectId?: string; from?: string; to?: string }) {
         const architectId = overrides?.architectId ?? filterArchitect?.id ?? '';
@@ -37,14 +34,14 @@ export function PointEntriesDataTable() {
         const to = overrides?.to ?? filterTo;
 
         const items: FilterItem[] = [];
-        if (architectId) items.push({ field: 'architect_id', operator: 'eq', value: architectId });
-        if (from) items.push({ field: 'entry_date', operator: 'gte', value: from });
-        if (to) items.push({ field: 'entry_date', operator: 'lte', value: to });
+        if (architectId) items.push({ field: 'userId', operator: 'eq', value: architectId });
+        if (from) items.push({ field: 'entryDate', operator: 'gte', value: from });
+        if (to) items.push({ field: 'entryDate', operator: 'lte', value: to });
 
         onFilterChange(items);
     }
 
-    const columns = pointEntriesColumns({
+    const columns = pointsColumns({
         onEdit: (entry) => {
             setEditingEntry(entry);
             setOpenDrawer(true);
@@ -123,7 +120,7 @@ export function PointEntriesDataTable() {
                 }
             />
 
-            <PointEntryForm
+            <PointForm
                 entry={editingEntry ?? undefined}
                 open={openDrawer}
                 onOpenChange={(open) => {

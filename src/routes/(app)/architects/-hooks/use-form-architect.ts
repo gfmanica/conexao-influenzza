@@ -2,7 +2,11 @@ import type { RefObject } from 'react';
 
 import { useForm } from '@tanstack/react-form';
 
-import { createArchitectSchema, updateArchitectSchema } from '@/routes/(app)/architects/-types';
+import {
+    createArchitectSchema,
+    updateArchitectSchema,
+    type Architect
+} from '@/routes/(app)/architects/-types';
 import { uploadAvatar } from '@/server/storage';
 
 import { useCreateArchitect, useUpdateArchitect } from './use-architects';
@@ -16,25 +20,30 @@ async function fileToBase64(file: File): Promise<string> {
     });
 }
 
-export function useFormArchitect({ photoFileRef }: { photoFileRef: RefObject<File | null> }) {
+type UseFormArchitectArgs = {
+    architect?: Architect;
+    photoFileRef?: RefObject<File | null>;
+};
+
+export function useFormArchitect({ architect, photoFileRef }: UseFormArchitectArgs) {
     const createArchitectMutation = useCreateArchitect();
     const updateArchitectMutation = useUpdateArchitect();
 
     return useForm({
         defaultValues: {
-            id: '',
-            name: '',
-            email: '',
-            officeEmail: '',
-            phone: '',
-            officeAddress: '',
-            birthdate: '',
-            cauRegister: '',
-            observation: '',
-            photoUrl: ''
+            id: architect?.id ?? '',
+            name: architect?.name ?? '',
+            email: architect?.email ?? '',
+            officeEmail: architect?.officeEmail ?? '',
+            phone: architect?.phone ?? '',
+            officeAddress: architect?.officeAddress ?? '',
+            birthdate: architect?.birthdate ?? '',
+            cauRegister: architect?.cauRegister ?? '',
+            observation: architect?.observation ?? '',
+            photoUrl: architect?.photoUrl ?? ''
         },
         onSubmit: async ({ value }) => {
-            if (photoFileRef.current) {
+            if (photoFileRef?.current) {
                 const file = photoFileRef.current;
                 value.photoUrl = await uploadAvatar({
                     data: {

@@ -16,5 +16,5 @@ export const adminMiddleware = createMiddleware({ type: 'function' })
     .server(async ({ next, context }) => {
         if (context.session.user.role !== 'admin') throw new Error('Acesso negado.');
 
-        return next();
+        return next({ context });
     });

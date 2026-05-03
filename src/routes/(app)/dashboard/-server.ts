@@ -2,7 +2,7 @@ import { createServerFn } from '@tanstack/react-start';
 import { and, desc, eq, gte, lte, sum } from 'drizzle-orm';
 
 import { db } from '@/lib/db';
-import { pointEntries, user as userTable } from '@/lib/db/schema';
+import { points, user as userTable } from '@/lib/db/schema';
 import { authMiddleware } from '@/lib/middleware';
 
 /**
@@ -17,18 +17,18 @@ export const getRanking = createServerFn({ method: 'GET' })
 
     const ranking = await db
         .select({
-            architectId: pointEntries.userId,
+            architectId: points.userId,
             name: userTable.name,
             photoUrl: userTable.photoUrl,
-            totalPoints: sum(pointEntries.amount)
+            totalPoints: sum(points.amount)
         })
-        .from(pointEntries)
-        .leftJoin(userTable, eq(pointEntries.userId, userTable.id))
+        .from(points)
+        .leftJoin(userTable, eq(points.userId, userTable.id))
         .where(
-            and(gte(pointEntries.entryDate, startOfYear), lte(pointEntries.entryDate, endOfYear))
+            and(gte(points.entryDate, startOfYear), lte(points.entryDate, endOfYear))
         )
-        .groupBy(pointEntries.userId, userTable.id, userTable.name, userTable.photoUrl)
-        .orderBy(desc(sum(pointEntries.amount)))
+        .groupBy(points.userId, userTable.id, userTable.name, userTable.photoUrl)
+        .orderBy(desc(sum(points.amount)))
         .limit(10);
 
     return ranking.map((item, i) => ({
@@ -47,9 +47,9 @@ export const getTotalPointsUser = createServerFn({ method: 'GET' })
     .middleware([authMiddleware])
     .handler(async ({ context }) => {
         const [result] = await db
-            .select({ totalPoints: sum(pointEntries.amount) })
-            .from(pointEntries)
-            .where(eq(pointEntries.userId, context.session.user.id));
+            .select({ totalPoints: sum(points.amount) })
+            .from(points)
+            .where(eq(points.userId, context.session.user.id));
 
         return Number(result?.totalPoints) || 0;
     });
@@ -62,13 +62,13 @@ export const listPointsUser = createServerFn({ method: 'GET' })
     .handler(async ({ context }) => {
         return await db
             .select({
-                id: pointEntries.id,
-                pointType: pointEntries.pointType,
-                amount: pointEntries.amount,
-                entryDate: pointEntries.entryDate,
-                createdAt: pointEntries.createdAt
+                id: points.id,
+                pointType: points.pointType,
+                amount: points.amount,
+                entryDate: points.entryDate,
+                createdAt: points.createdAt
             })
-            .from(pointEntries)
-            .where(eq(pointEntries.userId, context.session.user.id))
-            .orderBy(desc(pointEntries.entryDate));
+            .from(points)
+            .where(eq(points.userId, context.session.user.id))
+            .orderBy(desc(points.entryDate));
     });

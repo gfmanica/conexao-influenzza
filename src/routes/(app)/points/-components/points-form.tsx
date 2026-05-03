@@ -1,4 +1,4 @@
-import { type ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
 
 import { Button } from '@/components/ui/button';
 import { DatePicker } from '@/components/ui/date-picker';
@@ -18,23 +18,28 @@ import { Separator } from '@/components/ui/separator';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ArchitectCombobox } from '@/routes/(app)/architects/-components/architect-combobox';
 import type { Architect } from '@/routes/(app)/architects/-types';
-import { type PointEntry } from '@/routes/(app)/points/-types';
+import { type Point } from '@/routes/(app)/points/-types';
 
 import { useFormPoint } from '../-hooks/use-form-point';
 
-export type { PointEntry };
+export type { Point };
 
-type PointEntryFormProps = {
-    entry?: PointEntry;
+type PointFormProps = {
+    entry?: Point;
     trigger?: ReactNode;
     open: boolean;
     onOpenChange: (open: boolean) => void;
 };
 
-export function PointEntryForm({ entry, trigger, open, onOpenChange }: PointEntryFormProps) {
+export function PointForm({ entry, trigger, open, onOpenChange }: PointFormProps) {
     const isEditing = !!entry;
     const isMobile = useIsMobile();
-    const form = useFormPoint();
+    const form = useFormPoint({ entry });
+
+    useEffect(() => {
+        if (!open) return;
+        form.reset();
+    }, [open, entry?.id]);
 
     return (
         <Drawer direction={isMobile ? 'bottom' : 'right'} open={open} onOpenChange={onOpenChange}>
@@ -52,7 +57,7 @@ export function PointEntryForm({ entry, trigger, open, onOpenChange }: PointEntr
                 </DrawerHeader>
 
                 <form
-                    id="point-entry-form"
+                    id="point-form"
                     className="flex flex-col gap-5 overflow-y-auto px-4 py-2"
                     onSubmit={(e) => {
                         e.preventDefault();
@@ -176,7 +181,7 @@ export function PointEntryForm({ entry, trigger, open, onOpenChange }: PointEntr
                         {([canSubmit, isSubmitting]) => (
                             <Button
                                 type="submit"
-                                form="point-entry-form"
+                                form="point-form"
                                 disabled={!canSubmit}
                                 loading={isSubmitting}
                             >

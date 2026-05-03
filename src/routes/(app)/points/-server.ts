@@ -9,48 +9,48 @@ import {
     buildWhereConditions,
     getPaginationRange
 } from '@/lib/db/builders';
-import { pointEntries, user } from '@/lib/db/schema';
+import { points, user } from '@/lib/db/schema';
 import { adminMiddleware } from '@/lib/middleware';
-import { createPointEntrySchema, updatePointEntrySchema } from '@/routes/(app)/points/-types';
+import { createPointSchema, updatePointSchema } from '@/routes/(app)/points/-types';
 import { queryParamsSchema } from '@/types/builders';
 
-const pointEntryColumns = {
-    id: pointEntries.id,
-    userId: pointEntries.userId,
-    pointType: pointEntries.pointType,
-    amount: pointEntries.amount,
-    entryDate: pointEntries.entryDate,
-    createdBy: pointEntries.createdBy,
-    createdAt: pointEntries.createdAt,
-    updatedAt: pointEntries.updatedAt
+const pointColumns = {
+    id: points.id,
+    userId: points.userId,
+    pointType: points.pointType,
+    amount: points.amount,
+    entryDate: points.entryDate,
+    createdBy: points.createdBy,
+    createdAt: points.createdAt,
+    updatedAt: points.updatedAt
 };
 
 /**
  * Faz um findAll dos lançamentos de pontos.
  */
-export const listPointEntries = createServerFn({ method: 'GET' })
+export const listPoints = createServerFn({ method: 'GET' })
     .middleware([adminMiddleware])
     .inputValidator(queryParamsSchema)
     .handler(async ({ data }) => {
         const { offset, limit } = getPaginationRange(data?.page, data?.pageSize);
-        const where = buildWhereConditions(data?.filter, pointEntryColumns);
-        const orderBy = buildOrderByClause(data?.order ?? [], pointEntryColumns);
+        const where = buildWhereConditions(data?.filter, pointColumns);
+        const orderBy = buildOrderByClause(data?.order ?? [], pointColumns);
 
-        const [{ total }] = await db.select({ total: count() }).from(pointEntries).where(where);
+        const [{ total }] = await db.select({ total: count() }).from(points).where(where);
 
         const rows = await db
             .select({
-                ...pointEntryColumns,
+                ...pointColumns,
                 architect: {
                     id: user.id,
                     name: user.name,
                     photoUrl: user.photoUrl
                 }
             })
-            .from(pointEntries)
-            .leftJoin(user, eq(pointEntries.userId, user.id))
+            .from(points)
+            .leftJoin(user, eq(points.userId, user.id))
             .where(where)
-            .orderBy(...(orderBy.length ? orderBy : [pointEntries.entryDate]))
+            .orderBy(...(orderBy.length ? orderBy : [points.entryDate]))
             .limit(limit)
             .offset(offset);
 
@@ -60,18 +60,20 @@ export const listPointEntries = createServerFn({ method: 'GET' })
 /**
  * Faz um insert de um novo lançamento de pontos.
  */
-export const createPointEntry = createServerFn({ method: 'POST' })
+export const createPoint = createServerFn({ method: 'POST' })
     .middleware([adminMiddleware])
-    .inputValidator(createPointEntrySchema)
-    .handler(async ({ data }) => {
+    .inputValidator(createPointSchema)
+    .handler(async ({ data, context }) => {
         const [entry] = await db
-            .insert(pointEntries)
+            .insert(points)
             .values({
+                userId: data.architect!.id,
                 pointType: data.pointType,
                 amount: data.amount,
-                entryDate: new Date(data.entryDate)
+                entryDate: new Date(data.entryDate),
+                createdBy: context.session.user.name
             })
-            .returning(pointEntryColumns);
+            .returning(pointColumns);
 
         return entry;
     });
@@ -79,20 +81,20 @@ export const createPointEntry = createServerFn({ method: 'POST' })
 /**
  * Faz um update de um lançamento de pontos.
  */
-export const updatePointEntry = createServerFn({ method: 'POST' })
+export const updatePoint = createServerFn({ method: 'POST' })
     .middleware([adminMiddleware])
-    .inputValidator(updatePointEntrySchema)
+    .inputValidator(updatePointSchema)
     .handler(async ({ data }) => {
         const [entry] = await db
-            .update(pointEntries)
+            .update(points)
             .set({
                 userId: data.architect?.id,
                 pointType: data.pointType,
                 amount: data.amount,
                 entryDate: new Date(data.entryDate)
             })
-            .where(eq(pointEntries.id, data.id))
-            .returning(pointEntryColumns);
+            .where(eq(points.id, data.id))
+            .returning(pointColumns);
 
         if (!entry) throw new Error('Lançamento não encontrado.');
 
@@ -102,11 +104,11 @@ export const updatePointEntry = createServerFn({ method: 'POST' })
 /**
  * Faz um delete de um lançamento de pontos.
  */
-export const deletePointEntry = createServerFn({ method: 'POST' })
+export const deletePoint = createServerFn({ method: 'POST' })
     .middleware([adminMiddleware])
     .inputValidator(z.object({ id: z.uuid() }))
     .handler(async ({ data }) => {
-        await db.delete(pointEntries).where(eq(pointEntries.id, data.id));
+        await db.delete(points).where(eq(points.id, data.id));
 
         return { success: true };
     });
