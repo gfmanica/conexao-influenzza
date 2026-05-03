@@ -4,6 +4,8 @@ import { createRootRouteWithContext, HeadContent, Scripts } from '@tanstack/reac
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools';
 import { Toaster } from 'sonner';
 
+import { TooltipProvider } from '@/components/ui/tooltip';
+
 import appCss from '../styles.css?url';
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
@@ -78,7 +80,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
                     }}
                 />
 
-                {children}
+                <TooltipProvider delayDuration={0}>{children}</TooltipProvider>
 
                 <TanStackDevtools
                     config={{

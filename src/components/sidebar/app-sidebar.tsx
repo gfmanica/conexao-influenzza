@@ -1,22 +1,24 @@
 import * as React from 'react';
 
-import { useRouteContext } from '@tanstack/react-router';
-import { LayoutDashboardIcon, StarIcon, UsersIcon } from 'lucide-react';
+import { useRouteContext, useRouter } from '@tanstack/react-router';
+import { LayoutDashboardIcon, LogOutIcon, StarIcon, UsersIcon } from 'lucide-react';
+import { toast } from 'sonner';
 
-import { NavMain } from '@/components/nav-main';
-import { NavUser } from '@/components/nav-user';
+import { NavMain } from '@/components/sidebar/nav-main';
 import {
     Sidebar,
     SidebarContent,
     SidebarFooter,
     SidebarHeader,
     SidebarMenu,
+    SidebarMenuButton,
     SidebarMenuItem,
-    SidebarSeparator,
     SidebarTrigger,
     useSidebar
 } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
+import { ArchitectAvatar } from '@/routes/(app)/architects/-components/architect-avatar';
+import { logout } from '@/server/auth';
 
 const adminNavItems = [
     {
@@ -26,12 +28,12 @@ const adminNavItems = [
     },
     {
         title: 'Arquitetos',
-        url: '/arquitetos',
+        url: '/architects',
         icon: <UsersIcon />
     },
     {
         title: 'Pontuações',
-        url: '/pontuacoes',
+        url: '/points',
         icon: <StarIcon />
     }
 ];
@@ -101,30 +103,88 @@ function SidebarHeaderContent() {
     );
 }
 
+function SidebarFooterContent({
+    user
+}: {
+    user: { name: string; email: string; photoUrl?: string | null };
+}) {
+    const { state } = useSidebar();
+    const collapsed = state === 'collapsed';
+    const router = useRouter();
+
+    async function handleLogout() {
+        try {
+            await logout();
+
+            await router.invalidate();
+
+            router.navigate({ to: '/login' });
+        } catch {
+            toast.error('Erro ao sair. Tente novamente.');
+        }
+    }
+
+    return (
+        <SidebarMenu className="gap-1">
+            <SidebarMenuItem>
+                <div
+                    className={cn(
+                        'flex items-center gap-2 px-2 py-1',
+                        collapsed && 'justify-center'
+                    )}
+                >
+                    <ArchitectAvatar
+                        name={user.name}
+                        photoUrl={user.photoUrl}
+                        size={collapsed ? 'default' : 'lg'}
+                    />
+
+                    {!collapsed && (
+                        <div className="grid min-w-0 flex-1">
+                            <span className="truncate text-sm font-medium">{user.name}</span>
+
+                            <span className="text-muted-foreground truncate text-xs">
+                                {user.email}
+                            </span>
+                        </div>
+                    )}
+                </div>
+            </SidebarMenuItem>
+
+            <SidebarMenuItem>
+                <SidebarMenuButton
+                    onClick={handleLogout}
+                    className={cn(
+                        'text-muted-foreground hover:text-foreground',
+                        collapsed && 'justify-center'
+                    )}
+                    tooltip="Sair"
+                >
+                    <LogOutIcon />
+
+                    {!collapsed && <span>Sair</span>}
+                </SidebarMenuButton>
+            </SidebarMenuItem>
+        </SidebarMenu>
+    );
+}
+
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-    const { user } = useRouteContext({ from: '/_app' });
+    const { user } = useRouteContext({ from: '/(app)' });
     const navItems = user.role === 'admin' ? adminNavItems : architectNavItems;
 
     return (
-        <Sidebar collapsible="icon" {...props}>
+        <Sidebar variant="floating" collapsible="icon" {...props}>
             <SidebarHeader>
                 <SidebarHeaderContent />
             </SidebarHeader>
-
-            <SidebarSeparator />
 
             <SidebarContent>
                 <NavMain items={navItems} />
             </SidebarContent>
 
             <SidebarFooter>
-                <NavUser
-                    user={{
-                        name: user.name,
-                        email: user.email,
-                        avatar: user.photoUrl ?? ''
-                    }}
-                />
+                <SidebarFooterContent user={user} />
             </SidebarFooter>
         </Sidebar>
     );

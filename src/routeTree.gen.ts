@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as authRouteRouteImport } from './routes/(auth)/route'
+import { Route as appRouteRouteImport } from './routes/(app)/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as authRegisterIndexRouteImport } from './routes/(auth)/register/index'
 import { Route as authLoginIndexRouteImport } from './routes/(auth)/login/index'
@@ -20,6 +21,10 @@ import { Route as ApiAuthSplatRouteImport } from './routes/api.auth.$'
 
 const authRouteRoute = authRouteRouteImport.update({
   id: '/(auth)',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const appRouteRoute = appRouteRouteImport.update({
+  id: '/(app)',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -38,19 +43,19 @@ const authLoginIndexRoute = authLoginIndexRouteImport.update({
   getParentRoute: () => authRouteRoute,
 } as any)
 const appPointsIndexRoute = appPointsIndexRouteImport.update({
-  id: '/(app)/points/',
+  id: '/points/',
   path: '/points/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => appRouteRoute,
 } as any)
 const appDashboardIndexRoute = appDashboardIndexRouteImport.update({
-  id: '/(app)/dashboard/',
+  id: '/dashboard/',
   path: '/dashboard/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => appRouteRoute,
 } as any)
 const appArchitectsIndexRoute = appArchitectsIndexRouteImport.update({
-  id: '/(app)/architects/',
+  id: '/architects/',
   path: '/architects/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => appRouteRoute,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
@@ -79,6 +84,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/(app)': typeof appRouteRouteWithChildren
   '/(auth)': typeof authRouteRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/(app)/architects/': typeof appArchitectsIndexRoute
@@ -109,6 +115,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/(app)'
     | '/(auth)'
     | '/api/auth/$'
     | '/(app)/architects/'
@@ -120,11 +127,9 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  appRouteRoute: typeof appRouteRouteWithChildren
   authRouteRoute: typeof authRouteRouteWithChildren
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
-  appArchitectsIndexRoute: typeof appArchitectsIndexRoute
-  appDashboardIndexRoute: typeof appDashboardIndexRoute
-  appPointsIndexRoute: typeof appPointsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -134,6 +139,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: ''
       preLoaderRoute: typeof authRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/(app)': {
+      id: '/(app)'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof appRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -162,21 +174,21 @@ declare module '@tanstack/react-router' {
       path: '/points'
       fullPath: '/points/'
       preLoaderRoute: typeof appPointsIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof appRouteRoute
     }
     '/(app)/dashboard/': {
       id: '/(app)/dashboard/'
       path: '/dashboard'
       fullPath: '/dashboard/'
       preLoaderRoute: typeof appDashboardIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof appRouteRoute
     }
     '/(app)/architects/': {
       id: '/(app)/architects/'
       path: '/architects'
       fullPath: '/architects/'
       preLoaderRoute: typeof appArchitectsIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof appRouteRoute
     }
     '/api/auth/$': {
       id: '/api/auth/$'
@@ -187,6 +199,22 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface appRouteRouteChildren {
+  appArchitectsIndexRoute: typeof appArchitectsIndexRoute
+  appDashboardIndexRoute: typeof appDashboardIndexRoute
+  appPointsIndexRoute: typeof appPointsIndexRoute
+}
+
+const appRouteRouteChildren: appRouteRouteChildren = {
+  appArchitectsIndexRoute: appArchitectsIndexRoute,
+  appDashboardIndexRoute: appDashboardIndexRoute,
+  appPointsIndexRoute: appPointsIndexRoute,
+}
+
+const appRouteRouteWithChildren = appRouteRoute._addFileChildren(
+  appRouteRouteChildren,
+)
 
 interface authRouteRouteChildren {
   authLoginIndexRoute: typeof authLoginIndexRoute
@@ -204,11 +232,9 @@ const authRouteRouteWithChildren = authRouteRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  appRouteRoute: appRouteRouteWithChildren,
   authRouteRoute: authRouteRouteWithChildren,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
-  appArchitectsIndexRoute: appArchitectsIndexRoute,
-  appDashboardIndexRoute: appDashboardIndexRoute,
-  appPointsIndexRoute: appPointsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

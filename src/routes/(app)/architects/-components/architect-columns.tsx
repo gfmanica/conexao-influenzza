@@ -14,6 +14,7 @@ export function architectColumns({ onEdit }: ColumnsOptions): ColumnDef<Architec
     return [
         {
             accessorKey: 'name',
+            size: 220,
             header: ({ column }) => <DataTableColumnHeader column={column} title="Arquiteto" />,
             cell: ({ row }) => (
                 <div className="flex items-center gap-3">
@@ -22,9 +23,13 @@ export function architectColumns({ onEdit }: ColumnsOptions): ColumnDef<Architec
                         name={row.original.name}
                     />
 
-                    <div className="flex flex-col">
-                        <span className="leading-tight font-medium">{row.original.name}</span>
-                        <span className="text-muted-foreground text-xs">{row.original.email}</span>
+                    <div className="flex min-w-0 flex-col">
+                        <span className="truncate leading-tight font-medium">
+                            {row.original.name}
+                        </span>
+                        <span className="text-muted-foreground truncate text-xs">
+                            {row.original.email}
+                        </span>
                     </div>
                 </div>
             ),
@@ -32,6 +37,7 @@ export function architectColumns({ onEdit }: ColumnsOptions): ColumnDef<Architec
         },
         {
             accessorKey: 'phone',
+            size: 140,
             header: 'Telefone',
             cell: ({ row }) => (
                 <span className="text-muted-foreground">{row.original.phone ?? '—'}</span>
@@ -39,6 +45,7 @@ export function architectColumns({ onEdit }: ColumnsOptions): ColumnDef<Architec
         },
         {
             accessorKey: 'cauRegister',
+            size: 120,
             header: 'CAU',
             cell: ({ row }) => (
                 <span className="font-mono text-sm">{row.original.cauRegister ?? '—'}</span>
@@ -46,9 +53,10 @@ export function architectColumns({ onEdit }: ColumnsOptions): ColumnDef<Architec
         },
         {
             accessorKey: 'totalPoints',
+            size: 100,
             header: ({ column }) => <DataTableColumnHeader column={column} title="Pontos" />,
             cell: ({ row }) => (
-                <div className="text-right">
+                <div className="text-left">
                     <Badge variant="secondary">
                         {row.original.totalPoints
                             ? Number(row.original.totalPoints).toLocaleString('pt-BR')
@@ -58,7 +66,18 @@ export function architectColumns({ onEdit }: ColumnsOptions): ColumnDef<Architec
             )
         },
         {
+            accessorKey: 'observation',
+            size: 200,
+            header: 'Observações',
+            cell: ({ row }) => (
+                <span className="text-muted-foreground block min-w-0 truncate">
+                    {row.original.observation ?? '—'}
+                </span>
+            )
+        },
+        {
             id: 'actions',
+            size: 60,
             cell: ({ row }) => <DataTableActionCell row={row} onEdit={onEdit} />
         }
     ];

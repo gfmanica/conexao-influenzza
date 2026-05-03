@@ -155,7 +155,7 @@ export function LoginForm({ className }: React.ComponentProps<'form'>) {
                     <p className="text-muted-foreground text-center text-sm">
                         Não possui cadastro?{' '}
                         <Link
-                            to="/cadastro"
+                            to="/register"
                             className="text-foreground underline underline-offset-4"
                         >
                             Cadastre-se

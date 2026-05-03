@@ -99,12 +99,15 @@ export function DataTable<TData, TValue>({
         <div className="flex min-h-0 flex-1 flex-col gap-4">
             {toolbar}
             <div className="mx-4 flex-1 overflow-auto rounded-md border lg:mx-6">
-                <Table>
+                <Table className="table-fixed">
                     <TableHeader>
                         {table.getHeaderGroups().map((headerGroup) => (
                             <TableRow key={headerGroup.id}>
                                 {headerGroup.headers.map((header) => (
-                                    <TableHead key={header.id}>
+                                    <TableHead
+                                        key={header.id}
+                                        style={{ width: header.column.getSize() }}
+                                    >
                                         {header.isPlaceholder
                                             ? null
                                             : flexRender(
@@ -140,7 +143,10 @@ export function DataTable<TData, TValue>({
                                     data-state={row.getIsSelected() && 'selected'}
                                 >
                                     {row.getVisibleCells().map((cell) => (
-                                        <TableCell key={cell.id}>
+                                        <TableCell
+                                            key={cell.id}
+                                            style={{ width: cell.column.getSize() }}
+                                        >
                                             {flexRender(
                                                 cell.column.columnDef.cell,
                                                 cell.getContext()
