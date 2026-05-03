@@ -10,35 +10,35 @@ import { authMiddleware } from '@/lib/middleware';
  */
 export const getRanking = createServerFn({ method: 'GET' })
     .middleware([authMiddleware])
-    .handler(async () => {
-    const year = new Date().getFullYear();
-    const startOfYear = new Date(`${year}-01-01`);
-    const endOfYear = new Date(`${year}-12-31`);
+    .inputValidator((data: { month: number }) => data)
+    .handler(async ({ data }) => {
+        const year = new Date().getFullYear();
+        const month = data.month;
+        const startOfMonth = new Date(year, month - 1, 1);
+        const endOfMonth = new Date(year, month, 0);
 
-    const ranking = await db
-        .select({
-            architectId: points.userId,
-            name: userTable.name,
-            photoUrl: userTable.photoUrl,
-            totalPoints: sum(points.amount)
-        })
-        .from(points)
-        .leftJoin(userTable, eq(points.userId, userTable.id))
-        .where(
-            and(gte(points.entryDate, startOfYear), lte(points.entryDate, endOfYear))
-        )
-        .groupBy(points.userId, userTable.id, userTable.name, userTable.photoUrl)
-        .orderBy(desc(sum(points.amount)))
-        .limit(10);
+        const ranking = await db
+            .select({
+                architectId: points.userId,
+                name: userTable.name,
+                photoUrl: userTable.photoUrl,
+                totalPoints: sum(points.amount)
+            })
+            .from(points)
+            .leftJoin(userTable, eq(points.userId, userTable.id))
+            .where(and(gte(points.entryDate, startOfMonth), lte(points.entryDate, endOfMonth)))
+            .groupBy(points.userId, userTable.id, userTable.name, userTable.photoUrl)
+            .orderBy(desc(sum(points.amount)))
+            .limit(10);
 
-    return ranking.map((item, i) => ({
-        position: i + 1,
-        architectId: item.architectId,
-        name: item.name ?? '',
-        photoUrl: item.photoUrl ?? null,
-        totalPoints: Number(item.totalPoints)
-    }));
-});
+        return ranking.map((item, i) => ({
+            position: i + 1,
+            architectId: item.architectId,
+            name: item.name ?? '',
+            photoUrl: item.photoUrl ?? null,
+            totalPoints: Number(item.totalPoints)
+        }));
+    });
 
 /**
  * Obtém o total de pontos do usuário logado.
