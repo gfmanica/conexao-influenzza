@@ -1,5 +1,6 @@
 import { useEffect, type ReactNode } from 'react';
 
+import { PhotoUpload } from '@/components/photo-upload/photo-upload';
 import { Button } from '@/components/ui/button';
 import {
     Drawer,
@@ -15,9 +16,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
-import { PhotoUpload } from '@/components/photo-upload/photo-upload';
-import { usePhotoUpload } from '@/components/photo-upload/use-photo-upload';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { usePhotoUpload } from '@/hooks/use-photo-upload';
 import { useFormArchitect } from '@/routes/(app)/architects/-hooks/use-form-architect';
 import type { Architect } from '@/routes/(app)/architects/-types';
 
@@ -56,7 +56,7 @@ export function ArchitectForm({ architect, trigger, open, onOpenChange }: Archit
             photoUrl: architect?.photoUrl ?? ''
         });
 
-        photoUpload.reset(architect?.photoUrl ?? '');
+        photoUpload.resetInitialUrl(architect?.photoUrl ?? '');
     }, [open, architect?.id]);
 
     return (
@@ -90,18 +90,18 @@ export function ArchitectForm({ architect, trigger, open, onOpenChange }: Archit
                             selector={(s) => [s.values.photoUrl, s.values.name] as const}
                         >
                             {([photoUrl, name]) => {
+                                const hasNewFile = !!photoUpload.photoFileRef.current;
+
                                 const isDirty =
-                                    !!photoUpload.photoFileName ||
-                                    photoUrl !== (architect?.photoUrl ?? '');
+                                    hasNewFile || photoUrl !== (architect?.photoUrl ?? '');
 
                                 return (
                                     <PhotoUpload
+                                        inputId="photo"
                                         name={name}
                                         photoUrl={photoUrl}
                                         photoPreview={photoUpload.photoPreview}
-                                        photoFileName={photoUpload.photoFileName}
                                         fileInputRef={photoUpload.fileInputRef}
-                                        inputId="photo"
                                         onFileChange={photoUpload.handleFileChange}
                                         onDelete={photoUpload.handleDelete}
                                         onRestore={photoUpload.handleRestore}

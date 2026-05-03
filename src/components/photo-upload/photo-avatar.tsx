@@ -1,15 +1,19 @@
+import type { ComponentProps } from 'react';
+
 import { UserIcon } from 'lucide-react';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
-export function ArchitectAvatar({
+export function PhotoAvatar({
     photoUrl,
     name,
-    size = 'lg'
+    size,
+    className
 }: {
     photoUrl?: string | null;
     name: string;
-    size?: 'sm' | 'default' | 'lg';
+    size?: ComponentProps<typeof Avatar>['size'];
+    className?: ComponentProps<typeof Avatar>['className'];
 }) {
     const initials = name
         ?.split(' ')
@@ -19,12 +23,10 @@ export function ArchitectAvatar({
         .toUpperCase();
 
     return (
-        <Avatar size={size}>
+        <Avatar className={className} size={size}>
             <AvatarImage src={photoUrl ?? undefined} />
 
-            <AvatarFallback>
-                {initials} {!initials && <UserIcon className="size-4" />}
-            </AvatarFallback>
+            <AvatarFallback>{initials || <UserIcon className="size-4" />}</AvatarFallback>
         </Avatar>
     );
 }

@@ -1,10 +1,10 @@
-import { useState } from 'react';
-import type { ComponentProps } from 'react';
+import { useState, type ComponentProps } from 'react';
 
 import { useRouteContext, useRouter } from '@tanstack/react-router';
 import { LayoutDashboardIcon, LogOutIcon, PencilIcon, StarIcon, UsersIcon } from 'lucide-react';
 import { toast } from 'sonner';
 
+import { PhotoAvatar } from '@/components/photo-upload/photo-avatar';
 import { NavMain } from '@/components/sidebar/nav-main';
 import { ProfileForm } from '@/components/sidebar/profile-form';
 import {
@@ -19,7 +19,6 @@ import {
     useSidebar
 } from '@/components/ui/sidebar';
 import { cn } from '@/lib/utils';
-import { ArchitectAvatar } from '@/routes/(app)/architects/-components/architect-avatar';
 import { logout } from '@/server/auth';
 
 const adminNavItems = [
@@ -151,9 +150,9 @@ function SidebarFooterContent({
                             collapsed && 'justify-center'
                         )}
                     >
-                        <ArchitectAvatar
+                        <PhotoAvatar
+                            photoUrl={user.photoUrl || ''}
                             name={user.name}
-                            photoUrl={user.photoUrl}
                             size={collapsed ? 'default' : 'lg'}
                         />
 

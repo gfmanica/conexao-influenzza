@@ -1,9 +1,9 @@
 import { type ColumnDef } from '@tanstack/react-table';
 
+import { PhotoAvatar } from '@/components/photo-upload/photo-avatar';
 import { Badge } from '@/components/ui/badge';
 import { DataTableActionCell } from '@/components/ui/data-table-action-cell';
 import { DataTableColumnHeader } from '@/components/ui/data-table-column-header';
-import { ArchitectAvatar } from '@/routes/(app)/architects/-components/architect-avatar';
 import type { Point } from '@/routes/(app)/points/-types';
 
 type ColumnsOptions = {
@@ -30,7 +30,11 @@ export function pointsColumns({ onEdit, onDelete }: ColumnsOptions): ColumnDef<P
 
                 return (
                     <div className="flex items-center gap-3">
-                        <ArchitectAvatar name={arch?.name || ''} photoUrl={arch?.photoUrl || ''} />
+                        <PhotoAvatar
+                            photoUrl={arch?.photoUrl || ''}
+                            name={arch?.name || ''}
+                            size="lg"
+                        />
 
                         <span className="font-medium">{arch?.name}</span>
                     </div>

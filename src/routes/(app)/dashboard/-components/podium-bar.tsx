@@ -1,7 +1,7 @@
 import { CrownIcon } from 'lucide-react';
 
+import { PhotoAvatar } from '@/components/photo-upload/photo-avatar';
 import { cn } from '@/lib/utils';
-import { ArchitectAvatar } from '@/routes/(app)/architects/-components/architect-avatar';
 import type { ArchitectRanking } from '@/routes/(app)/dashboard/-types';
 
 const BAR_CONFIG = {
@@ -64,7 +64,7 @@ export function PodiumBar({ rank, entry, maxPoints, animDelay }: PodiumBarProps)
                     </div>
                 )}
 
-                <ArchitectAvatar name={entry.name} photoUrl={entry.photoUrl} />
+                <PhotoAvatar photoUrl={entry.photoUrl || ''} name={entry.name} size="lg" />
 
                 <div>
                     <p

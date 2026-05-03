@@ -1,6 +1,6 @@
 import { StarIcon } from 'lucide-react';
 
-import { ArchitectAvatar } from '@/routes/(app)/architects/-components/architect-avatar';
+import { PhotoAvatar } from '@/components/photo-upload/photo-avatar';
 import type { ArchitectRanking } from '@/routes/(app)/dashboard/-types';
 
 type RankingRowProps = {
@@ -22,7 +22,7 @@ export function RankingRow({ rank, entry, maxPoints, delay }: RankingRowProps) {
                 {rank}
             </span>
 
-            <ArchitectAvatar name={entry.name} photoUrl={entry.photoUrl} />
+            <PhotoAvatar photoUrl={entry.photoUrl || ''} name={entry.name} size="lg" />
 
             <div className="flex min-w-0 flex-1 flex-col gap-1.5">
                 <span className="truncate text-sm font-medium">{entry.name}</span>

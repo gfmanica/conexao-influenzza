@@ -4,6 +4,7 @@ import { useForm } from '@tanstack/react-form';
 import { useRouter } from '@tanstack/react-router';
 import { toast } from 'sonner';
 
+import { PhotoUpload } from '@/components/photo-upload/photo-upload';
 import { Button } from '@/components/ui/button';
 import {
     Drawer,
@@ -18,9 +19,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
-import { PhotoUpload } from '@/components/photo-upload/photo-upload';
-import { usePhotoUpload } from '@/components/photo-upload/use-photo-upload';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { usePhotoUpload } from '@/hooks/use-photo-upload';
 import { updateProfile } from '@/server/profile';
 import { uploadOwnAvatar } from '@/server/storage';
 
@@ -93,9 +93,7 @@ export function ProfileForm({ user, open, onOpenChange }: ProfileFormProps) {
 
                 await router.invalidate();
             } catch (error) {
-                toast.error(
-                    error instanceof Error ? error.message : 'Erro ao atualizar perfil.'
-                );
+                toast.error(error instanceof Error ? error.message : 'Erro ao atualizar perfil.');
             }
         },
         validators: {
@@ -261,9 +259,7 @@ export function ProfileForm({ user, open, onOpenChange }: ProfileFormProps) {
                                                 placeholder="(11) 99999-0000"
                                                 value={field.state.value}
                                                 onBlur={field.handleBlur}
-                                                onChange={(e) =>
-                                                    field.handleChange(e.target.value)
-                                                }
+                                                onChange={(e) => field.handleChange(e.target.value)}
                                             />
                                         </div>
                                     )}
@@ -281,9 +277,7 @@ export function ProfileForm({ user, open, onOpenChange }: ProfileFormProps) {
                                                 type="date"
                                                 value={field.state.value}
                                                 onBlur={field.handleBlur}
-                                                onChange={(e) =>
-                                                    field.handleChange(e.target.value)
-                                                }
+                                                onChange={(e) => field.handleChange(e.target.value)}
                                             />
                                         </div>
                                     )}

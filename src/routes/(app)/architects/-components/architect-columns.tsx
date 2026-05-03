@@ -1,9 +1,9 @@
 import { type ColumnDef } from '@tanstack/react-table';
 
+import { PhotoAvatar } from '@/components/photo-upload/photo-avatar';
 import { Badge } from '@/components/ui/badge';
 import { DataTableActionCell } from '@/components/ui/data-table-action-cell';
 import { DataTableColumnHeader } from '@/components/ui/data-table-column-header';
-import { ArchitectAvatar } from '@/routes/(app)/architects/-components/architect-avatar';
 import type { Architect } from '@/routes/(app)/architects/-types';
 
 type ColumnsOptions = {
@@ -18,9 +18,10 @@ export function architectColumns({ onEdit }: ColumnsOptions): ColumnDef<Architec
             header: ({ column }) => <DataTableColumnHeader column={column} title="Arquiteto" />,
             cell: ({ row }) => (
                 <div className="flex items-center gap-3">
-                    <ArchitectAvatar
+                    <PhotoAvatar
                         photoUrl={row.original.photoUrl || ''}
                         name={row.original.name}
+                        size="lg"
                     />
 
                     <div className="flex min-w-0 flex-col">

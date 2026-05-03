@@ -1,56 +1,70 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, type ChangeEvent } from 'react';
 
-type UsePhotoUploadOptions = {
-    onUrlChange: (url: string) => void;
-};
-
-export function usePhotoUpload({ onUrlChange }: UsePhotoUploadOptions) {
+export function usePhotoUpload({ onUrlChange }: { onUrlChange: (url: string) => void }) {
     const [photoPreview, setPhotoPreview] = useState('');
-    const [photoFileName, setPhotoFileName] = useState('');
     const photoFileRef = useRef<File | null>(null);
-    const fileInputRef = useRef<HTMLInputElement>(null);
+    const fileInputRef = useRef<HTMLInputElement | null>(null);
     const initialPhotoUrlRef = useRef('');
 
-    function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    /**
+     * Ao selecionar a foto, salva o arquivo e a prévia.
+     */
+    const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
+
         if (!file) return;
+
         photoFileRef.current = file;
+
         setPhotoPreview(URL.createObjectURL(file));
-        setPhotoFileName(file.name);
-    }
+    };
 
-    function handleDelete() {
+    /**
+     * Deleta a foto.
+     */
+    const handleDelete = () => {
         photoFileRef.current = null;
+
         setPhotoPreview('');
-        setPhotoFileName('');
+
         onUrlChange('');
-        if (fileInputRef.current) fileInputRef.current.value = '';
-    }
 
-    function handleRestore() {
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+
+    /**
+     * Restaura a foto original.
+     */
+    const handleRestore = () => {
         photoFileRef.current = null;
+
         setPhotoPreview('');
-        setPhotoFileName('');
+
         onUrlChange(initialPhotoUrlRef.current);
-        if (fileInputRef.current) fileInputRef.current.value = '';
-    }
 
-    function reset(newInitialUrl = '') {
-        initialPhotoUrlRef.current = newInitialUrl;
-        photoFileRef.current = null;
-        setPhotoPreview('');
-        setPhotoFileName('');
         if (fileInputRef.current) fileInputRef.current.value = '';
-    }
+    };
+
+    /**
+     * Reseta o estado inicial do photo upload.
+     */
+    const resetInitialUrl = (newInitialUrl = '') => {
+        initialPhotoUrlRef.current = newInitialUrl;
+
+        photoFileRef.current = null;
+
+        setPhotoPreview(newInitialUrl);
+
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    };
 
     return {
         photoPreview,
-        photoFileName,
         photoFileRef,
         fileInputRef,
         handleFileChange,
         handleDelete,
         handleRestore,
-        reset
+        resetInitialUrl
     };
 }
