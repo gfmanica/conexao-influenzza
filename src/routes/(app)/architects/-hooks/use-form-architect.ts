@@ -1,6 +1,8 @@
 import type { RefObject } from 'react';
 
 import { useForm } from '@tanstack/react-form';
+import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 import {
     createArchitectSchema,
@@ -9,7 +11,7 @@ import {
 } from '@/routes/(app)/architects/-types';
 import { uploadAvatar } from '@/server/storage';
 
-import { useCreateArchitect, useUpdateArchitect } from './use-architects';
+import { createArchitect, updateArchitect } from '../-server';
 
 async function fileToBase64(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
@@ -26,8 +28,7 @@ type UseFormArchitectArgs = {
 };
 
 export function useFormArchitect({ architect, photoFileRef }: UseFormArchitectArgs) {
-    const createArchitectMutation = useCreateArchitect();
-    const updateArchitectMutation = useUpdateArchitect();
+    const queryClient = useQueryClient();
 
     return useForm({
         defaultValues: {
@@ -45,6 +46,7 @@ export function useFormArchitect({ architect, photoFileRef }: UseFormArchitectAr
         onSubmit: async ({ value }) => {
             if (photoFileRef?.current) {
                 const file = photoFileRef.current;
+
                 value.photoUrl = await uploadAvatar({
                     data: {
                         fileBase64: await fileToBase64(file),
@@ -55,10 +57,18 @@ export function useFormArchitect({ architect, photoFileRef }: UseFormArchitectAr
                 });
             }
 
-            if (value.id) {
-                await updateArchitectMutation.mutateAsync({ data: value });
-            } else {
-                await createArchitectMutation.mutateAsync({ data: value });
+            try {
+                if (value.id) {
+                    await updateArchitect({ data: value });
+                } else {
+                    await createArchitect({ data: value });
+                }
+
+                queryClient.invalidateQueries({ queryKey: ['architects'] });
+
+                toast.success('Arquiteto salvo com sucesso!');
+            } catch (e: any) {
+                toast.error(e?.message ?? 'Erro ao salvar arquiteto');
             }
         },
         validators: {

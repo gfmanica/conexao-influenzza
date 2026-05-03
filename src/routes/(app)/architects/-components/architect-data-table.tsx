@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { useTableQuery } from '@/hooks/use-table-query';
 import { architectColumns } from '@/routes/(app)/architects/-components/architect-columns';
 import { ArchitectForm } from '@/routes/(app)/architects/-components/architect-form';
-import { architectsQueryOptions } from '@/routes/(app)/architects/-hooks/use-architects';
+import { architectsQueryOptions } from '@/routes/(app)/architects/-hooks/use-query-architects';
 import type { Architect } from '@/routes/(app)/architects/-types';
 
 export function ArchitectDataTable() {

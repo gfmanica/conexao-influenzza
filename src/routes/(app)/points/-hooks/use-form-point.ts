@@ -1,16 +1,18 @@
 import { useForm } from '@tanstack/react-form';
+import { useQueryClient } from '@tanstack/react-query';
 
 import type { Architect } from '@/routes/(app)/architects/-types';
-import { useCreatePoint, useUpdatePoint } from '@/routes/(app)/points/-hooks/use-points';
 import { createPointSchema, updatePointSchema, type Point } from '@/routes/(app)/points/-types';
+
+import { createPoint, updatePoint } from '../-server';
+import { toast } from 'sonner';
 
 type UseFormPointArgs = {
     entry?: Point;
 };
 
 export function useFormPoint({ entry }: UseFormPointArgs = {}) {
-    const createMutation = useCreatePoint();
-    const updateMutation = useUpdatePoint();
+    const queryClient = useQueryClient();
 
     const getEntryDate = () => {
         if (!entry?.entryDate) return new Date().toISOString().split('T')[0];
@@ -28,10 +30,20 @@ export function useFormPoint({ entry }: UseFormPointArgs = {}) {
             entryDate: getEntryDate()
         } as any,
         onSubmit: async ({ value }) => {
-            if (value.id) {
-                await updateMutation.mutateAsync({ data: value });
-            } else {
-                await createMutation.mutateAsync({ data: value });
+            try {
+                if (value.id) {
+                    await updatePoint({ data: value });
+                } else {
+                    await createPoint({ data: value });
+                }
+
+                queryClient.invalidateQueries({ queryKey: ['points'] });
+                queryClient.invalidateQueries({ queryKey: ['architects'] });
+                queryClient.invalidateQueries({ queryKey: ['ranking'] });
+
+                toast.success('Lançamento salvo com sucesso!');
+            } catch (error: any) {
+                toast.error(error?.message ?? 'Erro ao salvar lançamento');
             }
         },
         validators: {

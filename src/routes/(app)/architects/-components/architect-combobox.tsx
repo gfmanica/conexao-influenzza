@@ -2,7 +2,7 @@ import type { ComponentProps } from 'react';
 
 import { Combobox } from '@/components/ui/combobox';
 import { useComboboxQuery } from '@/hooks/use-combobox-query';
-import { architectsQueryOptions } from '@/routes/(app)/architects/-hooks/use-architects';
+import { architectsQueryOptions } from '@/routes/(app)/architects/-hooks/use-query-architects';
 import type { Architect } from '@/routes/(app)/architects/-types';
 
 export function ArchitectCombobox({

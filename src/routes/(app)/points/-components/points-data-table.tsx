@@ -11,7 +11,7 @@ import { ArchitectCombobox } from '@/routes/(app)/architects/-components/archite
 import type { Architect } from '@/routes/(app)/architects/-types';
 import { pointsColumns } from '@/routes/(app)/points/-components/points-columns';
 import { PointForm } from '@/routes/(app)/points/-components/points-form';
-import { pointsQueryOptions, useDeletePoint } from '@/routes/(app)/points/-hooks/use-points';
+import { pointsQueryOptions, useDeletePoint } from '@/routes/(app)/points/-hooks/use-query-points';
 import type { Point } from '@/routes/(app)/points/-types';
 import { type FilterItem } from '@/types/builders';
 
