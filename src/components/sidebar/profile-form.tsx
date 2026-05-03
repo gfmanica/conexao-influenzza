@@ -24,6 +24,8 @@ import { usePhotoUpload } from '@/hooks/use-photo-upload';
 import { updateProfile } from '@/server/profile';
 import { uploadOwnAvatar } from '@/server/storage';
 
+import { DatePicker } from '../ui/date-picker';
+
 async function fileToBase64(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
@@ -118,7 +120,7 @@ export function ProfileForm({ user, open, onOpenChange }: ProfileFormProps) {
             photoUrl: user.photoUrl ?? ''
         });
 
-        photoUpload.reset(user.photoUrl ?? '');
+        photoUpload.resetInitialUrl(user.photoUrl ?? '');
     }, [open, user.id]);
 
     return (
@@ -147,7 +149,7 @@ export function ProfileForm({ user, open, onOpenChange }: ProfileFormProps) {
                         >
                             {([photoUrl, name]) => {
                                 const isDirty =
-                                    !!photoUpload.photoFileName ||
+                                    !!photoUpload.photoFileRef.current ||
                                     photoUrl !== (user.photoUrl ?? '');
 
                                 return (
@@ -155,7 +157,6 @@ export function ProfileForm({ user, open, onOpenChange }: ProfileFormProps) {
                                         name={name}
                                         photoUrl={photoUrl}
                                         photoPreview={photoUpload.photoPreview}
-                                        photoFileName={photoUpload.photoFileName}
                                         fileInputRef={photoUpload.fileInputRef}
                                         inputId="profile-photo"
                                         onFileChange={photoUpload.handleFileChange}
@@ -203,7 +204,6 @@ export function ProfileForm({ user, open, onOpenChange }: ProfileFormProps) {
                         )}
                     </form.Field>
 
-                    {/* E-mail (read-only) */}
                     <div className="flex flex-col gap-3">
                         <Label htmlFor="profile-email">E-mail</Label>
                         <Input id="profile-email" type="email" value={user.email} disabled />
@@ -212,10 +212,8 @@ export function ProfileForm({ user, open, onOpenChange }: ProfileFormProps) {
                         </p>
                     </div>
 
-                    {/* Campos extras apenas para arquitetos */}
                     {isArchitect && (
                         <>
-                            {/* E-mail do escritório */}
                             <form.Field
                                 name="officeEmail"
                                 validators={{
@@ -249,7 +247,6 @@ export function ProfileForm({ user, open, onOpenChange }: ProfileFormProps) {
                             </form.Field>
 
                             <div className="grid grid-cols-2 gap-4">
-                                {/* Telefone */}
                                 <form.Field name="phone">
                                     {(field) => (
                                         <div className="flex flex-col gap-3">
@@ -265,19 +262,18 @@ export function ProfileForm({ user, open, onOpenChange }: ProfileFormProps) {
                                     )}
                                 </form.Field>
 
-                                {/* Data de nascimento */}
                                 <form.Field name="birthdate">
                                     {(field) => (
                                         <div className="flex flex-col gap-3">
                                             <Label htmlFor="profile-birthdate">
                                                 Data de nascimento
                                             </Label>
-                                            <Input
+
+                                            <DatePicker
                                                 id="profile-birthdate"
-                                                type="date"
                                                 value={field.state.value}
-                                                onBlur={field.handleBlur}
-                                                onChange={(e) => field.handleChange(e.target.value)}
+                                                onChange={(val) => field.handleChange(val)}
+                                                placeholder="Selecionar data..."
                                             />
                                         </div>
                                     )}

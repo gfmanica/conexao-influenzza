@@ -51,15 +51,15 @@ export function ArchitectDataTable() {
                 onSortChange={tableQuery.onSortChange}
                 isLoading={tableQuery.isFetching}
                 toolbar={
-                    <div className="flex w-full items-center justify-between gap-3 px-4 lg:px-6">
+                    <div className="flex w-full flex-col gap-3 px-4 lg:px-6 sm:flex-row sm:items-center sm:justify-between">
                         <Input
-                            className="max-w-xs"
+                            className="w-full sm:max-w-xs"
                             placeholder="Buscar arquiteto..."
                             value={nameFilter}
                             onChange={(e) => setNameFilter(e.target.value)}
                         />
 
-                        <Button size="sm" onClick={() => setOpenDrawer(true)}>
+                        <Button size="sm" className="w-full sm:w-auto" onClick={() => setOpenDrawer(true)}>
                             <PlusIcon />
                             Novo arquiteto
                         </Button>

@@ -3,6 +3,7 @@ import { and, count, eq, sum } from 'drizzle-orm';
 import { z } from 'zod/v4';
 
 import { db } from '@/lib/db';
+import { supabaseAdmin } from '@/lib/supabase-admin';
 import {
     buildOrderByClause,
     buildPagedResponse,
@@ -135,12 +136,30 @@ export const createArchitect = createServerFn({ method: 'POST' })
         }
     });
 
+const BUCKET = 'conexao-influenzza-dev';
+
 /**
  * Cadastro público de arquiteto (sem autenticação).
  */
 export const registerArchitect = createServerFn({ method: 'POST' })
     .inputValidator(registerArchitectSchema)
     .handler(async ({ data }) => {
+        let photoUrl: string | undefined;
+
+        if (data.photoBase64 && data.photoFileName && data.photoContentType) {
+            const ext = data.photoFileName.split('.').pop()?.toLowerCase();
+            const path = `avatars/${data.email}.${ext}`;
+            const buffer = Buffer.from(data.photoBase64, 'base64');
+
+            const { error } = await supabaseAdmin.storage
+                .from(BUCKET)
+                .upload(path, buffer, { contentType: data.photoContentType, upsert: true });
+
+            if (!error) {
+                photoUrl = supabaseAdmin.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+            }
+        }
+
         try {
             const [architect] = await db
                 .insert(user)
@@ -153,7 +172,8 @@ export const registerArchitect = createServerFn({ method: 'POST' })
                     phone: data.phone,
                     officeAddress: data.officeAddress,
                     birthdate: data.birthdate,
-                    cauRegister: data.cauRegister
+                    cauRegister: data.cauRegister,
+                    photoUrl
                 })
                 .returning(architectColumns);
 

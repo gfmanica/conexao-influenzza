@@ -95,7 +95,7 @@ export function RankingDashboard() {
             <style>{RANKING_STYLES}</style>
 
             <div className="flex flex-1 flex-col gap-8 overflow-auto py-6">
-                <div className="flex items-center gap-3 px-4 lg:px-6">
+                <div className="flex flex-col gap-3 px-4 sm:flex-row sm:items-center lg:px-6">
                     <div className="flex-1">
                         <h1 className="font-heading text-2xl font-semibold">
                             Ranking de Pontuação
@@ -115,7 +115,7 @@ export function RankingDashboard() {
                         displayField="label"
                         placeholder="Selecione o mês"
                         searchPlaceholder="Buscar mês..."
-                        className="w-80"
+                        className="w-full sm:w-48"
                     />
                 </div>
 

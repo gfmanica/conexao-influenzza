@@ -15,18 +15,18 @@ function RouteComponent() {
                 />
             </div>
 
-            <div className="relative flex flex-col items-center justify-center gap-12 p-6 sm:gap-12 md:p-10">
+            <div className="flex min-h-svh flex-col items-center p-6 pt-10 md:p-10">
                 <img
                     src="/logo/logomarca-vertical-black.png"
                     alt="Logo"
-                    className="-mt-16 block h-22 object-cover [image-rendering:-webkit-optimize-contrast] lg:hidden dark:brightness-[0.2] dark:grayscale"
+                    className="mb-4 block h-22 object-cover [image-rendering:-webkit-optimize-contrast] lg:hidden dark:brightness-[0.2] dark:grayscale"
                 />
 
-                <div className="w-full max-w-xs">
+                <div className="flex w-full max-w-xs flex-1 flex-col justify-center py-6">
                     <Outlet />
                 </div>
 
-                <div className="text-muted-foreground absolute right-0 bottom-6 left-0 text-center text-xs">
+                <div className="text-muted-foreground py-4 text-center text-xs">
                     &copy; {new Date().getFullYear()} Influenzza Caza. Todos os direitos reservados.
                 </div>
             </div>

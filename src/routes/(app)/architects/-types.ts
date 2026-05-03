@@ -58,7 +58,10 @@ export const registerArchitectSchema = z.object({
     cauRegister: z
         .string()
         .transform((v) => v || undefined)
-        .pipe(z.string().optional())
+        .pipe(z.string().optional()),
+    photoBase64: z.string().optional(),
+    photoFileName: z.string().optional(),
+    photoContentType: z.string().optional()
 });
 
 export type CreateArchitectInput = z.infer<typeof createArchitectSchema>;

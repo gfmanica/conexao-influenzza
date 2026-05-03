@@ -4,11 +4,23 @@ import { useForm } from '@tanstack/react-form';
 import { Link } from '@tanstack/react-router';
 import { CheckCircle2Icon } from 'lucide-react';
 
+import { PhotoUpload } from '@/components/photo-upload/photo-upload';
 import { Button } from '@/components/ui/button';
 import { Field, FieldError, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { usePhotoUpload } from '@/hooks/use-photo-upload';
 import { registerArchitect } from '@/routes/(app)/architects/-server';
 import { registerArchitectSchema } from '@/routes/(app)/architects/-types';
+
+async function fileToBase64(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve((reader.result as string).split(',')[1]);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
+}
 
 function RegisterSuccess({ name }: { name: string }) {
     return (
@@ -37,6 +49,8 @@ function RegisterSuccess({ name }: { name: string }) {
 export function RegisterForm() {
     const [registeredName, setRegisteredName] = useState<string | null>(null);
 
+    const photoUpload = usePhotoUpload({ onUrlChange: () => {} });
+
     const form = useForm({
         defaultValues: {
             name: '',
@@ -49,7 +63,20 @@ export function RegisterForm() {
         },
         onSubmit: async ({ value, formApi }) => {
             try {
-                const result = await registerArchitect({ data: value });
+                let photoBase64: string | undefined;
+                let photoFileName: string | undefined;
+                let photoContentType: string | undefined;
+
+                if (photoUpload.photoFileRef.current) {
+                    const file = photoUpload.photoFileRef.current;
+                    photoBase64 = await fileToBase64(file);
+                    photoFileName = file.name;
+                    photoContentType = file.type;
+                }
+
+                const result = await registerArchitect({
+                    data: { ...value, photoBase64, photoFileName, photoContentType }
+                });
                 setRegisteredName(result.name);
             } catch (e: unknown) {
                 console.log(e);
@@ -89,6 +116,24 @@ export function RegisterForm() {
                         <p className="text-muted-foreground max-w-sm text-sm text-balance">
                             Preencha seus dados para se cadastrar como arquiteto parceiro.
                         </p>
+                    </div>
+
+                    {/* Foto de perfil */}
+                    <div className="flex flex-col gap-2">
+                        <Label htmlFor="photo">Foto de perfil</Label>
+                        <form.Subscribe selector={(s) => s.values.name}>
+                            {(name) => (
+                                <PhotoUpload
+                                    inputId="photo"
+                                    name={name}
+                                    photoUrl=""
+                                    photoPreview={photoUpload.photoPreview}
+                                    fileInputRef={photoUpload.fileInputRef}
+                                    onFileChange={photoUpload.handleFileChange}
+                                    onDelete={photoUpload.handleDelete}
+                                />
+                            )}
+                        </form.Subscribe>
                     </div>
 
                     {/* Nome */}

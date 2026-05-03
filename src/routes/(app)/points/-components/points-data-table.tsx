@@ -63,8 +63,8 @@ export function PointsDataTable() {
                 onSortChange={tableQuery.onSortChange}
                 isLoading={tableQuery.isFetching}
                 toolbar={
-                    <div className="flex w-full flex-wrap items-end justify-between gap-3 px-4 lg:px-6">
-                        <div className="flex flex-wrap items-end gap-3">
+                    <div className="flex w-full flex-col gap-3 px-4 lg:px-6">
+                        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
                             <div className="flex flex-col gap-1.5">
                                 <Label className="text-xs">Arquiteto</Label>
 
@@ -77,7 +77,7 @@ export function PointsDataTable() {
                                     placeholder="Todos"
                                     searchPlaceholder="Buscar arquiteto..."
                                     emptyText="Nenhum arquiteto encontrado."
-                                    className="h-8 w-48 text-sm"
+                                    className="h-8 w-full text-sm sm:w-48"
                                 />
                             </div>
 
@@ -90,7 +90,7 @@ export function PointsDataTable() {
                                         applyFilters({ from: value });
                                     }}
                                     placeholder="Data inicial"
-                                    className="h-8 w-44 text-sm"
+                                    className="h-8 w-full text-sm sm:w-44"
                                 />
                             </div>
 
@@ -103,14 +103,14 @@ export function PointsDataTable() {
                                         applyFilters({ to: value });
                                     }}
                                     placeholder="Data final"
-                                    className="h-8 w-44 text-sm"
+                                    className="h-8 w-full text-sm sm:w-44"
                                 />
                             </div>
                         </div>
 
                         <Button
                             size="sm"
-                            className="h-8 self-end"
+                            className="h-8 w-full sm:w-auto sm:self-end"
                             onClick={() => setOpenDrawer(true)}
                         >
                             <PlusIcon />

@@ -1,11 +1,11 @@
 import { useForm } from '@tanstack/react-form';
 import { useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
 import type { Architect } from '@/routes/(app)/architects/-types';
 import { createPointSchema, updatePointSchema, type Point } from '@/routes/(app)/points/-types';
 
 import { createPoint, updatePoint } from '../-server';
-import { toast } from 'sonner';
 
 type UseFormPointArgs = {
     entry?: Point;
@@ -52,11 +52,9 @@ export function useFormPoint({ entry }: UseFormPointArgs = {}) {
                     ? updatePointSchema.safeParse(value)
                     : createPointSchema.safeParse(value);
 
-                if (!result.success) {
-                    return result.error.issues[0]?.message ?? 'Formulário inválido';
-                }
+                if (result.success) return undefined;
 
-                return undefined;
+                return result.error.issues[0]?.message ?? 'Formulário inválido';
             }
         }
     });

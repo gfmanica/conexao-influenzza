@@ -77,11 +77,9 @@ export function useFormArchitect({ architect, photoFileRef }: UseFormArchitectAr
                     ? updateArchitectSchema.safeParse(value)
                     : createArchitectSchema.safeParse(value);
 
-                if (!result.success) {
-                    return result.error.issues[0]?.message ?? 'Formulário inválido';
-                }
+                if (result.success) return undefined;
 
-                return undefined;
+                return result.error.issues[0]?.message ?? 'Formulário inválido';
             }
         }
     });

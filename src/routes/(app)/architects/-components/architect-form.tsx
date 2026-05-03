@@ -2,6 +2,7 @@ import { useEffect, type ReactNode } from 'react';
 
 import { PhotoUpload } from '@/components/photo-upload/photo-upload';
 import { Button } from '@/components/ui/button';
+import { DatePicker } from '@/components/ui/date-picker';
 import {
     Drawer,
     DrawerClose,
@@ -90,10 +91,9 @@ export function ArchitectForm({ architect, trigger, open, onOpenChange }: Archit
                             selector={(s) => [s.values.photoUrl, s.values.name] as const}
                         >
                             {([photoUrl, name]) => {
-                                const hasNewFile = !!photoUpload.photoFileRef.current;
-
                                 const isDirty =
-                                    hasNewFile || photoUrl !== (architect?.photoUrl ?? '');
+                                    !!photoUpload.photoFileRef.current ||
+                                    photoUrl !== (architect?.photoUrl ?? '');
 
                                 return (
                                     <PhotoUpload
@@ -148,22 +148,13 @@ export function ArchitectForm({ architect, trigger, open, onOpenChange }: Archit
                     </form.Field>
 
                     {/* E-mail */}
-                    <form.Field
-                        name="email"
-                        validators={{
-                            onBlur: ({ value }) => {
-                                if (!isEditing && !value.trim()) return 'E-mail é obrigatório';
-                                if (value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))
-                                    return 'E-mail inválido';
-                                return undefined;
-                            }
-                        }}
-                    >
+                    <form.Field name="email">
                         {(field) => (
                             <div className="flex flex-col gap-3">
                                 <Label htmlFor="email">
                                     E-mail <span className="text-destructive">*</span>
                                 </Label>
+
                                 <Input
                                     id="email"
                                     type="email"
@@ -180,7 +171,7 @@ export function ArchitectForm({ architect, trigger, open, onOpenChange }: Archit
                                 )}
                                 {field.state.meta.errors.length > 0 && (
                                     <p className="text-destructive text-xs">
-                                        {field.state.meta.errors[0]?.toString()}
+                                        {field.state.meta.errors[0]}
                                     </p>
                                 )}
                             </div>
@@ -188,16 +179,7 @@ export function ArchitectForm({ architect, trigger, open, onOpenChange }: Archit
                     </form.Field>
 
                     {/* E-mail do escritório */}
-                    <form.Field
-                        name="officeEmail"
-                        validators={{
-                            onBlur: ({ value }) => {
-                                if (value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value))
-                                    return 'E-mail inválido';
-                                return undefined;
-                            }
-                        }}
-                    >
+                    <form.Field name="officeEmail">
                         {(field) => (
                             <div className="flex flex-col gap-3">
                                 <Label htmlFor="officeEmail">E-mail do escritório</Label>
@@ -211,7 +193,7 @@ export function ArchitectForm({ architect, trigger, open, onOpenChange }: Archit
                                 />
                                 {field.state.meta.errors.length > 0 && (
                                     <p className="text-destructive text-xs">
-                                        {field.state.meta.errors[0]?.toString()}
+                                        {field.state.meta.errors[0]}
                                     </p>
                                 )}
                             </div>
@@ -219,7 +201,6 @@ export function ArchitectForm({ architect, trigger, open, onOpenChange }: Archit
                     </form.Field>
 
                     <div className="grid grid-cols-2 gap-4">
-                        {/* Telefone */}
                         <form.Field name="phone">
                             {(field) => (
                                 <div className="flex flex-col gap-3">
@@ -235,24 +216,22 @@ export function ArchitectForm({ architect, trigger, open, onOpenChange }: Archit
                             )}
                         </form.Field>
 
-                        {/* Data de nascimento */}
                         <form.Field name="birthdate">
                             {(field) => (
                                 <div className="flex flex-col gap-3">
                                     <Label htmlFor="birthdate">Data de nascimento</Label>
-                                    <Input
+
+                                    <DatePicker
                                         id="birthdate"
-                                        type="date"
                                         value={field.state.value}
-                                        onBlur={field.handleBlur}
-                                        onChange={(e) => field.handleChange(e.target.value)}
+                                        onChange={(val) => field.handleChange(val)}
+                                        placeholder="Selecionar data..."
                                     />
                                 </div>
                             )}
                         </form.Field>
                     </div>
 
-                    {/* Registro CAU */}
                     <form.Field name="cauRegister">
                         {(field) => (
                             <div className="flex flex-col gap-3">
@@ -268,7 +247,6 @@ export function ArchitectForm({ architect, trigger, open, onOpenChange }: Archit
                         )}
                     </form.Field>
 
-                    {/* Endereço do escritório */}
                     <form.Field name="officeAddress">
                         {(field) => (
                             <div className="flex flex-col gap-3">
@@ -284,7 +262,6 @@ export function ArchitectForm({ architect, trigger, open, onOpenChange }: Archit
                         )}
                     </form.Field>
 
-                    {/* Observação */}
                     <form.Field name="observation">
                         {(field) => (
                             <div className="flex flex-col gap-3">
