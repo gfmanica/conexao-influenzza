@@ -1,9 +1,5 @@
 import { useEffect } from 'react';
 
-import { useForm } from '@tanstack/react-form';
-import { useRouter } from '@tanstack/react-router';
-import { toast } from 'sonner';
-
 import { PhotoUpload } from '@/components/photo-upload/photo-upload';
 import { Button } from '@/components/ui/button';
 import {
@@ -21,33 +17,9 @@ import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { usePhotoUpload } from '@/hooks/use-photo-upload';
-import { updateProfile } from '@/server/profile';
-import { uploadOwnAvatar } from '@/server/storage';
 
 import { DatePicker } from '../ui/date-picker';
-
-async function fileToBase64(file: File): Promise<string> {
-    return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve((reader.result as string).split(',')[1]);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-    });
-}
-
-type ProfileUser = {
-    id: string;
-    name: string;
-    email: string;
-    role: string;
-    photoUrl?: string | null;
-    officeEmail?: string | null;
-    phone?: string | null;
-    officeAddress?: string | null;
-    birthdate?: string | null;
-    cauRegister?: string | null;
-    observation?: string | null;
-};
+import { type ProfileUser, useFormProfile } from './use-form-profile';
 
 type ProfileFormProps = {
     user: ProfileUser;
@@ -57,53 +29,16 @@ type ProfileFormProps = {
 
 export function ProfileForm({ user, open, onOpenChange }: ProfileFormProps) {
     const isMobile = useIsMobile();
-    const router = useRouter();
     const isArchitect = user.role === 'architect';
 
     const photoUpload = usePhotoUpload({
         onUrlChange: (url) => form.setFieldValue('photoUrl', url)
     });
 
-    const form = useForm({
-        defaultValues: {
-            name: user.name ?? '',
-            officeEmail: user.officeEmail ?? '',
-            phone: user.phone ?? '',
-            officeAddress: user.officeAddress ?? '',
-            birthdate: user.birthdate ?? '',
-            cauRegister: user.cauRegister ?? '',
-            observation: user.observation ?? '',
-            photoUrl: user.photoUrl ?? ''
-        },
-        onSubmit: async ({ value }) => {
-            try {
-                if (photoUpload.photoFileRef.current) {
-                    const file = photoUpload.photoFileRef.current;
-                    value.photoUrl = await uploadOwnAvatar({
-                        data: {
-                            fileBase64: await fileToBase64(file),
-                            fileName: file.name,
-                            contentType: file.type
-                        }
-                    });
-                }
-
-                await updateProfile({ data: value });
-
-                toast.success('Perfil atualizado com sucesso!');
-                onOpenChange(false);
-
-                await router.invalidate();
-            } catch (error) {
-                toast.error(error instanceof Error ? error.message : 'Erro ao atualizar perfil.');
-            }
-        },
-        validators: {
-            onSubmit: ({ value }) => {
-                if (!value.name.trim()) return 'Nome é obrigatório';
-                return undefined;
-            }
-        }
+    const form = useFormProfile({
+        user,
+        photoFileRef: photoUpload.photoFileRef,
+        onSuccess: () => onOpenChange(false)
     });
 
     useEffect(() => {
@@ -334,16 +269,24 @@ export function ProfileForm({ user, open, onOpenChange }: ProfileFormProps) {
                 </form>
 
                 <DrawerFooter>
+                    <form.Subscribe selector={(s) => s.errors as unknown as string[]}>
+                        {(errors) =>
+                            errors.length > 0 && (
+                                <p className="text-destructive text-xs">{errors[0]}</p>
+                            )
+                        }
+                    </form.Subscribe>
+
                     <DrawerClose asChild>
                         <Button variant="outline">Cancelar</Button>
                     </DrawerClose>
 
-                    <form.Subscribe selector={(s) => [s.canSubmit, s.isSubmitting]}>
-                        {([canSubmit, isSubmitting]) => (
+                    <form.Subscribe selector={(s) => s.isSubmitting}>
+                        {(isSubmitting) => (
                             <Button
                                 type="submit"
                                 form="profile-form"
-                                disabled={!canSubmit}
+                                disabled={isSubmitting}
                                 loading={isSubmitting}
                             >
                                 Salvar alterações

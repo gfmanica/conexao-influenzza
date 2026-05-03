@@ -115,15 +115,7 @@ export function ArchitectForm({ architect, trigger, open, onOpenChange }: Archit
                     <Separator />
 
                     {/* Nome */}
-                    <form.Field
-                        name="name"
-                        validators={{
-                            onBlur: ({ value }) => {
-                                if (!value.trim()) return 'Nome é obrigatório';
-                                return undefined;
-                            }
-                        }}
-                    >
+                    <form.Field name="name">
                         {(field) => (
                             <div className="flex flex-col gap-3">
                                 <Label htmlFor="name">
@@ -140,7 +132,7 @@ export function ArchitectForm({ architect, trigger, open, onOpenChange }: Archit
 
                                 {field.state.meta.errors.length > 0 && (
                                     <p className="text-destructive text-xs">
-                                        {field.state.meta.errors[0]?.toString()}
+                                        {field.state.meta.errors[0]}
                                     </p>
                                 )}
                             </div>
@@ -279,16 +271,24 @@ export function ArchitectForm({ architect, trigger, open, onOpenChange }: Archit
                 </form>
 
                 <DrawerFooter>
+                    <form.Subscribe selector={(s) => s.errors as unknown as string[]}>
+                        {(errors) =>
+                            errors.length > 0 && (
+                                <p className="text-destructive text-xs">{errors[0]}</p>
+                            )
+                        }
+                    </form.Subscribe>
+
                     <DrawerClose asChild>
                         <Button variant="outline">Cancelar</Button>
                     </DrawerClose>
 
-                    <form.Subscribe selector={(s) => [s.canSubmit, s.isSubmitting]}>
-                        {([canSubmit, isSubmitting]) => (
+                    <form.Subscribe selector={(s) => s.isSubmitting}>
+                        {(isSubmitting) => (
                             <Button
                                 type="submit"
                                 form="architect-form"
-                                disabled={!canSubmit}
+                                disabled={isSubmitting}
                                 loading={isSubmitting}
                             >
                                 {isEditing ? 'Salvar alterações' : 'Cadastrar arquiteto'}

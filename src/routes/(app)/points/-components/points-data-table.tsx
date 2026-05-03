@@ -63,7 +63,7 @@ export function PointsDataTable() {
                 onSortChange={tableQuery.onSortChange}
                 isLoading={tableQuery.isFetching}
                 toolbar={
-                    <div className="flex w-full flex-col gap-3 px-4 lg:px-6">
+                    <div className="flex w-full flex-col justify-between gap-3 px-4 sm:flex-row lg:px-6">
                         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
                             <div className="flex flex-col gap-1.5">
                                 <Label className="text-xs">Arquiteto</Label>

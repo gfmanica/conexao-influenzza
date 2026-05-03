@@ -79,7 +79,16 @@ export function useFormArchitect({ architect, photoFileRef }: UseFormArchitectAr
 
                 if (result.success) return undefined;
 
-                return result.error.issues[0]?.message ?? 'Formulário inválido';
+                const firstIssue = result.error.issues[0];
+                if (firstIssue?.path.length) {
+                    return {
+                        fields: {
+                            [firstIssue.path.join('.')]: firstIssue.message
+                        }
+                    };
+                }
+
+                return firstIssue?.message ?? 'Formulário inválido';
             }
         }
     });

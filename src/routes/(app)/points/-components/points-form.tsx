@@ -14,7 +14,6 @@ import {
 } from '@/components/ui/drawer';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ArchitectCombobox } from '@/routes/(app)/architects/-components/architect-combobox';
 import type { Architect } from '@/routes/(app)/architects/-types';
@@ -64,7 +63,6 @@ export function PointForm({ entry, trigger, open, onOpenChange }: PointFormProps
                         form.handleSubmit();
                     }}
                 >
-                    {/* Arquiteto */}
                     <form.Field name="architect">
                         {(field) => (
                             <div className="flex flex-col gap-3">
@@ -86,9 +84,6 @@ export function PointForm({ entry, trigger, open, onOpenChange }: PointFormProps
                         )}
                     </form.Field>
 
-                    <Separator />
-
-                    {/* Tipo de ponto */}
                     <form.Field name="pointType">
                         {(field) => (
                             <div className="flex flex-col gap-3">
@@ -145,7 +140,6 @@ export function PointForm({ entry, trigger, open, onOpenChange }: PointFormProps
                             )}
                         </form.Field>
 
-                        {/* Data */}
                         <form.Field name="entryDate">
                             {(field) => {
                                 return (
@@ -173,16 +167,24 @@ export function PointForm({ entry, trigger, open, onOpenChange }: PointFormProps
                 </form>
 
                 <DrawerFooter>
+                    <form.Subscribe selector={(s) => s.errors as unknown as string[]}>
+                        {(errors) =>
+                            errors.length > 0 && (
+                                <p className="text-destructive text-xs">{errors[0]}</p>
+                            )
+                        }
+                    </form.Subscribe>
+
                     <DrawerClose asChild>
                         <Button variant="outline">Cancelar</Button>
                     </DrawerClose>
 
-                    <form.Subscribe selector={(s) => [s.canSubmit, s.isSubmitting]}>
-                        {([canSubmit, isSubmitting]) => (
+                    <form.Subscribe selector={(s) => s.isSubmitting}>
+                        {(isSubmitting) => (
                             <Button
                                 type="submit"
                                 form="point-form"
-                                disabled={!canSubmit}
+                                disabled={isSubmitting}
                                 loading={isSubmitting}
                             >
                                 {isEditing ? 'Salvar alterações' : 'Registrar pontos'}
