@@ -6,7 +6,7 @@ export const Route = createFileRoute('/(auth)')({
 
 function RouteComponent() {
     return (
-        <div className="grid min-h-svh lg:grid-cols-2">
+        <div className="grid h-svh lg:grid-cols-2">
             <div className="bg-foreground hidden items-center justify-center lg:flex">
                 <img
                     src="/logo/logomarca-vertical-white.png"
@@ -15,14 +15,14 @@ function RouteComponent() {
                 />
             </div>
 
-            <div className="flex min-h-svh flex-col items-center p-6 pt-10 md:p-10">
+            <div className="flex h-svh flex-col items-center p-6 pt-10 md:p-10">
                 <img
                     src="/logo/logomarca-vertical-black.png"
                     alt="Logo"
                     className="mb-4 block h-22 object-cover [image-rendering:-webkit-optimize-contrast] lg:hidden dark:brightness-[0.2] dark:grayscale"
                 />
 
-                <div className="flex w-full max-w-xs flex-1 flex-col justify-center py-6">
+                <div className="flex w-full max-w-xs flex-1 flex-col justify-center py-6 min-h-0">
                     <Outlet />
                 </div>
 

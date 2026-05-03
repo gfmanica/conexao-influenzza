@@ -51,7 +51,7 @@ export function RegisterForm() {
     }
 
     return (
-        <div className="animate-in fade-in-0 slide-in-from-bottom-3 duration-300">
+        <div className="animate-in fade-in-0 slide-in-from-bottom-3 duration-300 h-full overflow-y-auto pr-2 -mr-2">
             <form
                 className="flex flex-col gap-5"
                 onSubmit={(e) => {
