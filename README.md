@@ -16,7 +16,7 @@ Crie `.env.development` na raiz (veja `.env.example`):
 ```env
 VITE_SUPABASE_URL=https://<project-id>.supabase.co
 VITE_SUPABASE_KEY=<anon-key>
-SUPABASE_SERVICE_ROLE_KEY=<service-role-key>
+VITE_SUPABASE_SERVICE_ROLE_KEY=<service-role-key>
 ```
 
 As keys estão em **Supabase Dashboard → Settings → API**.  
