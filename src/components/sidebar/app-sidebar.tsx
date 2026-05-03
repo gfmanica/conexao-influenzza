@@ -1,10 +1,12 @@
-import * as React from 'react';
+import { useState } from 'react';
+import type { ComponentProps } from 'react';
 
 import { useRouteContext, useRouter } from '@tanstack/react-router';
-import { LayoutDashboardIcon, LogOutIcon, StarIcon, UsersIcon } from 'lucide-react';
+import { LayoutDashboardIcon, LogOutIcon, PencilIcon, StarIcon, UsersIcon } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { NavMain } from '@/components/sidebar/nav-main';
+import { ProfileForm } from '@/components/sidebar/profile-form';
 import {
     Sidebar,
     SidebarContent,
@@ -106,11 +108,24 @@ function SidebarHeaderContent() {
 function SidebarFooterContent({
     user
 }: {
-    user: { name: string; email: string; photoUrl?: string | null };
+    user: {
+        id: string;
+        name: string;
+        email: string;
+        role: string;
+        photoUrl?: string | null;
+        officeEmail?: string | null;
+        phone?: string | null;
+        officeAddress?: string | null;
+        birthdate?: string | null;
+        cauRegister?: string | null;
+        observation?: string | null;
+    };
 }) {
     const { state } = useSidebar();
     const collapsed = state === 'collapsed';
     const router = useRouter();
+    const [profileOpen, setProfileOpen] = useState(false);
 
     async function handleLogout() {
         try {
@@ -125,51 +140,70 @@ function SidebarFooterContent({
     }
 
     return (
-        <SidebarMenu className="gap-1">
-            <SidebarMenuItem>
-                <div
-                    className={cn(
-                        'flex items-center gap-2 px-2 py-1',
-                        collapsed && 'justify-center'
-                    )}
-                >
-                    <ArchitectAvatar
-                        name={user.name}
-                        photoUrl={user.photoUrl}
-                        size={collapsed ? 'default' : 'lg'}
-                    />
+        <>
+            <ProfileForm user={user} open={profileOpen} onOpenChange={setProfileOpen} />
 
-                    {!collapsed && (
-                        <div className="grid min-w-0 flex-1">
-                            <span className="truncate text-sm font-medium">{user.name}</span>
+            <SidebarMenu className="gap-1">
+                <SidebarMenuItem>
+                    <div
+                        className={cn(
+                            'flex items-center gap-2 px-2 py-1',
+                            collapsed && 'justify-center'
+                        )}
+                    >
+                        <ArchitectAvatar
+                            name={user.name}
+                            photoUrl={user.photoUrl}
+                            size={collapsed ? 'default' : 'lg'}
+                        />
 
-                            <span className="text-muted-foreground truncate text-xs">
-                                {user.email}
-                            </span>
-                        </div>
-                    )}
-                </div>
-            </SidebarMenuItem>
+                        {!collapsed && (
+                            <div className="grid min-w-0 flex-1">
+                                <span className="truncate text-sm font-medium">{user.name}</span>
 
-            <SidebarMenuItem>
-                <SidebarMenuButton
-                    onClick={handleLogout}
-                    className={cn(
-                        'text-muted-foreground hover:text-foreground',
-                        collapsed && 'justify-center'
-                    )}
-                    tooltip="Sair"
-                >
-                    <LogOutIcon />
+                                <span className="text-muted-foreground truncate text-xs">
+                                    {user.email}
+                                </span>
+                            </div>
+                        )}
+                    </div>
+                </SidebarMenuItem>
 
-                    {!collapsed && <span>Sair</span>}
-                </SidebarMenuButton>
-            </SidebarMenuItem>
-        </SidebarMenu>
+                <SidebarMenuItem>
+                    <SidebarMenuButton
+                        onClick={() => setProfileOpen(true)}
+                        className={cn(
+                            'text-muted-foreground hover:text-foreground',
+                            collapsed && 'justify-center'
+                        )}
+                        tooltip="Editar Perfil"
+                    >
+                        <PencilIcon />
+
+                        {!collapsed && <span>Editar Perfil</span>}
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
+
+                <SidebarMenuItem>
+                    <SidebarMenuButton
+                        onClick={handleLogout}
+                        className={cn(
+                            'text-muted-foreground hover:text-foreground',
+                            collapsed && 'justify-center'
+                        )}
+                        tooltip="Sair"
+                    >
+                        <LogOutIcon />
+
+                        {!collapsed && <span>Sair</span>}
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
+            </SidebarMenu>
+        </>
     );
 }
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AppSidebar({ ...props }: ComponentProps<typeof Sidebar>) {
     const { user } = useRouteContext({ from: '/(app)' });
     const navItems = user.role === 'admin' ? adminNavItems : architectNavItems;
 

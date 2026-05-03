@@ -115,7 +115,7 @@ export function RankingDashboard() {
                         displayField="label"
                         placeholder="Selecione o mês"
                         searchPlaceholder="Buscar mês..."
-                        className="w-[160px]"
+                        className="w-80"
                     />
                 </div>
 

@@ -51,6 +51,7 @@ export function DatePicker({
                     selected={date}
                     onSelect={(d) => {
                         onChange(d ? format(d, 'yyyy-MM-dd') : '');
+
                         setOpen(false);
                     }}
                     locale={ptBR}
